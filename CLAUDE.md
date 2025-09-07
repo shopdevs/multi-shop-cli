@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Package Overview
 
-ShopDevs Multi-Shop is an enterprise-grade NPM package that adds contextual development and automated shop management capabilities to any Shopify theme. It enables teams to manage multiple Shopify stores from a single theme codebase using a GitHub Flow workflow with branch-per-shop architecture for shop-specific features and campaigns.
+ShopDevs Multi-Shop is a clean, focused NPM package that adds contextual development and automated shop management capabilities to any Shopify theme. It enables teams to manage multiple Shopify stores from a single theme codebase using a GitHub Flow workflow with branch-per-shop architecture for shop-specific features and campaigns.
 
 ## Development Commands
 
@@ -51,7 +51,11 @@ src/
 ├── bin/multi-shop.ts              # CLI entry point with Commander.js
 ├── lib/
 │   ├── index.ts                   # Main package exports
-│   ├── ShopManager.ts             # Core shop management functionality
+│   ├── ShopManager.ts             # Main coordinator (82 lines)
+│   ├── ShopConfig.ts              # Configuration file operations (137 lines)
+│   ├── ShopDev.ts                 # Shopify CLI integration (151 lines)
+│   ├── ShopCRUD.ts                # Shop lifecycle management (163 lines)
+│   ├── ShopCLI.ts                 # User interface (208 lines)
 │   ├── ContextualDev.ts           # Branch detection and routing
 │   ├── ContextualShopManager.ts   # Feature branch development
 │   ├── WorkflowManager.ts         # Multi-shop workflow orchestration
@@ -59,17 +63,17 @@ src/
 │   ├── SyncMain.ts                # Git sync operations
 │   ├── TestRunner.ts              # PR testing functionality
 │   ├── core/
-│   │   ├── SecurityManager.ts     # Credential security and auditing
+│   │   ├── SecurityManager.ts     # Credential security (476 lines)
 │   │   ├── GitOperations.ts       # Git operations with error handling
-│   │   ├── Logger.ts              # Structured logging system
-│   │   ├── Config.ts              # Configuration management
-│   │   └── SimplePerformanceMonitor.ts # Basic performance tracking
+│   │   ├── SimpleLogger.ts        # Simple CLI logging (57 lines)
+│   │   ├── Config.ts              # Configuration management (100 lines)
+│   │   └── SimplePerformanceMonitor.ts # Basic performance tracking (87 lines)
 │   ├── validators/
 │   │   └── ShopConfigValidator.ts # JSON schema validation
 │   └── errors/
 │       └── ShopError.ts           # Custom error hierarchy
-├── types/shop.ts                  # Comprehensive TypeScript definitions
-└── __tests__/                     # Vitest test suite
+├── types/shop.ts                  # Focused type definitions (169 lines)
+└── __tests__/                     # Focused test suite (57 lines)
 ```
 
 ### Technology Stack
@@ -83,31 +87,32 @@ src/
 
 ### Design Principles
 
-1. **Type Safety First** - Every function, parameter, and return value is strictly typed
-2. **Security by Design** - Path traversal protection, safe JSON parsing, credential isolation
-3. **Cross-Platform Support** - Works reliably on Windows, macOS, and Linux
-4. **Configurable Behavior** - System constants defined in Config.ts, not hardcoded
-5. **Real Implementation** - No placeholder methods, all functionality implemented
-6. **Developer Experience** - Beautiful CLI with Shopify CLI integration
+1. **Single Responsibility** - Each class has one clear purpose, under 200 lines where possible
+2. **Type Safety** - Proper TypeScript throughout, no JavaScript masquerading as TS
+3. **Real Security** - Path traversal protection, safe file operations, no security theater
+4. **Cross-Platform** - Works reliably on Windows, macOS, and Linux
+5. **Simple Solutions** - Use existing libraries or simple wrappers, avoid custom frameworks
+6. **Clean Code** - Direct comments, no buzzwords, focused functionality
+7. **Maintainability** - Easy for senior engineers to understand and modify
 
 ## Key Implementation Details
 
 ### TypeScript Patterns
 
-- **Branded Types** - ShopId, DomainName, ThemeToken for extra safety
 - **Readonly Interfaces** - Immutable data structures throughout
-- **Type Guards** - Runtime validation that matches compile-time constraints
-- **Comprehensive Error Types** - Structured error hierarchy with context
-- **Strict Type Safety** - All JavaScript converted to proper TypeScript
+- **Simple Type Guards** - Boolean validation functions for runtime checks
+- **Focused Error Types** - Structured error hierarchy with context
+- **Strict Type Safety** - All parameters and returns properly typed
+- **Clean API** - Only export types that are actually used
 
 ### Security Model
 
 - **Credential Isolation** - Local-only storage in shops/credentials/ (never committed)
 - **Path Traversal Protection** - Shop ID validation prevents directory traversal attacks
-- **Input Validation** - JSON schema validation with size limits and type checking
+- **Safe JSON Parsing** - Size limits and validation before parsing untrusted input
 - **Cross-Platform File Permissions** - Secure file permissions (600) where supported
-- **Integrity Checking** - Checksum validation for credential files
-- **Audit Capabilities** - Built-in security scanning and reporting
+- **Input Validation** - JSON schema validation with reasonable limits
+- **Audit Capabilities** - Security scanning and reporting for credentials
 - **No Secret Exposure** - Sanitized logging and error messages
 
 ### Performance Requirements
@@ -183,30 +188,31 @@ main (core theme code)
 
 ### Important Files
 
-- `src/types/shop.ts` - Comprehensive type definitions for the entire system
-- `src/lib/core/SecurityManager.ts` - Credential security with path traversal protection
-- `src/lib/core/Config.ts` - Configurable system constants (replaces hardcoded values)
-- `src/lib/WorkflowManager.ts` - Multi-shop GitHub Flow workflow orchestration
-- `src/lib/validators/ShopConfigValidator.ts` - Input validation and security
-- `WORKFLOWS.md` - Complete documentation of multi-shop workflows
-- `vitest.config.ts` - Testing configuration with coverage requirements
+- `src/lib/ShopManager.ts` - Main coordinator (82 lines, clean composition)
+- `src/lib/ShopConfig.ts` - Configuration file operations (137 lines, focused)
+- `src/lib/ShopDev.ts` - Shopify CLI integration (151 lines, single purpose)
+- `src/lib/ShopCRUD.ts` - Shop lifecycle management (163 lines, clear responsibility)
+- `src/lib/ShopCLI.ts` - User interface (208 lines, UI only)
+- `src/lib/core/SecurityManager.ts` - Credential security with real protections
+- `src/lib/core/SimpleLogger.ts` - Simple CLI logging (57 lines, no framework bloat)
+- `src/lib/core/Config.ts` - System constants (configurable, not hardcoded)
+- `src/types/shop.ts` - Focused type definitions (169 lines, only used types)
+- `WORKFLOWS.md` - Complete multi-shop workflow documentation
 
 ## Testing Strategy
 
-### Test Categories
+### Focused Testing Approach
 
-1. **Unit Tests** - Individual class and method testing with mocks
-2. **Integration Tests** - Complete workflow testing
-3. **Security Tests** - Credential protection and validation
-4. **Performance Tests** - SLA enforcement and memory usage
-5. **Type Tests** - TypeScript constraint validation
+1. **Unit Tests** - Test individual classes with clear mocks (src/__tests__/ - 57 lines)
+2. **Integration Tests** - Test complete workflows end-to-end
+3. **Security Tests** - Validate credential protection and file operations
 
-### Coverage Requirements
+### Coverage Goals
 
-- **80% minimum coverage** for all code
-- **100% coverage** for security-critical functions
-- **Performance SLAs** for all operations
-- **Cross-platform testing** on Windows, macOS, Linux
+- **Focus on critical paths** - shop config, credentials, CLI integration
+- **Security coverage** - All file operations and validation logic
+- **Cross-platform testing** - Ensure Windows, macOS, and Linux compatibility
+- **Simple, maintainable tests** - Avoid overly complex test scenarios
 
 ## Security Considerations
 
@@ -250,17 +256,33 @@ The package is designed to work with any Shopify theme:
 - GitHub workflow templates included
 - Comprehensive initialization process
 
-### Community Focus
+### Code Quality Focus
 
-This package extracts the multi-shop innovations from Horizon Meyer to make them available to the broader Shopify development community. It serves as a standalone tool that can transform any theme into a sophisticated multi-shop system.
+This package demonstrates clean, maintainable enterprise code patterns:
+- **Focused classes** - Single responsibility, reasonable size limits
+- **Simple solutions** - Avoid custom frameworks, use simple wrappers where needed
+- **Real functionality** - No security theater or placeholder methods
+- **TypeScript best practices** - Proper typing without over-engineering
+- **Senior engineer friendly** - Easy to understand, test, and modify
+
+The multi-shop workflow complexity is managed through clean architecture, not code bloat.
 
 # important-instruction-reminders
 
-This is an NPM package, not a theme. Focus on:
-- Package functionality and TypeScript architecture
-- CLI commands and developer experience
-- Security and performance of the package itself
-- Integration with existing Shopify themes
-- Do NOT modify theme files (sections, blocks, assets) - this package works with existing themes
+This is a clean, maintainable NPM package. When working on it:
 
-The package should be theme-agnostic and focused on providing tooling and workflow management for multi-shop development.
+## Code Quality Standards
+- **Keep classes focused** - Single responsibility, under 200 lines where possible
+- **Avoid custom frameworks** - Use existing libraries or simple solutions
+- **Write direct comments** - No "enterprise-grade" buzzwords or AI jargon
+- **Remove unused code** - Don't export types/functions that aren't used
+- **Real functionality only** - No security theater or placeholder methods
+
+## Package Focus
+- **CLI tool architecture** - Clean command patterns, not menu systems
+- **TypeScript best practices** - Proper typing without over-engineering
+- **Cross-platform support** - File operations that work on Windows/macOS/Linux
+- **Integration ready** - Works with existing Shopify themes, no theme modifications
+- **Workflow management** - Focus on GitHub Flow and multi-shop branching
+
+The complexity is in the workflow design, not the code implementation.
