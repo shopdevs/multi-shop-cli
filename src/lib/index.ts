@@ -14,7 +14,7 @@ export { TestRunner } from "./TestRunner.js";
 // Core infrastructure
 export { SecurityManager } from "./core/SecurityManager.js";
 export { GitOperations } from "./core/GitOperations.js";
-export { Logger, logger } from "./core/Logger.js";
+export { SimpleLogger as Logger, logger } from "./core/SimpleLogger.js";
 export { SimplePerformanceMonitor, performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 
 // Validation and error handling

@@ -26,7 +26,7 @@ import type {
 import { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
 import { SecurityManager } from "./core/SecurityManager.js";
 import { GitOperations } from "./core/GitOperations.js";
-import { logger } from "./core/Logger.js";
+import { logger } from "./core/SimpleLogger.js";
 import { performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 import { config as systemConfig } from "./core/Config.js";
 import { 

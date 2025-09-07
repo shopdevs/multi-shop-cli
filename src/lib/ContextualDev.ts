@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import type { ShopManagerOptions } from "../types/shop.js";
-import { logger } from "./core/Logger.js";
+import { logger } from "./core/SimpleLogger.js";
 
 /**
  * Contextual development that adapts to branch context

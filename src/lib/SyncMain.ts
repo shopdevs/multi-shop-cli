@@ -10,7 +10,7 @@ import {
   log,
 } from "@clack/prompts";
 
-import { logger } from "./core/Logger.js";
+import { logger } from "./core/SimpleLogger.js";
 import { GitOperations } from "./core/GitOperations.js";
 import { ShopCommandError } from "./errors/ShopError.js";
 

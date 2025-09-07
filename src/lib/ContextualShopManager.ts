@@ -17,7 +17,7 @@ import type { ShopConfig, Environment, ShopCredentials } from "../types/shop.js"
 import { SecurityManager } from "./core/SecurityManager.js";
 import { GitOperations } from "./core/GitOperations.js";
 import { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
-import { logger } from "./core/Logger.js";
+import { logger } from "./core/SimpleLogger.js";
 import { ShopConfigurationError, ShopCredentialError } from "./errors/ShopError.js";
 
 /**
