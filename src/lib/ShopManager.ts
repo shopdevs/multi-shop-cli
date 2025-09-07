@@ -363,6 +363,85 @@ export class ShopManager {
     }
   }
 
+  // ================== SHOPIFY CLI INTEGRATION ==================
+
+  /**
+   * Starts the Shopify CLI development server
+   */
+  private async startShopifyDevServer(
+    storeDomain: string, 
+    themeToken: string, 
+    shopId: string, 
+    environment: 'staging' | 'production'
+  ): Promise<void> {
+    const s = spinner();
+    s.start("Starting Shopify CLI development server...");
+
+    try {
+      // Set environment variables for Shopify CLI
+      const env = {
+        ...process.env,
+        SHOPIFY_CLI_THEME_TOKEN: themeToken,
+        SHOPIFY_STORE: storeDomain.replace('.myshopify.com', '')
+      };
+
+      // Check if Shopify CLI is available
+      try {
+        execSync('shopify version', { stdio: 'ignore' });
+      } catch {
+        s.stop("❌ Shopify CLI not found");
+        note("Install Shopify CLI: npm install -g @shopify/cli", "Installation Required");
+        return;
+      }
+
+      s.stop("✅ Starting development server");
+
+      // Display connection info
+      console.log(`\n🔗 Development Server Starting:`);
+      console.log(`   Shop: ${shopId} (${environment})`);
+      console.log(`   Store: ${storeDomain}`);
+      console.log(`   Token: ${themeToken.substring(0, 8)}...`);
+      console.log(`\n⚡ Running: shopify theme dev --store=${storeDomain.replace('.myshopify.com', '')}`);
+      console.log(`\nPress Ctrl+C to stop the development server\n`);
+
+      // Start the development server
+      const devProcess = spawn('shopify', ['theme', 'dev', `--store=${storeDomain.replace('.myshopify.com', '')}`], {
+        env,
+        stdio: 'inherit', // Pass through all output to user
+        cwd: this.cwd
+      });
+
+      // Handle process events
+      devProcess.on('error', (error) => {
+        this.logger.error('Shopify CLI error', { 
+          error: error.message, 
+          shopId, 
+          environment 
+        });
+      });
+
+      // Wait for the process to exit
+      return new Promise<void>((resolve, reject) => {
+        devProcess.on('close', (code) => {
+          if (code === 0 || code === null) {
+            note("Development server stopped", "ℹ️ Info");
+            resolve();
+          } else {
+            reject(new Error(`Shopify CLI exited with code ${code}`));
+          }
+        });
+
+        devProcess.on('error', (error) => {
+          reject(error);
+        });
+      });
+
+    } catch (error) {
+      s.stop("❌ Failed to start development server");
+      throw error;
+    }
+  }
+
   // ================== PRIVATE UTILITY METHODS ==================
 
   /**
@@ -435,16 +514,35 @@ export class ShopManager {
         return;
       }
 
-      note(`Starting development server for ${config.name}...`, "🚀 Development Server");
+      // Choose environment for development
+      const envChoice = await select({
+        message: "Select environment:",
+        options: [
+          { value: "staging", label: "Staging", hint: config.shopify.stores.staging.domain },
+          { value: "production", label: "Production", hint: config.shopify.stores.production.domain }
+        ]
+      });
+
+      if (isCancel(envChoice)) return;
+
+      const environment = envChoice as 'staging' | 'production';
+      const store = config.shopify.stores[environment];
+      const token = this.securityManager.getThemeToken(shopChoice as string, environment);
+
+      if (!token) {
+        note(`No theme token found for ${environment}`, "⚠️ Setup Required");
+        return;
+      }
+
+      note(`Starting development server for ${config.name} (${environment})...`, "🚀 Development Server");
       
-      // In a real implementation, this would start the Shopify CLI dev server
-      // For now, we'll display the configuration that would be used
-      console.log(`\nShop: ${config.name}`);
-      console.log(`Production: ${config.shopify.stores.production.domain}`);
-      console.log(`Staging: ${config.shopify.stores.staging.domain}`);
-      console.log(`Branch: ${config.shopify.stores.production.branch}`);
-      
-      note("Development server would start here. Run 'shopify theme dev' manually for now.", "ℹ️ Manual Step");
+      try {
+        // Start Shopify CLI dev server with the appropriate credentials
+        await this.startShopifyDevServer(store.domain, token, shopChoice as string, environment);
+      } catch (error) {
+        log.error(`Failed to start Shopify CLI: ${error instanceof Error ? error.message : String(error)}`);
+        note("Ensure Shopify CLI is installed: npm install -g @shopify/cli", "💡 Help");
+      }
       
     } catch (error) {
       log.error(`Failed to start dev server: ${error instanceof Error ? error.message : String(error)}`);

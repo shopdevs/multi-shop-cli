@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Package Overview
 
-ShopDevs Multi-Shop is an enterprise-grade NPM package that adds contextual development and automated shop management capabilities to any Shopify theme. It enables teams to manage multiple Shopify stores from a single theme codebase using a sophisticated branch-per-shop architecture.
+ShopDevs Multi-Shop is an enterprise-grade NPM package that adds contextual development and automated shop management capabilities to any Shopify theme. It enables teams to manage multiple Shopify stores from a single theme codebase using a GitHub Flow workflow with branch-per-shop architecture for shop-specific features and campaigns.
 
 ## Development Commands
 
@@ -54,6 +54,7 @@ src/
 │   ├── ShopManager.ts             # Core shop management functionality
 │   ├── ContextualDev.ts           # Branch detection and routing
 │   ├── ContextualShopManager.ts   # Feature branch development
+│   ├── WorkflowManager.ts         # Multi-shop workflow orchestration
 │   ├── Initializer.ts             # Project initialization
 │   ├── SyncMain.ts                # Git sync operations
 │   ├── TestRunner.ts              # PR testing functionality
@@ -61,7 +62,8 @@ src/
 │   │   ├── SecurityManager.ts     # Credential security and auditing
 │   │   ├── GitOperations.ts       # Git operations with error handling
 │   │   ├── Logger.ts              # Structured logging system
-│   │   └── PerformanceMonitor.ts  # Performance tracking and SLAs
+│   │   ├── Config.ts              # Configuration management
+│   │   └── SimplePerformanceMonitor.ts # Basic performance tracking
 │   ├── validators/
 │   │   └── ShopConfigValidator.ts # JSON schema validation
 │   └── errors/
@@ -82,10 +84,11 @@ src/
 ### Design Principles
 
 1. **Type Safety First** - Every function, parameter, and return value is strictly typed
-2. **Security by Design** - Credentials never exposed, comprehensive validation
-3. **Performance Monitoring** - Built-in SLA tracking and memory monitoring
-4. **Error Context** - Rich error information for debugging without exposing secrets
-5. **Developer Experience** - Beautiful CLI with helpful prompts and guidance
+2. **Security by Design** - Path traversal protection, safe JSON parsing, credential isolation
+3. **Cross-Platform Support** - Works reliably on Windows, macOS, and Linux
+4. **Configurable Behavior** - System constants defined in Config.ts, not hardcoded
+5. **Real Implementation** - No placeholder methods, all functionality implemented
+6. **Developer Experience** - Beautiful CLI with Shopify CLI integration
 
 ## Key Implementation Details
 
@@ -95,21 +98,24 @@ src/
 - **Readonly Interfaces** - Immutable data structures throughout
 - **Type Guards** - Runtime validation that matches compile-time constraints
 - **Comprehensive Error Types** - Structured error hierarchy with context
+- **Strict Type Safety** - All JavaScript converted to proper TypeScript
 
 ### Security Model
 
-- **Credential Isolation** - Local-only storage in shops/credentials/
-- **Input Validation** - JSON schema validation for all user input
-- **File Permissions** - Automatic enforcement of secure file permissions (600)
+- **Credential Isolation** - Local-only storage in shops/credentials/ (never committed)
+- **Path Traversal Protection** - Shop ID validation prevents directory traversal attacks
+- **Input Validation** - JSON schema validation with size limits and type checking
+- **Cross-Platform File Permissions** - Secure file permissions (600) where supported
+- **Integrity Checking** - Checksum validation for credential files
 - **Audit Capabilities** - Built-in security scanning and reporting
 - **No Secret Exposure** - Sanitized logging and error messages
 
 ### Performance Requirements
 
-- **CLI Startup** - <500ms cold start
-- **Shop Operations** - <2 seconds for complex operations
-- **Memory Usage** - <100MB for typical workflows
-- **File I/O** - Minimized filesystem operations with caching
+- **CLI Startup** - Fast startup for responsive user experience
+- **Shop Operations** - Efficient operations with configurable thresholds
+- **Memory Usage** - Reasonable memory consumption for CLI tools
+- **Cross-Platform** - Works reliably on Windows, macOS, and Linux
 
 ## Workflow Integration
 
@@ -119,47 +125,53 @@ This package enables any Shopify theme to adopt the multi-shop workflow:
 
 ```bash
 # Install in existing theme
-npm install -D shopdevs-multi-shop
+pnpm add -D shopdevs-multi-shop
 
 # Initialize multi-shop capabilities
-npx multi-shop init
+pnpx multi-shop init
 
 # Create shops
-npm run shop → Create New Shop
+pnpm run shop → Create New Shop
 
 # Contextual development
-npm run dev  # Adapts to branch context automatically
+pnpm run dev  # Adapts to branch context automatically
 ```
 
 ### Branch Strategy
 
-The package implements branch-per-shop architecture:
+The package implements GitHub Flow for core features with branch-per-shop architecture for shop-specific work:
 
 ```
 main (core theme code)
-├── feature/WEB-123-carousel    # Contextual development
-├── shop-a/main                 # Connected to shop-a.myshopify.com
-├── shop-a/staging              # Connected to staging-shop-a.myshopify.com
-├── shop-a/promo-spring-sale    # Campaign branches
-└── shop-b/main                 # Connected to shop-b.myshopify.com
-    └── shop-b/staging          # Connected to staging-shop-b.myshopify.com
+├── feature/carousel-fix        # Contextual development
+├── hotfix/critical-bug         # Emergency fixes
+│
+├── shop-a/main                 # Connected to shop-a
+│   ├── shop-a/staging          # Connected to staging-shop-a
+│   └── shop-a/promo-spring     # Campaign branches
+│
+└── shop-b/main                 # Connected to shop-b
+    ├── shop-b/staging          # Connected to staging-shop-b
+    └── shop-b/promo-holiday    # Campaign branches
 ```
 
 ### Development Workflows
 
-#### Core Feature Development
-1. Create feature branch from main: `git checkout -b WEB-123-feature`
-2. Contextual development: `npm run dev` (select shop context)
-3. Sync with main: `npm run sync-main` (interactive rebase/merge)
-4. Create PR to main: `gh pr create --base main`
-5. Auto-created shop sync PRs: `main → shop-a/staging, main → shop-b/staging`
+#### Core Feature Development (GitHub Flow)
+1. Create feature branch from main: `git checkout -b feature/carousel-fix`
+2. Contextual development: `pnpm run dev` (select shop context for testing)
+3. Sync with main: `pnpm run sync-main` (if needed)
+4. Create PR directly to main: `gh pr create --base main` (GitHub Flow)
+5. Auto-created shop sync PRs: `main → shop-a/staging → shop-a/main, main → shop-b/staging → shop-b/main`
 
-#### Campaign Management
-1. Create promo branch: `npm run shop → Campaign Tools → Create Promo Branch`
-2. Connect to Shopify theme and customize
-3. Launch promo theme directly in Shopify
-4. Push content to main: `npm run shop → Campaign Tools → Push Promo to Main`
-5. Republish main theme to keep current
+#### Campaign Management (Complex Promo Workflow)
+1. Create promo branch: `pnpm run shop → Campaign Tools → Create Promo Branch` (shop-a/main → shop-a/promo-123)
+2. Connect Shopify theme to promo branch via GitHub integration
+3. Customize in Shopify admin (content syncs back to promo branch)
+4. Launch promo theme (Launchpad app or manual publish)
+5. Push content to main: `pnpm run shop → Campaign Tools → Push Promo to Main` (shop-a/promo-123 → shop-a/main)
+6. Republish main theme to keep it current
+7. Optional: Create end-promo branch for content cleanup (shop-a/main → shop-a/end-promo-123)
 
 ## File Organization
 
@@ -172,8 +184,11 @@ main (core theme code)
 ### Important Files
 
 - `src/types/shop.ts` - Comprehensive type definitions for the entire system
-- `src/lib/core/SecurityManager.ts` - Credential security and audit functionality
-- `src/validators/ShopConfigValidator.ts` - Input validation and security
+- `src/lib/core/SecurityManager.ts` - Credential security with path traversal protection
+- `src/lib/core/Config.ts` - Configurable system constants (replaces hardcoded values)
+- `src/lib/WorkflowManager.ts` - Multi-shop GitHub Flow workflow orchestration
+- `src/lib/validators/ShopConfigValidator.ts` - Input validation and security
+- `WORKFLOWS.md` - Complete documentation of multi-shop workflows
 - `vitest.config.ts` - Testing configuration with coverage requirements
 
 ## Testing Strategy

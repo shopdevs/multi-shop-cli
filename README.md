@@ -25,7 +25,7 @@ Transform any Shopify theme into a sophisticated multi-shop system with **contex
 
 ```bash
 # Add to your theme project
-npm install -D shopdevs-multi-shop
+pnpm add -D shopdevs-multi-shop
 ```
 
 ### Initialize in Your Theme
@@ -44,8 +44,8 @@ This creates:
 ### Create Your First Shop
 
 ```bash
-# Use npm scripts (recommended)
-npm run shop
+# Use pnpm scripts (recommended)
+pnpm run shop
 # → Create New Shop
 # → Follow interactive setup
 
@@ -56,8 +56,8 @@ npx multi-shop shop
 ### Start Development
 
 ```bash
-# Use npm scripts (recommended)
-npm run dev
+# Use pnpm scripts (recommended)
+pnpm run dev
 # → Contextual development that adapts to your branch
 
 # Or use npx directly  
@@ -89,7 +89,7 @@ npm run dev
 # → Starts development immediately
 ```
 
-### Automated Shop Syncing
+### Automated Shop Syncing (GitHub Flow)
 
 When you merge features to main:
 1. **GitHub Action automatically creates PRs**: `main → shop-a/staging, main → shop-b/staging`
@@ -112,11 +112,11 @@ npm run shop → Campaign Tools → Push Promo to Main
 
 ## 📋 Development Workflow
 
-### Core Feature Development
+### Core Feature Development (GitHub Flow)
 
 ```bash
 # 1. Create feature from main
-git checkout main && git checkout -b WEB-123-new-feature
+git checkout main && git checkout -b feature/new-component
 
 # 2. Contextual development
 pnpm run dev  # Select shop context for testing
@@ -124,11 +124,11 @@ pnpm run dev  # Select shop context for testing
 # 3. Test across shops  
 pnpm run dev  # Try different shop contexts
 
-# 4. Sync with latest main
+# 4. Sync with latest main (if needed)
 pnpm run sync-main
 
-# 5. Create PR to main
-gh pr create --base main --title "Add new feature"
+# 5. Create PR directly to main (GitHub Flow)
+gh pr create --base main --title "Add new component"
 
 # 6. After merge → Auto-created shop sync PRs
 ```
@@ -137,6 +137,7 @@ gh pr create --base main --title "Add new feature"
 
 ```bash
 # 1. Create shop branch
+git checkout shop-a/main
 git checkout -b shop-a/custom-feature
 
 # 2. Auto-detected development
@@ -154,15 +155,15 @@ gh pr create --base shop-a/main --title "Custom feature for Shop A"
 
 ```
 main (core theme)
-├── feature/WEB-123-carousel      # Contextual development
+├── feature/carousel-fix         # Contextual development
 ├── hotfix/critical-bug          # Emergency fixes
 │
-├── shop-a/main                  # Connected to shop-a.myshopify.com
-├── shop-a/staging               # Connected to staging-shop-a.myshopify.com
-├── shop-a/promo-spring-sale     # Campaign branches
+├── shop-a/main                  # Connected to shop-a
+│   ├── shop-a/staging           # Connected to staging-shop-a  
+│   └── shop-a/promo-spring-sale # Campaign branches
 │
-└── shop-b/main                  # Connected to shop-b.myshopify.com  
-    ├── shop-b/staging           # Connected to staging-shop-b.myshopify.com
+└── shop-b/main                  # Connected to shop-b
+    ├── shop-b/staging           # Connected to staging-shop-b
     └── shop-b/promo-holiday     # Campaign branches
 ```
 
@@ -176,8 +177,17 @@ main (core theme)
   "name": "Shop A", 
   "shopify": {
     "stores": {
-      "staging": { "domain": "staging-shop-a.myshopify.com" },
-      "production": { "domain": "shop-a.myshopify.com" }
+      "production": { 
+        "domain": "shop-a.myshopify.com",
+        "branch": "shop-a/main"
+      },
+      "staging": { 
+        "domain": "staging-shop-a.myshopify.com",
+        "branch": "shop-a/staging" 
+      }
+    },
+    "authentication": {
+      "method": "theme-access-app"
     }
   }
   // ⚠️ NO theme tokens stored here
@@ -191,10 +201,11 @@ main (core theme)
   "developer": "your-name",
   "shopify": {
     "stores": {
-      "staging": { "themeToken": "your-personal-staging-password" },
-      "production": { "themeToken": "your-personal-production-password" }
+      "production": { "themeToken": "your-personal-production-password" },
+      "staging": { "themeToken": "your-personal-staging-password" }
     }
-  }
+  },
+  "notes": "Theme access app credentials for shop-a"
 }
 ```
 

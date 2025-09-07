@@ -30,7 +30,7 @@ cd my-multi-shop-dawn
 npm init -y
 
 # Install multi-shop package
-npm install -D shopdevs-multi-shop
+pnpm add -D shopdevs-multi-shop
 
 # Initialize multi-shop
 npx multi-shop init
@@ -40,7 +40,7 @@ npx multi-shop init
 
 ```bash
 # Launch shop manager
-npm run shop
+pnpm run shop
 
 # Create first shop
 # → Create New Shop
@@ -87,14 +87,14 @@ git checkout main
 git checkout -b feature/add-testimonials-section
 
 # Start contextual development  
-npm run dev
+pnpm run dev
 # → Select shop: fitness-store
 # → Select environment: staging
 # → Development server starts
 # → Test your changes on Fitness Store staging
 
 # Test same feature on Beauty Store
-npm run dev
+pnpm run dev
 # → Select shop: beauty-store  
 # → Select environment: staging
 # → Same code, different shop context
@@ -114,16 +114,16 @@ git checkout -b feature/hero-banner-v2
 # Create: sections/hero-banner-v2.liquid
 
 # 3. Test on Fitness Store
-npm run dev → fitness-store → staging
+pnpm run dev → fitness-store → staging
 # Preview: https://staging-fitness-store.myshopify.com?preview_theme_id=...
 
 # 4. Test on Beauty Store  
-npm run dev → beauty-store → staging
+pnpm run dev → beauty-store → staging
 # Preview: https://staging-beauty-store.myshopify.com?preview_theme_id=...
 
 # 5. Run tests
-npm run test:integration  # Test shopping flows
-npm run test:visual      # Test layout consistency
+pnpm run test:integration  # Test shopping flows
+pnpm run test:visual      # Test layout consistency
 
 # 6. Create PR
 gh pr create --base main --title "Add hero banner v2 section"
@@ -146,7 +146,7 @@ git checkout -b fitness-store/custom-workout-calculator
 # Only for Fitness Store
 
 # 3. Test (auto-detects fitness-store context)
-npm run dev
+pnpm run dev
 # → Auto-detects: fitness-store
 # → Starts immediately on fitness store
 
@@ -158,7 +158,7 @@ gh pr create --base fitness-store/main --title "Add workout calculator"
 
 ```bash
 # 1. Create promo for Fitness Store
-npm run shop → Campaign Tools → Create Promo Branch
+pnpm run shop → Campaign Tools → Create Promo Branch
 # → Select: fitness-store
 # → Promo name: summer-fitness-sale
 # → Creates: fitness-store/promo-summer-fitness-sale
@@ -174,7 +174,7 @@ npm run shop → Campaign Tools → Create Promo Branch
 # Shopify Admin → Publish theme
 
 # 5. Push content back to main (keeps main current)
-npm run shop → Campaign Tools → Push Promo to Main
+pnpm run shop → Campaign Tools → Push Promo to Main
 # Creates PR: fitness-store/promo-summer-fitness-sale → fitness-store/main
 ```
 
