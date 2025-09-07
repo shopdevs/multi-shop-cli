@@ -59,7 +59,7 @@ export {
 
 // Package metadata
 export const VERSION = "1.0.0";
-export const PACKAGE_NAME = "shopdevs-multi-shop";
+export const PACKAGE_NAME = "@shopdevs/multi-shop-cli";
 
 /**
  * Creates a new ShopManager instance

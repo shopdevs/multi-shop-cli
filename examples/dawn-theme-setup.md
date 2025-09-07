@@ -30,7 +30,7 @@ cd my-multi-shop-dawn
 npm init -y
 
 # Install multi-shop package
-pnpm add -D shopdevs-multi-shop
+pnpm add -D @shopdevs/multi-shop-cli
 
 # Initialize multi-shop
 npx multi-shop init

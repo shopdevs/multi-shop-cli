@@ -25,7 +25,7 @@ Transform any Shopify theme into a sophisticated multi-shop system with **contex
 
 ```bash
 # Add to your theme project
-pnpm add -D shopdevs-multi-shop
+pnpm add -D @shopdevs/multi-shop-cli
 ```
 
 ### Initialize in Your Theme

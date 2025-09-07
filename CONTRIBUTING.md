@@ -19,13 +19,13 @@ git clone https://github.com/shopdevs/multi-shop.git
 cd multi-shop
 
 # Install dependencies
-npm install
+pnpm install
 
 # Run tests to verify setup
-npm test
+pnpm test
 
 # Start development mode
-npm run dev
+pnpm run dev
 ```
 
 ## 🛠️ Development Workflow
@@ -46,23 +46,23 @@ git checkout -b feature/your-feature-name
 # Update documentation
 
 # Validate your changes
-npm run validate  # Runs lint, typecheck, and tests
+pnpm run validate  # Runs lint, typecheck, and tests
 ```
 
 ### 3. Testing
 
 ```bash
 # Unit tests
-npm test
+pnpm test
 
 # E2E tests  
-npm run test:e2e
+pnpm run test:e2e
 
 # Security checks
-npm run security:audit
+pnpm run security:audit
 
 # Performance validation
-npm run test:performance
+pnpm run test:performance
 ```
 
 ### 4. Submit Pull Request

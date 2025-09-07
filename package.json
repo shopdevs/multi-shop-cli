@@ -1,7 +1,7 @@
 {
-  "name": "shopdevs-multi-shop",
+  "name": "@shopdevs/multi-shop-cli",
   "version": "1.0.0",
-  "description": "Enterprise-grade contextual development and automated shop management for multi-shop Shopify themes",
+  "description": "CLI tool for contextual development and automated shop management for multi-shop Shopify themes",
   "keywords": [
     "shopify",
     "theme",
@@ -47,13 +47,16 @@
   },
   "files": [
     "dist/",
-    "src/",
     "templates/",
     "examples/",
     "README.md",
     "LICENSE",
     "SECURITY.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "WORKFLOWS.md",
+    "VERSIONING.md",
+    "LOCAL-TESTING.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "build": "tsc && npm run build:chmod",
@@ -74,7 +77,10 @@
     "security:audit": "npm audit --audit-level moderate",
     "security:outdated": "npm outdated",
     "docs:build": "typedoc --out docs src/lib/index.ts",
-    "release": "echo 'Manual release: npm version patch && npm publish'",
+    "version": "npm run validate && npm run build",
+    "release:patch": "npm version patch && npm publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm publish && git push --follow-tags", 
+    "release:major": "npm version major && npm publish && git push --follow-tags",
     "size-check": "npm pack --dry-run && du -sh *.tgz 2>/dev/null || echo 'Package size check complete'"
   },
   "dependencies": {

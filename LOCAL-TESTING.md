@@ -13,7 +13,7 @@ npm link                      # Create global symlink
 
 # In a test Shopify theme directory
 cd /path/to/test-shopify-theme
-npm link shopdevs-multi-shop  # Link to your local package
+npm link @shopdevs/multi-shop-cli  # Link to your local package
 
 # Now test it
 npx multi-shop --version     # Should show your local version
@@ -27,12 +27,12 @@ pnpm run dev                 # Test contextual development
 ```bash
 # In the package directory
 pnpm run build
-npm pack                     # Creates shopdevs-multi-shop-1.0.0.tgz
+npm pack                     # Creates @shopdevs/multi-shop-cli-1.0.0.tgz
 
 # In a test theme directory  
 cd /path/to/test-shopify-theme
 npm init -y                  # If no package.json exists
-pnpm add -D /path/to/shopdevs-multi-shop/shopdevs-multi-shop-1.0.0.tgz
+pnpm add -D /path/to/@shopdevs/multi-shop-cli/@shopdevs/multi-shop-cli-1.0.0.tgz
 
 # Test the installation
 npx multi-shop --version
@@ -42,7 +42,7 @@ npx multi-shop --version
 
 ```bash
 # In a test theme directory
-pnpm add -D file:../path/to/shopdevs-multi-shop
+pnpm add -D file:../path/to/@shopdevs/multi-shop-cli
 
 # Test functionality
 npx multi-shop init
@@ -74,13 +74,13 @@ git commit -m "Initial commit"
 
 ```bash
 # From your package directory
-cd /Users/brandt/codes/meyer/shopdevs-multi-shop
+cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
 pnpm run build
 npm link
 
 # In test theme directory
 cd /tmp/test-multi-shop-theme
-npm link shopdevs-multi-shop
+npm link @shopdevs/multi-shop-cli
 ```
 
 ### 3. Test Core Functionality
@@ -179,7 +179,7 @@ pnpm run shop
 
 # Test without git repository
 cd /tmp && mkdir no-git-test && cd no-git-test
-npm link shopdevs-multi-shop
+npm link @shopdevs/multi-shop-cli
 npx multi-shop init
 # Should handle gracefully
 ```
@@ -196,7 +196,7 @@ ls -la shops/credentials/
 ### Test TypeScript Integration
 ```bash
 # In a TypeScript project
-echo 'import { ShopManager } from "shopdevs-multi-shop";' > test.ts
+echo 'import { ShopManager } from "@shopdevs/multi-shop-cli";' > test.ts
 npx tsc --noEmit test.ts
 # Should compile without errors
 ```
@@ -235,10 +235,10 @@ Before publishing to NPM, ensure all these work locally:
 ```bash
 # Unlink from test projects
 cd /tmp/test-multi-shop-theme
-npm unlink shopdevs-multi-shop
+npm unlink @shopdevs/multi-shop-cli
 
 # Unlink global package
-cd /Users/brandt/codes/meyer/shopdevs-multi-shop
+cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
 npm unlink
 
 # Clean up test directories
@@ -246,7 +246,7 @@ rm -rf /tmp/test-multi-shop-theme
 rm -rf /tmp/no-git-test
 
 # Remove generated tarball
-rm -f shopdevs-multi-shop-*.tgz
+rm -f @shopdevs/multi-shop-cli-*.tgz
 ```
 
 ---
@@ -257,10 +257,10 @@ rm -f shopdevs-multi-shop-*.tgz
 ```bash
 # Use file: protocol for rapid iteration
 cd /path/to/test-theme
-pnpm add -D file:/Users/brandt/codes/meyer/shopdevs-multi-shop
+pnpm add -D file:/Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
 
 # Each time you make changes:
-cd /Users/brandt/codes/meyer/shopdevs-multi-shop
+cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
 pnpm run build
 
 cd /path/to/test-theme  
@@ -271,10 +271,10 @@ pnpm install  # Reinstalls your local changes
 ```bash
 # Using nvm (if available)
 nvm use 18
-npm link shopdevs-multi-shop
+npm link @shopdevs/multi-shop-cli
 
 nvm use 20  
-npm link shopdevs-multi-shop
+npm link @shopdevs/multi-shop-cli
 # Test on different Node versions
 ```
 

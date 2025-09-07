@@ -38,7 +38,7 @@ pnpm run dev
 # → Shopify CLI starts with shop-a staging credentials
 ```
 
-Test the same code against different brands:
+Test the same code against different shops:
 ```bash
 pnpm run dev
 # → Choose: shop-b (staging)  
@@ -76,7 +76,7 @@ After merge to main, either:
 **Option B: Manual PRs**
 ```bash
 multi-shop workflow deploy
-# → Shows commands for creating brand PRs:
+# → Shows commands for creating shop PRs:
 # gh pr create --base shop-a/staging --head main --title "Deploy carousel fix"
 # gh pr create --base shop-b/staging --head main --title "Deploy carousel fix"
 ```

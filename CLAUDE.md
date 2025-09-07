@@ -130,7 +130,7 @@ This package enables any Shopify theme to adopt the multi-shop workflow:
 
 ```bash
 # Install in existing theme
-pnpm add -D shopdevs-multi-shop
+pnpm add -D @shopdevs/multi-shop-cli
 
 # Initialize multi-shop capabilities
 pnpx multi-shop init

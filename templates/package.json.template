@@ -10,6 +10,6 @@
     "test:performance": "multi-shop test performance"
   },
   "devDependencies": {
-    "shopdevs-multi-shop": "^1.0.0"
+    "@shopdevs/multi-shop-cli": "^1.0.0"
   }
 }

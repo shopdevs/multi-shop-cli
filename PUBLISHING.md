@@ -1,6 +1,7 @@
 # 📦 Publishing ShopDevs Multi-Shop to NPM
 
-Complete guide to publishing and maintaining the ShopDevs Multi-Shop NPM package.
+Complete guide to publishing and maintaining the ShopDevs Multi-Shop NPM
+package.
 
 ## 🚀 Quick Publish (First Time)
 
@@ -9,14 +10,19 @@ Complete guide to publishing and maintaining the ShopDevs Multi-Shop NPM package
 npm whoami  # Check if logged in
 npm login   # If not logged in
 
-# 2. Run quality checks
-pnpm run validate
+# 2. Ensure clean git state
+git status  # Should be clean
+git pull origin main
 
-# 3. Build the package
-pnpm run build
+# 3. Use built-in release scripts (recommended)
+pnpm run release:patch  # For bug fixes (1.0.0 → 1.0.1)
+# This automatically: validates, builds, versions, publishes, pushes tags
 
-# 4. Publish
-npm publish
+# OR manually:
+pnpm run validate  # lint + typecheck + test
+pnpm run build     # TypeScript compilation
+npm publish        # Publish to NPM
+git push --follow-tags  # Push version tag
 ```
 
 ---
@@ -26,6 +32,7 @@ npm publish
 Before publishing, ensure everything is ready:
 
 ### 1. Code Quality ✅
+
 ```bash
 # Run all quality checks
 pnpm run validate
@@ -40,6 +47,7 @@ ls dist/  # Should show compiled JS files
 ```
 
 ### 2. Documentation ✅
+
 - [ ] README.md updated with current features
 - [ ] WORKFLOWS.md reflects actual workflow
 - [ ] CLAUDE.md has current architecture
@@ -47,6 +55,7 @@ ls dist/  # Should show compiled JS files
 - [ ] Troubleshooting section complete
 
 ### 3. Package Configuration ✅
+
 ```bash
 # Check package.json fields
 grep -A 20 '"name"' package.json
@@ -61,6 +70,7 @@ cat .npmignore
 ```
 
 ### 4. Test Installation ✅
+
 ```bash
 # Test local installation
 npm pack
@@ -82,26 +92,46 @@ npx multi-shop --version
 ## 🏷️ Version Management
 
 ### Semantic Versioning
+
 - **Patch** (`1.0.1`) - Bug fixes, documentation updates
 - **Minor** (`1.1.0`) - New features, backward compatible
 - **Major** (`2.0.0`) - Breaking changes
 
-### Version Commands
-```bash
-# Patch release (bug fixes)
-npm version patch
-# 1.0.0 → 1.0.1
+### Version Commands (NPM Best Practice)
 
-# Minor release (new features)
-npm version minor  
-# 1.0.1 → 1.1.0
+**Use the built-in scripts for automated workflows:**
+
+```bash
+# Patch release (bug fixes, documentation updates)
+pnpm run release:patch
+# 1.0.0 → 1.0.1 → validates → builds → publishes → pushes tag
+
+# Minor release (new features, backward compatible)
+pnpm run release:minor
+# 1.0.1 → 1.1.0 → validates → builds → publishes → pushes tag
 
 # Major release (breaking changes)
-npm version major
-# 1.1.0 → 2.0.0
+pnpm run release:major
+# 1.1.0 → 2.0.0 → validates → builds → publishes → pushes tag
+```
+
+**Manual versioning (if needed):**
+
+```bash
+# Just update version (no publish)
+npm version patch --no-git-tag-version  # Updates package.json only
+npm version minor --no-git-tag-version
+npm version major --no-git-tag-version
+
+# Then publish manually
+pnpm run validate && pnpm run build
+npm publish
+git add package.json && git commit -m "Release v1.0.1"
+git tag v1.0.1 && git push --follow-tags
 ```
 
 ### Pre-Release Versions
+
 ```bash
 # Beta versions for testing
 npm version prerelease --preid=beta
@@ -111,52 +141,187 @@ npm version prerelease --preid=beta
 npm publish --tag beta
 
 # Install beta version
-pnpm add -D shopdevs-multi-shop@beta
+pnpm add -D @shopdevs/multi-shop-cli@beta
 ```
 
 ---
 
 ## 📤 Publishing Process
 
-### First-Time Publishing
+### First-Time NPM Publishing Setup
 
-1. **Create NPM Account** (if needed)
+#### 1. **NPM Account Setup**
+
 ```bash
-# Create account at npmjs.com
-npm adduser
+# Check if you have an account
+npm whoami
+# If not logged in: "npm ERR! need auth"
+
+# Create account (if needed)
+# Visit https://www.npmjs.com/signup
+# Or: npm adduser
+
+# Login to existing account
+npm login
+# Enter username, password, email
+# Enter OTP if 2FA is enabled (recommended)
 ```
 
-2. **Verify Package Name Available**
+#### 2. **Enable 2FA (Highly Recommended)**
+
 ```bash
-npm view shopdevs-multi-shop
+# Enable two-factor authentication
+npm profile enable-2fa auth-and-writes
+
+# This requires 2FA for:
+# - Login (auth)
+# - Publishing packages (writes)
+```
+
+#### 3. **Verify Package Name Available**
+
+```bash
+npm view @shopdevs/multi-shop-cli
 # Should return 404 if name is available
+# If taken, you'll see existing package info
+
+# Check alternative names if needed:
+# npm view @your-username/multi-shop
+# npm view @shopdevs/multi-shop-cli-v2
 ```
 
-3. **Publish Initial Version**
+#### 4. **First Publication**
+
 ```bash
 # Ensure version is 1.0.0 in package.json
-pnpm run validate  # Final quality check
-pnpm run build     # Build for distribution
-npm publish        # Publish to NPM registry
+grep '"version"' package.json
+
+# Use the automated release script
+pnpm run release:patch  # Will be 1.0.0 → 1.0.1 on first run
 ```
 
-### Regular Updates
+#### 5. **Verify Publication**
 
 ```bash
-# 1. Update version
-npm version patch  # or minor/major
+# Check your package is live
+npm view @shopdevs/multi-shop-cli
+npm view @shopdevs/multi-shop-cli@latest
 
-# 2. Quality gate
-pnpm run validate
+# Check it installs correctly
+cd /tmp && mkdir test-install && cd test-install
+npm init -y
+pnpm add -D @shopdevs/multi-shop-cli
+npx multi-shop --version
+```
 
-# 3. Build
-pnpm run build
+### Regular Updates (Recommended Workflow)
 
-# 4. Publish
-npm publish
+**For your typical release cycle:**
 
-# 5. Create git tag
+```bash
+# 1. Ensure clean git state
+git status  # Should show "working tree clean"
+git pull origin main
+
+# 2. Choose appropriate release type:
+
+# PATCH - Bug fixes, documentation updates, small improvements
+pnpm run release:patch  # 1.0.0 → 1.0.1
+
+# MINOR - New features, backward compatible changes
+pnpm run release:minor  # 1.0.1 → 1.1.0
+
+# MAJOR - Breaking changes, API changes
+pnpm run release:major  # 1.1.0 → 2.0.0
+
+# 3. Verify publication
+npm view @shopdevs/multi-shop-cli@latest
+```
+
+**What the automated scripts do:**
+
+1. Run `npm run validate` (lint + typecheck + test)
+2. Run `npm run build` (TypeScript compilation)
+3. Update version in package.json
+4. Create git commit with version
+5. Create git tag (e.g., v1.0.1)
+6. Publish to NPM registry
+7. Push commit and tags to GitHub
+
+---
+
+## 🔰 NPM Publishing Guide
+
+Modern publishing best practices:
+
+### **1. Understanding NPM Package Lifecycle**
+
+```bash
+# Development (local)
+pnpm install           # Install dependencies
+pnpm run dev          # Development mode
+pnpm run test         # Run tests
+pnpm run build        # Build for distribution
+
+# Publishing (public)
+npm version patch     # Update version
+npm publish          # Publish to registry
+```
+
+### **2. Modern NPM Security Practices (2024/2025)**
+
+```bash
+# Essential security setup
+npm profile enable-2fa auth-and-writes  # Enable 2FA
+npm profile get                         # Verify your profile
+npm audit                               # Check dependencies
+```
+
+### **3. Package Naming**
+
+- ✅ `@shopdevs/multi-shop-cli` - Scoped package name with clear CLI designation
+
+### **4. Version Strategy**
+
+```bash
+# Alpha/Beta testing (before 1.0.0)
+npm version prerelease --preid=alpha  # 0.1.0-alpha.0
+npm publish --tag alpha
+
+# Stable releases (after 1.0.0)
+npm version patch   # Bug fixes: 1.0.0 → 1.0.1
+npm version minor   # New features: 1.0.1 → 1.1.0
+npm version major   # Breaking changes: 1.1.0 → 2.0.0
+```
+
+### **5. Modern NPM Commands You Should Know**
+
+```bash
+# Check what will be published
+npm pack --dry-run
+
+# Check package info
+npm view @shopdevs/multi-shop-cli
+
+# Check download stats (after publishing)
+npm view @shopdevs/multi-shop-cli --json | grep downloads
+
+# Unpublish (only within 72 hours, use carefully!)
+npm unpublish @shopdevs/multi-shop-cli@1.0.1
+```
+
+### **6. Git Tag Integration (Modern Standard)**
+
+```bash
+# NPM automatically creates git tags when versioning
+npm version patch  # Creates v1.0.1 tag
+
+# Push tags to GitHub (important!)
 git push --follow-tags
+
+# View tags
+git tag -l
+git show v1.0.1
 ```
 
 ---
@@ -164,23 +329,25 @@ git push --follow-tags
 ## 🔍 Post-Publishing Verification
 
 ### 1. Verify Package is Live
+
 ```bash
 # Check package exists on NPM
-npm view shopdevs-multi-shop
+npm view @shopdevs/multi-shop-cli
 
 # Check specific version
-npm view shopdevs-multi-shop@1.0.0
+npm view @shopdevs/multi-shop-cli@1.0.0
 
 # View all versions
-npm view shopdevs-multi-shop versions --json
+npm view @shopdevs/multi-shop-cli versions --json
 ```
 
 ### 2. Test Installation
+
 ```bash
 # Test fresh installation
 cd /tmp && mkdir test-fresh && cd test-fresh
 npm init -y
-pnpm add -D shopdevs-multi-shop
+pnpm add -D @shopdevs/multi-shop-cli
 
 # Test CLI functionality
 npx multi-shop --help
@@ -188,10 +355,11 @@ npx multi-shop --version
 ```
 
 ### 3. Test in Real Project
+
 ```bash
 # Test in actual Shopify theme
 cd /path/to/shopify-theme
-pnpm add -D shopdevs-multi-shop@latest
+pnpm add -D @shopdevs/multi-shop-cli@latest
 npx multi-shop init
 
 # Verify scripts were added
@@ -205,6 +373,7 @@ grep "multi-shop" package.json
 ### Regular Updates
 
 **Monthly Tasks:**
+
 ```bash
 # Check for outdated dependencies
 npm outdated
@@ -217,6 +386,7 @@ npm audit --audit-level=moderate
 ```
 
 **Quarterly Tasks:**
+
 ```bash
 # Review package size
 pnpm run size-check
@@ -230,6 +400,7 @@ pnpm run size-check
 ### Handling Issues
 
 **Bug Reports:**
+
 1. Reproduce issue locally
 2. Create test case
 3. Fix bug
@@ -237,13 +408,15 @@ pnpm run size-check
 5. `npm publish`
 
 **Feature Requests:**
+
 1. Discuss in GitHub issues
 2. Implement feature
-3. Update documentation  
+3. Update documentation
 4. `npm version minor`
 5. `npm publish`
 
 **Breaking Changes:**
+
 1. Document migration path
 2. Update major version
 3. `npm version major`
@@ -255,6 +428,7 @@ pnpm run size-check
 ## 🔐 Security Best Practices
 
 ### NPM Account Security
+
 ```bash
 # Enable 2FA on NPM account
 npm profile enable-2fa auth-and-writes
@@ -265,13 +439,15 @@ npm token create --cidr=0.0.0.0/0  # For publishing (restrict IP if possible)
 ```
 
 ### Package Security
+
 - **Never commit credentials** to the repository
-- **Use .npmignore** to exclude sensitive files  
+- **Use .npmignore** to exclude sensitive files
 - **Regular security audits** with `npm audit`
 - **Monitor dependencies** for vulnerabilities
 - **Review all dependencies** before adding new ones
 
 ### Publishing Security
+
 ```bash
 # Dry run first
 npm publish --dry-run
@@ -280,7 +456,7 @@ npm publish --dry-run
 npm pack --dry-run
 
 # Use specific version tags for important releases
-npm dist-tag add shopdevs-multi-shop@1.0.0 stable
+npm dist-tag add @shopdevs/multi-shop-cli@1.0.0 stable
 ```
 
 ---
@@ -317,7 +493,7 @@ git push --follow-tags
 gh release create v1.0.1 --notes "Bug fixes and improvements"
 
 # 9. Verify publication
-npm view shopdevs-multi-shop@latest
+npm view @shopdevs/multi-shop-cli@latest
 ```
 
 ---
@@ -325,17 +501,19 @@ npm view shopdevs-multi-shop@latest
 ## 📊 Package Analytics
 
 ### Monitor Package Usage
+
 ```bash
 # Check download stats
-npm view shopdevs-multi-shop
+npm view @shopdevs/multi-shop-cli
 
 # Check dependents (who's using your package)
 # Visit: https://www.npmjs.com/package/shopdevs-multi-shop?activeTab=dependents
 ```
 
 ### Success Metrics
+
 - **Weekly downloads**
-- **GitHub stars and forks**  
+- **GitHub stars and forks**
 - **Issue reports and resolution time**
 - **Community contributions**
 
@@ -346,13 +524,14 @@ npm view shopdevs-multi-shop
 ### GitHub Actions (Optional)
 
 Create `.github/workflows/publish.yml`:
+
 ```yaml
 name: Publish Package
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   publish:
@@ -361,18 +540,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-      
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Run quality checks
         run: pnpm run validate
-      
+
       - name: Build
         run: pnpm run build
-      
+
       - name: Publish
         run: npm publish
         env:
@@ -386,9 +565,10 @@ jobs:
 ### Common Issues
 
 **"Package name already exists"**
+
 ```bash
 # Check if name is taken
-npm view shopdevs-multi-shop
+npm view @shopdevs/multi-shop-cli
 
 # Try alternative names:
 # @your-org/multi-shop
@@ -396,6 +576,7 @@ npm view shopdevs-multi-shop
 ```
 
 **"Authentication failed"**
+
 ```bash
 # Re-login to NPM
 npm logout
@@ -406,6 +587,7 @@ npm whoami
 ```
 
 **"Files missing from package"**
+
 ```bash
 # Check .npmignore
 cat .npmignore
@@ -415,6 +597,7 @@ npm pack --dry-run
 ```
 
 **"CLI not executable after install"**
+
 ```bash
 # Check bin field in package.json
 grep -A 3 '"bin"' package.json
@@ -428,15 +611,17 @@ ls -la dist/bin/multi-shop.js
 ## 🎉 After Publishing
 
 ### Announce Release
+
 - **GitHub Releases** - Create release notes
 - **Documentation** - Update any external docs
 - **Community** - Share with Shopify dev community
 - **Team** - Notify team members of new version
 
 ### Monitor Health
+
 ```bash
 # Check package health
-npm view shopdevs-multi-shop
+npm view @shopdevs/multi-shop-cli
 
 # Monitor downloads
 # https://npm-stat.com/charts.html?package=shopdevs-multi-shop
@@ -445,4 +630,5 @@ npm view shopdevs-multi-shop
 # Monitor GitHub issues and NPM feedback
 ```
 
-The package is now ready to transform any Shopify theme into a sophisticated multi-shop development system!
+The package is now ready to transform any Shopify theme into a sophisticated
+multi-shop development system!

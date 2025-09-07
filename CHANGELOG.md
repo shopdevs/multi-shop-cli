@@ -14,42 +14,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security and credential management
 - Comprehensive testing framework
 
-## [1.0.0] - 2025-01-25
+## [1.0.0] - 2025-09-07
 
 ### Added
-- 🚀 **Initial Release** - Enterprise-grade multi-shop management for Shopify themes
-- 🧠 **Contextual Development** - Smart development server that adapts to branch context
-- 🏪 **Shop Management** - Interactive shop creation and configuration
-- 🔐 **Secure Credentials** - Local-only credential storage with encryption and validation
-- 🤖 **Automated Syncing** - GitHub Actions for automated shop synchronization
-- 🎨 **Campaign Tools** - Promo branch creation and content-forward workflow
-- 🧪 **Interactive Testing** - Comprehensive test suite with real Shopify preview themes
-- 📊 **Performance Monitoring** - Built-in performance tracking and optimization
-- 🛡️ **Enterprise Security** - Comprehensive security model with auditing
-- 🔧 **GitHub Flow Integration** - Modern PR-based development workflow
-- 📚 **Complete Documentation** - Comprehensive guides and API documentation
+- 🚀 **Initial Release** - Multi-shop management for Shopify themes
+- 🧠 **Contextual Development** - Smart `pnpm run dev` that adapts to branch context
+- 🏪 **Shop Management** - Interactive shop creation with automated GitHub branch creation
+- 🔐 **Secure Credentials** - Local-only credential storage with file permissions
+- 🎨 **Campaign Workflow** - Promo branch creation and content-forward workflow
+- 🔧 **GitHub Flow Integration** - Direct feature → main → shop-*/staging → shop-*/main workflow
+- 📚 **Complete Documentation** - Setup guides, workflows, and troubleshooting
+
+### Architecture
+- **Clean TypeScript** - Strict type safety with zero workarounds
+- **Focused Classes** - Single responsibility, maintainable code under 200 lines per class
+- **Shopify CLI Integration** - Uses official Shopify CLI for development servers
+- **Simple Solutions** - No custom frameworks, focused on real needs
+- **Cross-Platform** - Works on Windows, macOS, and Linux
 
 ### Security
-- Credential protection with local-only storage
-- JSON schema validation for all configuration
-- File permission enforcement (600 for credentials)
-- Integrity checking for credential files
-- Security audit capabilities
-- Input sanitization and validation
-
-### Performance  
-- CLI cold start optimization (<500ms)
-- Memory usage monitoring and leak detection
-- Operation timing with performance SLAs
-- Efficient file I/O with minimal filesystem operations
-- Log rotation to prevent disk space issues
+- **Path traversal protection** - Shop ID validation prevents directory attacks
+- **Safe JSON parsing** - Size limits and validation before parsing
+- **Credential isolation** - Local-only storage, never committed
+- **File permissions** - Secure file permissions where supported
+- **Security audit** - Built-in credential security checking
 
 ### Developer Experience
-- Beautiful CLI interface with @clack/prompts
-- Intelligent branch detection and context switching
-- Comprehensive error messages with actionable guidance
-- Auto-completion ready commands
-- Rich logging and debugging capabilities
+- **One command works everywhere** - `pnpm run dev` adapts to branch context
+- **Automated branch creation** - GitHub branches created during shop setup
+- **Clean error messages** - Actionable guidance without jargon
+- **Simple CLI** - Direct commands, not complex menu systems
 
 ---
 
