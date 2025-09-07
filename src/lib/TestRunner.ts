@@ -14,7 +14,7 @@ import {
 } from "@clack/prompts";
 
 import { logger } from "./core/Logger.js";
-import { performanceMonitor } from "./core/PerformanceMonitor.js";
+import { performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 import { GitOperations } from "./core/GitOperations.js";
 import { ShopCommandError } from "./errors/ShopError.js";
 
