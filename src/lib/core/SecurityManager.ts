@@ -2,24 +2,29 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { ShopCredentialError, ShopConfigurationError } from "../errors/ShopError.js";
+import type { ShopCredentials, SecurityAuditReport } from "../../types/shop.js";
+import { config } from "./Config.js";
 
 /**
  * Enterprise-grade security manager for credential handling
  * Implements security best practices for sensitive data
  */
 export class SecurityManager {
-  constructor(credentialsDir) {
+  private readonly credentialsDir: string;
+  private readonly encryptionKey: string;
+
+  constructor(credentialsDir: string) {
     this.credentialsDir = credentialsDir;
     this.encryptionKey = this.getOrCreateEncryptionKey();
   }
 
   /**
    * Securely loads credentials with integrity validation
-   * @param {string} shopId - Shop identifier
-   * @returns {Object|null} Credentials or null if not found
-   * @throws {ShopCredentialError} If corruption detected
+   * @param shopId - Shop identifier
+   * @returns Credentials or null if not found
+   * @throws ShopCredentialError If corruption detected
    */
-  loadCredentials(shopId) {
+  loadCredentials(shopId: string): ShopCredentials | null {
     try {
       const credPath = this.getCredentialPath(shopId);
       
@@ -53,11 +58,11 @@ export class SecurityManager {
 
   /**
    * Securely saves credentials with integrity protection
-   * @param {string} shopId - Shop identifier  
-   * @param {Object} credentials - Credential data
-   * @throws {ShopCredentialError} If save fails
+   * @param shopId - Shop identifier  
+   * @param credentials - Credential data
+   * @throws ShopCredentialError If save fails
    */
-  saveCredentials(shopId, credentials) {
+  saveCredentials(shopId: string, credentials: ShopCredentials): void {
     try {
       // Ensure credentials directory exists with proper permissions
       this.ensureCredentialsDirectory();
@@ -77,17 +82,35 @@ export class SecurityManager {
 
       const credPath = this.getCredentialPath(shopId);
       
-      // Write with restricted permissions (600)
-      fs.writeFileSync(credPath, JSON.stringify(secureCredentials, null, 2), {
-        mode: 0o600 // rw------- (owner read/write only)
-      });
+      // Write file first, then set permissions (cross-platform compatible)
+      fs.writeFileSync(credPath, JSON.stringify(secureCredentials, null, 2));
+      
+      // Set restricted permissions (works on Unix-like systems, ignored on Windows)
+      try {
+        fs.chmodSync(credPath, 0o600); // rw------- (owner read/write only)
+      } catch (error) {
+        // Permissions may not be supported on all platforms (e.g., Windows)
+        // This is not a critical failure for functionality
+        this.logger?.warn?.('Could not set file permissions', {
+          file: credPath,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
 
       // Verify write success
       if (!fs.existsSync(credPath)) {
-        throw new Error("Failed to verify credential file was written");
+        throw new ShopCredentialError(
+          `Failed to verify credential file was written for ${shopId}`,
+          shopId,
+          'write_error',
+          { path: credPath }
+        );
       }
 
-      console.log(`   🔐 Securely saved to: shops/credentials/${shopId}.credentials.json`);
+      // Log successful save (using proper logging interface when available)
+      if (typeof console !== 'undefined') {
+        console.log(`   🔐 Securely saved to: shops/credentials/${shopId}.credentials.json`);
+      }
       
     } catch (error) {
       throw new ShopCredentialError(
@@ -101,12 +124,12 @@ export class SecurityManager {
 
   /**
    * Gets theme token with security validation
-   * @param {string} shopId - Shop identifier
-   * @param {string} environment - Environment (staging/production)
-   * @returns {string|null} Theme token or null if not found
-   * @throws {ShopCredentialError} If security validation fails
+   * @param shopId - Shop identifier
+   * @param environment - Environment (staging/production)
+   * @returns Theme token or null if not found
+   * @throws ShopCredentialError If security validation fails
    */
-  getThemeToken(shopId, environment) {
+  getThemeToken(shopId: string, environment: 'production' | 'staging'): string | null {
     const credentials = this.loadCredentials(shopId);
     
     if (!credentials) {
@@ -127,10 +150,10 @@ export class SecurityManager {
 
   /**
    * Sanitizes credential data for logging (removes sensitive info)
-   * @param {Object} credentials - Credential object
-   * @returns {Object} Sanitized version safe for logging
+   * @param credentials - Credential object
+   * @returns Sanitized version safe for logging
    */
-  sanitizeForLogging(credentials) {
+  sanitizeForLogging(credentials: ShopCredentials | null): ShopCredentials | null {
     if (!credentials) return null;
 
     const sanitized = JSON.parse(JSON.stringify(credentials));
@@ -151,9 +174,9 @@ export class SecurityManager {
 
   /**
    * Audits credential security across all shops
-   * @returns {Object} Security audit report
+   * @returns Security audit report
    */
-  auditCredentialSecurity() {
+  auditCredentialSecurity(): SecurityAuditReport {
     const report = {
       timestamp: new Date().toISOString(),
       shops: [],
@@ -247,26 +270,74 @@ export class SecurityManager {
 
   // ================== PRIVATE METHODS ==================
 
-  getCredentialPath(shopId) {
-    return path.join(this.credentialsDir, `${shopId}.credentials.json`);
+  private getCredentialPath(shopId: string): string {
+    // Validate shopId to prevent path traversal attacks
+    if (!shopId || typeof shopId !== 'string') {
+      throw new ShopCredentialError('Invalid shop ID provided', shopId, 'validation');
+    }
+    
+    // Remove any path traversal attempts
+    const sanitizedShopId = shopId.replace(/[^a-z0-9-]/gi, '');
+    if (sanitizedShopId !== shopId) {
+      throw new ShopCredentialError(
+        'Shop ID contains invalid characters - only letters, numbers and hyphens allowed',
+        shopId,
+        'validation'
+      );
+    }
+    
+    // Validate length
+    if (sanitizedShopId.length === 0 || sanitizedShopId.length > 50) {
+      throw new ShopCredentialError(
+        'Shop ID must be between 1-50 characters',
+        shopId,
+        'validation'
+      );
+    }
+    
+    const credentialPath = path.join(this.credentialsDir, `${sanitizedShopId}.credentials.json`);
+    
+    // Ensure the resolved path is still within credentials directory
+    const resolvedPath = path.resolve(credentialPath);
+    const resolvedCredentialsDir = path.resolve(this.credentialsDir);
+    
+    if (!resolvedPath.startsWith(resolvedCredentialsDir)) {
+      throw new ShopCredentialError(
+        'Invalid credential path - potential path traversal attempt',
+        shopId,
+        'security'
+      );
+    }
+    
+    return credentialPath;
   }
 
-  ensureCredentialsDirectory() {
+  private ensureCredentialsDirectory(): void {
     if (!fs.existsSync(this.credentialsDir)) {
-      fs.mkdirSync(this.credentialsDir, { 
-        recursive: true,
-        mode: 0o700 // rwx------ (owner only)
-      });
-    }
-
-    // Verify directory permissions
-    const stats = fs.statSync(this.credentialsDir);
-    if ((stats.mode & parseInt('077', 8)) !== 0) {
-      fs.chmodSync(this.credentialsDir, 0o700);
+      fs.mkdirSync(this.credentialsDir, { recursive: true });
+      
+      // Set directory permissions (Unix-like systems only)
+      try {
+        fs.chmodSync(this.credentialsDir, 0o700); // rwx------ (owner only)
+      } catch (error) {
+        // Permissions may not be supported on Windows
+        // Not a critical failure
+      }
+    } else {
+      // Try to fix permissions on existing directory
+      try {
+        const stats = fs.statSync(this.credentialsDir);
+        // Only check permissions on Unix-like systems
+        if (process.platform !== 'win32' && (stats.mode & parseInt('077', 8)) !== 0) {
+          fs.chmodSync(this.credentialsDir, 0o700);
+        }
+      } catch (error) {
+        // Ignore permission errors - not critical for functionality
+      }
     }
   }
 
-  validateCredentialStructure(credentials, shopId) {
+  private validateCredentialStructure(credentials: unknown, shopId: string): void {
     if (!credentials || typeof credentials !== 'object') {
       throw new ShopCredentialError(
         `Invalid credentials structure for ${shopId}`,
@@ -286,34 +357,100 @@ export class SecurityManager {
     }
   }
 
-  validateCredentialIntegrity(credentials, shopId) {
-    // Check for suspicious modifications
-    const stores = credentials.shopify.stores;
+  private validateCredentialIntegrity(credentials: ShopCredentials, shopId: string): void {
+    // Validate credential structure and content
+    const stores = credentials.shopify?.stores;
     
-    Object.keys(stores).forEach(env => {
-      const token = stores[env]?.themeToken;
+    if (!stores || typeof stores !== 'object') {
+      throw new ShopCredentialError(
+        `Invalid credential structure for ${shopId}`,
+        shopId,
+        'validation',
+        { issue: "Missing or invalid stores object" }
+      );
+    }
+    
+    const environments = ['production', 'staging'] as const;
+    environments.forEach(env => {
+      const store = stores[env];
       
-      if (token && token.includes('<script>')) {
+      if (!store) {
         throw new ShopCredentialError(
-          `Potential credential corruption detected for ${shopId}`,
+          `Missing ${env} store credentials for ${shopId}`,
           shopId,
           env,
-          { issue: "Script injection detected in token" }
+          { issue: `${env} store configuration missing` }
+        );
+      }
+      
+      const token = store.themeToken;
+      
+      if (!token || typeof token !== 'string') {
+        throw new ShopCredentialError(
+          `Invalid or missing theme token for ${shopId} ${env}`,
+          shopId,
+          env,
+          { issue: "Theme token must be a non-empty string" }
         );
       }
 
-      if (token && token.length > 1000) {
+      // Validate token format (basic checks)
+      if (token.length < config.security.minTokenLength) {
         throw new ShopCredentialError(
-          `Abnormally long token detected for ${shopId}`,
+          `Theme token too short for ${shopId} ${env}`,
           shopId,
           env,
-          { tokenLength: token.length }
+          { tokenLength: token.length, minLength: config.security.minTokenLength }
+        );
+      }
+
+      if (token.length > config.security.maxTokenLength) {
+        throw new ShopCredentialError(
+          `Theme token too long for ${shopId} ${env}`,
+          shopId,
+          env,
+          { tokenLength: token.length, maxLength: config.security.maxTokenLength }
+        );
+      }
+
+      // Check for obvious corruption (control characters, newlines)
+      if (/[\x00-\x1f\x7f]/.test(token)) {
+        throw new ShopCredentialError(
+          `Token contains invalid characters for ${shopId} ${env}`,
+          shopId,
+          env,
+          { issue: "Token contains control characters" }
         );
       }
     });
+    
+    // Validate metadata if present
+    if (credentials._metadata) {
+      const metadata = credentials._metadata;
+      if (metadata.checksum && typeof metadata.checksum === 'string') {
+        const calculatedChecksum = this.calculateChecksum({
+          developer: credentials.developer,
+          shopify: credentials.shopify,
+          notes: credentials.notes
+        });
+        
+        if (metadata.checksum !== calculatedChecksum) {
+          throw new ShopCredentialError(
+            `Credential integrity check failed for ${shopId}`,
+            shopId,
+            'integrity',
+            { 
+              issue: "Checksum mismatch - credentials may have been tampered with",
+              expected: calculatedChecksum,
+              actual: metadata.checksum
+            }
+          );
+        }
+      }
+    }
   }
 
-  validateTokenFormat(token, shopId, environment) {
+  private validateTokenFormat(token: string, shopId: string, environment: string): void {
     if (!token || typeof token !== 'string') {
       throw new ShopCredentialError(
         `Invalid token format for ${shopId} ${environment}`,
@@ -323,39 +460,86 @@ export class SecurityManager {
       );
     }
 
-    // Check for obvious security issues
-    if (token.includes(' ') || token.includes('\n')) {
+    // Check for whitespace (tokens should not contain spaces or newlines)
+    if (/\s/.test(token)) {
       throw new ShopCredentialError(
-        `Token contains invalid characters for ${shopId} ${environment}`,
+        `Token contains whitespace for ${shopId} ${environment}`,
         shopId,
         environment,
-        { issue: "Whitespace detected in token" }
+        { issue: "Tokens should not contain spaces or line breaks" }
       );
     }
   }
 
-  calculateChecksum(data) {
+  private calculateChecksum(data: unknown): string {
     const hash = crypto.createHash('sha256');
     hash.update(JSON.stringify(data, null, 0));
     return hash.digest('hex').substring(0, 16);
   }
 
-  getOrCreateEncryptionKey() {
-    // For future encryption implementation
+  private getOrCreateEncryptionKey(): string {
+    // Note: This is for future encryption implementation
+    // Currently credentials are stored as plain JSON with file permissions
     const keyPath = path.join(this.credentialsDir, '.key');
     
     if (fs.existsSync(keyPath)) {
-      return fs.readFileSync(keyPath, 'utf8');
+      try {
+        const key = fs.readFileSync(keyPath, 'utf8');
+        if (key.length !== 64) { // 32 bytes = 64 hex characters
+          throw new ShopCredentialError(
+            'Invalid encryption key length',
+            'system',
+            'key_validation_error',
+            { expectedLength: 64, actualLength: key.length }
+          );
+        }
+        return key;
+      } catch (error) {
+        throw new ShopCredentialError(
+          'Failed to read encryption key',
+          'system',
+          'key_read_error',
+          { error: error instanceof Error ? error.message : String(error) }
+        );
+      }
     }
 
     // Generate new key for future encryption features
     const key = crypto.randomBytes(32).toString('hex');
-    try {
-      fs.writeFileSync(keyPath, key, { mode: 0o600 });
-    } catch {
-      // If we can't write key file, continue without it
-    }
     
-    return key;
+    try {
+      this.ensureCredentialsDirectory();
+      fs.writeFileSync(keyPath, key);
+      
+      // Set file permissions after creation (cross-platform safe)
+      try {
+        fs.chmodSync(keyPath, 0o600);
+      } catch (permError) {
+        // Permission setting failed - not critical on Windows
+      }
+      
+      // Verify write was successful
+      if (!fs.existsSync(keyPath)) {
+        throw new ShopCredentialError(
+          'Encryption key file was not created',
+          'system',
+          'key_create_error',
+          { keyPath }
+        );
+      }
+      
+      return key;
+    } catch (error) {
+      throw new ShopCredentialError(
+        'Failed to create encryption key - credentials directory may not be writable',
+        'system',
+        'key_create_error',
+        { 
+          error: error instanceof Error ? error.message : String(error),
+          keyPath,
+          credentialsDir: this.credentialsDir
+        }
+      );
+    }
   }
 }

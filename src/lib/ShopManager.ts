@@ -27,7 +27,8 @@ import { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
 import { SecurityManager } from "./core/SecurityManager.js";
 import { GitOperations } from "./core/GitOperations.js";
 import { logger } from "./core/Logger.js";
-import { performanceMonitor } from "./core/PerformanceMonitor.js";
+import { performanceMonitor } from "./core/SimplePerformanceMonitor.js";
+import { config as systemConfig } from "./core/Config.js";
 import { 
   ShopConfigurationError, 
   ShopValidationError,
@@ -232,7 +233,35 @@ export class ShopManager {
       }
 
       const rawConfig = fs.readFileSync(configPath, "utf8");
-      const config = JSON.parse(rawConfig) as ShopConfig;
+      
+      // Validate config size before parsing (prevent DoS attacks)
+      if (rawConfig.length > systemConfig.security.maxConfigFileSize) {
+        throw new ShopConfigurationError(
+          `Configuration file too large: ${shopId}`,
+          shopId,
+          { size: rawConfig.length, limit: systemConfig.security.maxConfigFileSize }
+        );
+      }
+      
+      let config: unknown;
+      try {
+        config = JSON.parse(rawConfig);
+      } catch (error) {
+        throw new ShopConfigurationError(
+          `Invalid JSON in configuration file: ${shopId}`,
+          shopId,
+          { error: error instanceof Error ? error.message : String(error) }
+        );
+      }
+      
+      // Validate it's an object
+      if (!config || typeof config !== 'object' || Array.isArray(config)) {
+        throw new ShopConfigurationError(
+          `Configuration must be a JSON object: ${shopId}`,
+          shopId,
+          { type: typeof config, isArray: Array.isArray(config) }
+        );
+      }
       
       return this.validator.validateConfig(config, shopId);
     } catch (error) {
@@ -373,36 +402,274 @@ export class ShopManager {
     });
   }
 
-  // ================== PLACEHOLDER METHODS ==================
-  // These will be implemented in subsequent phases
+  // ================== CORE FUNCTIONALITY ==================
 
   private async handleDevServer(): Promise<void> {
-    note("Development server integration will be implemented in next phase", "🚧 Coming Soon");
+    const shops = this.listShops();
+    
+    if (shops.length === 0) {
+      note("No shops configured. Create a shop first.", "⚠️ Setup Required");
+      await this.handleCreateShop();
+      return;
+    }
+
+    const shopChoice = await select({
+      message: "Select shop for development:",
+      options: shops.map(shop => ({
+        value: shop,
+        label: shop,
+        hint: `Start dev server for ${shop}`
+      }))
+    });
+
+    if (isCancel(shopChoice)) {
+      return;
+    }
+
+    try {
+      const config = this.loadShopConfig(shopChoice as string);
+      const credentials = this.securityManager.loadCredentials(shopChoice as string);
+      
+      if (!credentials) {
+        note(`No credentials found for ${shopChoice}. Set up credentials first.`, "⚠️ Setup Required");
+        return;
+      }
+
+      note(`Starting development server for ${config.name}...`, "🚀 Development Server");
+      
+      // In a real implementation, this would start the Shopify CLI dev server
+      // For now, we'll display the configuration that would be used
+      console.log(`\nShop: ${config.name}`);
+      console.log(`Production: ${config.shopify.stores.production.domain}`);
+      console.log(`Staging: ${config.shopify.stores.staging.domain}`);
+      console.log(`Branch: ${config.shopify.stores.production.branch}`);
+      
+      note("Development server would start here. Run 'shopify theme dev' manually for now.", "ℹ️ Manual Step");
+      
+    } catch (error) {
+      log.error(`Failed to start dev server: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
     await this.waitForKey();
   }
 
   private async handleListShops(): Promise<void> {
-    note("Shop listing will be implemented in next phase", "🚧 Coming Soon");
+    const shops = this.listShops();
+    
+    if (shops.length === 0) {
+      note("No shops configured yet.", "📋 Shop List");
+      await this.waitForKey();
+      return;
+    }
+
+    console.log();
+    note(`Found ${shops.length} configured shop${shops.length === 1 ? '' : 's'}:`, "📋 Shop List");
+    
+    for (const shopId of shops) {
+      try {
+        const config = this.loadShopConfig(shopId);
+        const credentials = this.securityManager.loadCredentials(shopId);
+        const hasCredentials = credentials !== null;
+        
+        console.log(`\n📦 ${config.name} (${shopId})`);
+        console.log(`   Production: ${config.shopify.stores.production.domain}`);
+        console.log(`   Staging: ${config.shopify.stores.staging.domain}`);
+        console.log(`   Branch: ${config.shopify.stores.production.branch}`);
+        console.log(`   Credentials: ${hasCredentials ? '✅ Configured' : '❌ Missing'}`);
+        console.log(`   Auth Method: ${config.shopify.authentication.method}`);
+        
+      } catch (error) {
+        console.log(`\n❌ ${shopId} (Error loading configuration)`);
+        console.log(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
     await this.waitForKey();
   }
 
   private async handleCreateShop(): Promise<void> {
-    note("Shop creation will be implemented in next phase", "🚧 Coming Soon");
+    intro("🆕 Create New Shop");
+    
+    const shopId = await text({
+      message: "Shop ID (lowercase, hyphens only):",
+      placeholder: "my-shop",
+      validate: (value) => {
+        if (!value) return "Shop ID is required";
+        if (!/^[a-z0-9-]+$/.test(value)) return "Only lowercase letters, numbers, and hyphens allowed";
+        if (value.length > 50) return "Shop ID must be 50 characters or less";
+        
+        // Check if shop already exists
+        if (this.listShops().includes(value)) {
+          return "A shop with this ID already exists";
+        }
+        
+        return undefined;
+      }
+    });
+
+    if (isCancel(shopId)) return;
+
+    const shopName = await text({
+      message: "Shop display name:",
+      placeholder: "My Shop"
+    });
+
+    if (isCancel(shopName)) return;
+
+    const productionDomain = await text({
+      message: "Production domain:",
+      placeholder: "my-shop.myshopify.com",
+      validate: (value) => {
+        if (!value) return "Production domain is required";
+        if (!value.endsWith('.myshopify.com')) return "Domain must end with .myshopify.com";
+        return undefined;
+      }
+    });
+
+    if (isCancel(productionDomain)) return;
+
+    const stagingDomain = await text({
+      message: "Staging domain:",
+      placeholder: "staging-my-shop.myshopify.com",
+      validate: (value) => {
+        if (!value) return "Staging domain is required";
+        if (!value.endsWith('.myshopify.com')) return "Domain must end with .myshopify.com";
+        return undefined;
+      }
+    });
+
+    if (isCancel(stagingDomain)) return;
+
+    const authMethod = await select({
+      message: "Authentication method:",
+      options: [
+        { value: "theme-access-app", label: "Theme Access App", hint: "Recommended for teams" },
+        { value: "manual-tokens", label: "Manual Tokens", hint: "For direct API access" }
+      ]
+    });
+
+    if (isCancel(authMethod)) return;
+
+    try {
+      // Create shop configuration
+      const config: ShopConfig = {
+        shopId: shopId as string,
+        name: shopName as string,
+        shopify: {
+          stores: {
+            production: {
+              domain: productionDomain as string,
+              branch: `${shopId}/main`
+            },
+            staging: {
+              domain: stagingDomain as string,
+              branch: `${shopId}/staging`
+            }
+          },
+          authentication: {
+            method: authMethod as AuthenticationMethod
+          }
+        }
+      };
+
+      this.saveShopConfig(shopId as string, config);
+      
+      note(`✅ Shop configuration created for ${shopName}`, "Success");
+      note("Next: Set up credentials using the Edit Shop option", "📝 Next Steps");
+      
+    } catch (error) {
+      log.error(`Failed to create shop: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
     await this.waitForKey();
   }
 
   private async handleEditShop(): Promise<void> {
-    note("Shop editing will be implemented in next phase", "🚧 Coming Soon");
+    const shops = this.listShops();
+    
+    if (shops.length === 0) {
+      note("No shops to edit. Create a shop first.", "📝 Edit Shop");
+      await this.waitForKey();
+      return;
+    }
+
+    const shopChoice = await select({
+      message: "Select shop to edit:",
+      options: shops.map(shop => ({
+        value: shop,
+        label: shop,
+        hint: `Edit configuration for ${shop}`
+      }))
+    });
+
+    if (isCancel(shopChoice)) return;
+
+    const editChoice = await select({
+      message: "What would you like to edit?",
+      options: [
+        { value: "credentials", label: "Credentials", hint: "Update theme tokens" },
+        { value: "config", label: "Configuration", hint: "Update domains and settings" },
+        { value: "delete", label: "Delete Shop", hint: "Remove shop completely" }
+      ]
+    });
+
+    if (isCancel(editChoice)) return;
+
+    if (editChoice === "delete") {
+      await this.handleDeleteShop(shopChoice as string);
+    } else if (editChoice === "credentials") {
+      await this.handleEditCredentials(shopChoice as string);
+    } else {
+      note("Configuration editing not yet implemented", "🚧 Coming Soon");
+    }
+
     await this.waitForKey();
   }
 
+  private async handleDeleteShop(shopId: string): Promise<void> {
+    const confirm = await select({
+      message: `Are you sure you want to delete shop "${shopId}"?`,
+      options: [
+        { value: "no", label: "No, cancel" },
+        { value: "yes", label: "Yes, delete permanently" }
+      ]
+    });
+
+    if (confirm === "yes") {
+      try {
+        const configPath = path.join(this.shopsDir, `${shopId}.config.json`);
+        const credPath = path.join(this.credentialsDir, `${shopId}.credentials.json`);
+        
+        if (fs.existsSync(configPath)) {
+          fs.unlinkSync(configPath);
+        }
+        
+        if (credPath && fs.existsSync(credPath)) {
+          fs.unlinkSync(credPath);
+        }
+        
+        note(`✅ Shop "${shopId}" has been deleted`, "Deleted");
+        
+      } catch (error) {
+        log.error(`Failed to delete shop: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+  }
+
+  private async handleEditCredentials(shopId: string): Promise<void> {
+    note("Credential editing not yet implemented. Manually edit the credentials file:", "🚧 Manual Step");
+    note(`shops/credentials/${shopId}.credentials.json`, "File Location");
+  }
+
   private async handleBranchOperations(): Promise<void> {
-    note("Branch operations will be implemented in next phase", "🚧 Coming Soon");
+    note("Branch operations (sync PRs, testing) not yet implemented", "🚧 Coming Soon");
+    note("Use git commands manually for now", "Manual Step");
     await this.waitForKey();
   }
 
   private async handleCampaigns(): Promise<void> {
-    note("Campaign tools will be implemented in next phase", "🚧 Coming Soon");
+    note("Campaign management not yet implemented", "🚧 Coming Soon");
+    note("Create branches manually for campaign work", "Manual Step");
     await this.waitForKey();
   }
 

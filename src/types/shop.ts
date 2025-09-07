@@ -163,23 +163,17 @@ export interface Logger {
 // Performance Monitor interface
 export interface PerformanceMonitor {
   startOperation(name: string, context?: Record<string, unknown>): string;
-  endOperation(operationId: string, result?: unknown, error?: Error): PerformanceMetrics;
-  getPerformanceSummary(): PerformanceSummary;
+  endOperation(operationId: string, result?: unknown, error?: Error): void;
+  getPerformanceSummary(): {
+    uptime: number;
+    memoryUsage: NodeJS.MemoryUsage;
+    activeOperations: number;
+    recentOperations: number;
+    averageDuration: number;
+  };
   cleanup(): Promise<void>;
 }
 
-export interface PerformanceSummary {
-  readonly uptime: number;
-  readonly memoryUsage: NodeJS.MemoryUsage;
-  readonly activeOperations: number;
-  readonly metrics: {
-    commands?: {
-      total: number;
-      averageDuration: number;
-      successRate: number;
-    };
-  };
-}
 
 export interface ShopManagerOptions {
   readonly cwd?: string;

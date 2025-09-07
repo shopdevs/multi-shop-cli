@@ -6,13 +6,32 @@ import { fileURLToPath } from "url";
  * Enterprise-grade logging system with structured logging
  * Implements observability best practices
  */
+interface LoggerOptions {
+  level?: string;
+  enableFile?: boolean;
+  logDir?: string;
+  maxLogFiles?: number;
+  maxLogSize?: number;
+  context?: Record<string, unknown>;
+}
+
 export class Logger {
-  constructor(options = {}) {
-    this.level = options.level || process.env.LOG_LEVEL || 'info';
+  private readonly level: string;
+  private readonly enableFile: boolean;
+  private readonly logDir: string;
+  private readonly maxLogFiles: number;
+  private readonly maxLogSize: number;
+  private readonly levels: Record<string, number>;
+  private readonly currentLevel: number;
+  private readonly context: Record<string, unknown>;
+
+  constructor(options: LoggerOptions = {}) {
+    this.level = options.level || process.env['LOG_LEVEL'] || 'info';
     this.enableFile = options.enableFile !== false;
     this.logDir = options.logDir || path.join(process.cwd(), '.multi-shop', 'logs');
     this.maxLogFiles = options.maxLogFiles || 10;
     this.maxLogSize = options.maxLogSize || 10 * 1024 * 1024; // 10MB
+    this.context = options.context || {};
     
     this.levels = {
       error: 0,
@@ -32,47 +51,47 @@ export class Logger {
 
   /**
    * Logs error with context
-   * @param {string} message - Error message
-   * @param {Object} meta - Additional context
+   * @param message - Error message
+   * @param meta - Additional context
    */
-  error(message, meta = {}) {
+  error(message: string, meta: Record<string, unknown> = {}): void {
     this.log('error', message, meta);
   }
 
   /**
    * Logs warning with context  
-   * @param {string} message - Warning message
-   * @param {Object} meta - Additional context
+   * @param message - Warning message
+   * @param meta - Additional context
    */
-  warn(message, meta = {}) {
+  warn(message: string, meta: Record<string, unknown> = {}): void {
     this.log('warn', message, meta);
   }
 
   /**
    * Logs info with context
-   * @param {string} message - Info message  
-   * @param {Object} meta - Additional context
+   * @param message - Info message  
+   * @param meta - Additional context
    */
-  info(message, meta = {}) {
+  info(message: string, meta: Record<string, unknown> = {}): void {
     this.log('info', message, meta);
   }
 
   /**
    * Logs debug with context
-   * @param {string} message - Debug message
-   * @param {Object} meta - Additional context
+   * @param message - Debug message
+   * @param meta - Additional context
    */
-  debug(message, meta = {}) {
+  debug(message: string, meta: Record<string, unknown> = {}): void {
     this.log('debug', message, meta);
   }
 
   /**
    * Logs operation start for performance tracking
-   * @param {string} operation - Operation name
-   * @param {Object} meta - Additional context
-   * @returns {Function} End function to call when operation completes
+   * @param operation - Operation name
+   * @param meta - Additional context
+   * @returns End function to call when operation completes
    */
-  startOperation(operation, meta = {}) {
+  startOperation(operation: string, meta: Record<string, unknown> = {}): (result?: string, endMeta?: Record<string, unknown>) => void {
     const startTime = process.hrtime.bigint();
     const operationId = this.generateOperationId();
 
@@ -98,10 +117,10 @@ export class Logger {
 
   /**
    * Logs security events with high priority
-   * @param {string} event - Security event type
-   * @param {Object} meta - Security context
+   * @param event - Security event type
+   * @param meta - Security context
    */
-  security(event, meta = {}) {
+  security(event: string, meta: Record<string, unknown> = {}): void {
     this.log('warn', `SECURITY: ${event}`, {
       type: 'security_event',
       event,
@@ -111,12 +130,12 @@ export class Logger {
 
   /**
    * Logs performance metrics
-   * @param {string} metric - Metric name
-   * @param {number} value - Metric value
-   * @param {string} unit - Metric unit
-   * @param {Object} meta - Additional context
+   * @param metric - Metric name
+   * @param value - Metric value
+   * @param unit - Metric unit
+   * @param meta - Additional context
    */
-  metric(metric, value, unit = 'count', meta = {}) {
+  metric(metric: string, value: number, unit: string = 'count', meta: Record<string, unknown> = {}): void {
     this.log('info', `METRIC: ${metric}`, {
       type: 'performance_metric',
       metric,
@@ -130,7 +149,7 @@ export class Logger {
    * Main logging method with structured output
    * @private
    */
-  log(level, message, meta = {}) {
+  private log(level: string, message: string, meta: Record<string, unknown> = {}): void {
     if (this.levels[level] > this.currentLevel) {
       return; // Skip if below current log level
     }
@@ -156,7 +175,7 @@ export class Logger {
    * Outputs formatted log to console
    * @private
    */
-  outputToConsole(level, message, meta) {
+  private outputToConsole(level: string, message: string, meta: Record<string, unknown>): void {
     const timestamp = new Date().toLocaleTimeString();
     const colors = {
       error: '\x1b[31m', // Red
@@ -183,7 +202,7 @@ export class Logger {
    * Outputs structured log to file
    * @private
    */
-  outputToFile(logEntry) {
+  private outputToFile(logEntry: Record<string, unknown>): void {
     try {
       const logFile = path.join(this.logDir, `multi-shop-${this.getLogDate()}.log`);
       const logLine = JSON.stringify(logEntry) + '\n';
@@ -199,7 +218,7 @@ export class Logger {
    * Ensures log directory exists with proper permissions
    * @private
    */
-  ensureLogDirectory() {
+  private ensureLogDirectory(): void {
     try {
       if (!fs.existsSync(this.logDir)) {
         fs.mkdirSync(this.logDir, { 
@@ -216,7 +235,7 @@ export class Logger {
    * Rotates log files to prevent disk space issues
    * @private
    */
-  rotateLogsIfNeeded() {
+  private rotateLogsIfNeeded(): void {
     try {
       if (!fs.existsSync(this.logDir)) return;
 
@@ -255,7 +274,7 @@ export class Logger {
    * Gets log date string for file naming
    * @private
    */
-  getLogDate() {
+  private getLogDate(): string {
     return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
@@ -263,16 +282,16 @@ export class Logger {
    * Generates unique operation ID for tracking
    * @private
    */
-  generateOperationId() {
+  private generateOperationId(): string {
     return `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
    * Creates child logger with additional context
-   * @param {Object} context - Additional context for all logs
-   * @returns {Logger} Child logger instance
+   * @param context - Additional context for all logs
+   * @returns Child logger instance
    */
-  child(context = {}) {
+  child(context: Record<string, unknown> = {}): Logger {
     return new Logger({
       level: this.level,
       enableFile: this.enableFile,
@@ -285,16 +304,17 @@ export class Logger {
    * Flushes any pending log operations
    * Useful for graceful shutdowns
    */
-  flush() {
-    // For future async logging implementation
+  async flush(): Promise<void> {
+    // Currently all logging is synchronous, but this method
+    // provides a consistent interface for future async implementations
     return Promise.resolve();
   }
 
   /**
    * Gets log statistics for monitoring
-   * @returns {Object} Log statistics
+   * @returns Log statistics
    */
-  getStats() {
+  getStats(): Record<string, unknown> {
     try {
       if (!fs.existsSync(this.logDir)) {
         return { totalLogs: 0, totalSize: 0, files: [] };
@@ -329,7 +349,7 @@ export class Logger {
    * Formats bytes for human-readable output
    * @private
    */
-  formatBytes(bytes) {
+  private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];

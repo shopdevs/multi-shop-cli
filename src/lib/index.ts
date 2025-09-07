@@ -15,7 +15,7 @@ export { TestRunner } from "./TestRunner.js";
 export { SecurityManager } from "./core/SecurityManager.js";
 export { GitOperations } from "./core/GitOperations.js";
 export { Logger, logger } from "./core/Logger.js";
-export { PerformanceMonitor, performanceMonitor } from "./core/PerformanceMonitor.js";
+export { SimplePerformanceMonitor, performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 
 // Validation and error handling
 export { ShopConfigValidator } from "../validators/ShopConfigValidator.js";

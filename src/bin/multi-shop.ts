@@ -10,7 +10,7 @@ import { Initializer } from "../lib/Initializer.js";
 import { SyncMain } from "../lib/SyncMain.js";
 import { TestRunner } from "../lib/TestRunner.js";
 import { logger } from "../lib/core/Logger.js";
-import { performanceMonitor } from "../lib/core/PerformanceMonitor.js";
+import { performanceMonitor } from "../lib/core/SimplePerformanceMonitor.js";
 
 const program = new Command();
 

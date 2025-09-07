@@ -5,7 +5,7 @@
   "keywords": [
     "shopify",
     "theme",
-    "multi-shop", 
+    "multi-shop",
     "contextual-development",
     "github-flow",
     "cli",
@@ -63,8 +63,8 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
@@ -73,38 +73,37 @@
     "security:audit": "npm audit --audit-level moderate",
     "security:outdated": "npm outdated",
     "docs:build": "typedoc --out docs src/lib/index.ts",
-    "release": "np",
+    "release": "echo 'Manual release: npm version patch && npm publish'",
     "size-check": "npm pack --dry-run && du -sh *.tgz 2>/dev/null || echo 'Package size check complete'"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "ajv": "^8.12.0",
     "commander": "^11.1.0",
     "kleur": "^4.1.5",
-    "ajv": "^8.12.0",
     "semver": "^7.5.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@typescript-eslint/eslint-plugin": "^6.14.0", 
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
-    "@vitest/coverage-v8": "^1.1.0",
-    "@vitest/ui": "^1.1.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-security": "^1.7.1",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
-    "typescript": "^5.3.3",
     "typedoc": "^0.25.4",
-    "vitest": "^1.1.0",
-    "np": "^9.2.0"
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@shopify/cli": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "@shopify/cli": {
-      "optional": false
+      "optional": true
     }
   }
 }
