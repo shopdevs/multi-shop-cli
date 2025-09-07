@@ -49,10 +49,7 @@ export default defineConfig({
     mockReset: true,
     
     // Output
-    reporter: ['verbose', 'junit'],
-    outputFile: {
-      junit: './coverage/junit.xml'
-    },
+    reporter: ['verbose'],
     
     // Setup
     setupFiles: ['./vitest.setup.ts'],
