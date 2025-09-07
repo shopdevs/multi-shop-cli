@@ -41,16 +41,25 @@ This creates:
 - Updated package.json with multi-shop scripts
 - Secure credential storage setup
 
-### Create Your First Shop
+### Set Up Your Shops
 
 ```bash
-# Use pnpm scripts (recommended)
+# Create all your shops interactively
 pnpm run shop
 # → Create New Shop
-# → Follow interactive setup
 
-# Or use npx directly
-npx multi-shop shop
+# For each shop, you'll configure:
+# 1. Shop ID (e.g., fitness-store)
+# 2. Display name (e.g., "Fitness Store") 
+# 3. Production domain (e.g., fitness-store.myshopify.com)
+# 4. Staging domain (e.g., staging-fitness-store.myshopify.com)
+# 5. Authentication method (theme-access-app recommended)
+
+# Repeat for all shops:
+# → shop-a (Shop A)
+# → shop-b (Shop B) 
+# → shop-c (Shop C)
+# → shop-d (Shop D)
 ```
 
 ### Start Development
@@ -66,15 +75,153 @@ npx multi-shop dev
 
 ---
 
+## 🚀 Complete Setup for 4 Shops
+
+Here's the step-by-step process to set up multi-shop on a new Shopify theme for 4 different stores:
+
+### Step 1: Initialize Project
+
+```bash
+cd your-shopify-theme
+pnpm add -D shopdevs-multi-shop
+npx multi-shop init
+```
+
+### Step 2: Create All 4 Shop Configurations
+
+```bash
+pnpm run shop
+# → Create New Shop
+
+# Shop A
+# Shop ID: shop-a
+# Name: Shop A
+# Production: shop-a.myshopify.com  
+# Staging: staging-shop-a.myshopify.com
+# Auth: theme-access-app
+
+# Shop B  
+# Shop ID: shop-b
+# Name: Shop B
+# Production: shop-b.myshopify.com
+# Staging: staging-shop-b.myshopify.com
+# Auth: theme-access-app
+
+# Shop C
+# Shop ID: shop-c  
+# Name: Shop C
+# Production: shop-c.myshopify.com
+# Staging: staging-shop-c.myshopify.com
+# Auth: theme-access-app
+
+# Shop D
+# Shop ID: shop-d
+# Name: Shop D  
+# Production: shop-d.myshopify.com
+# Staging: staging-shop-d.myshopify.com
+# Auth: theme-access-app
+```
+
+### Step 3: Set Up Credentials (Each Developer)
+
+Each developer needs to set up their own theme access tokens:
+
+```bash
+# Create credential files manually:
+shops/credentials/shop-a.credentials.json
+shops/credentials/shop-b.credentials.json  
+shops/credentials/shop-c.credentials.json
+shops/credentials/shop-d.credentials.json
+```
+
+Example credential file format:
+```json
+// shops/credentials/shop-a.credentials.json
+{
+  "developer": "your-name",
+  "shopify": {
+    "stores": {
+      "production": { "themeToken": "your-shop-a-production-password" },
+      "staging": { "themeToken": "your-shop-a-staging-password" }
+    }
+  },
+  "notes": "Theme access app credentials for shop-a"
+}
+```
+
+### Step 4: Create GitHub Branches
+
+```bash
+# Create shop-specific branches for each store:
+git checkout -b shop-a/main && git push -u origin shop-a/main
+git checkout -b shop-a/staging && git push -u origin shop-a/staging
+
+git checkout -b shop-b/main && git push -u origin shop-b/main  
+git checkout -b shop-b/staging && git push -u origin shop-b/staging
+
+git checkout -b shop-c/main && git push -u origin shop-c/main
+git checkout -b shop-c/staging && git push -u origin shop-c/staging
+
+git checkout -b shop-d/main && git push -u origin shop-d/main
+git checkout -b shop-d/staging && git push -u origin shop-d/staging
+
+# Return to main
+git checkout main
+```
+
+### Step 5: Connect Branches to Shopify Themes
+
+For each shop, connect the Git branches to Shopify themes:
+
+1. **Shopify Admin** → your-shop.myshopify.com → Online Store → Themes
+2. **Add theme** → Connect from GitHub
+3. **Select branch**: `shop-a/main` (for production) or `shop-a/staging`
+4. **Repeat for all 4 shops**
+
+### Step 6: Verify Setup
+
+```bash
+# Check all shops are configured
+pnpm run shop → List Shops
+# Should show: shop-a, shop-b, shop-c, shop-d
+
+# Check branches exist
+git branch -r
+# Should show: origin/shop-a/main, origin/shop-a/staging, etc.
+
+# Check credential files exist (each developer)
+ls shops/credentials/
+# Should show: shop-a.credentials.json, shop-b.credentials.json, etc.
+```
+
+### Step 7: Start Developing!
+
+```bash
+# Test contextual development
+git checkout -b feature/new-header
+pnpm run dev
+# → Select shop for testing: shop-a, shop-b, shop-c, or shop-d
+# → Select environment: staging (recommended) or production
+# → Shopify CLI starts with selected shop's credentials
+
+# Test different shops with same code
+pnpm run dev  # Try shop-b staging
+pnpm run dev  # Try shop-c staging
+pnpm run dev  # Try shop-d staging
+# Same feature code, different shop contexts!
+```
+
+---
+
 ## 🛠️ How It Works
 
 ### Contextual Development
 
 The system detects your branch context and adapts automatically:
 
-**Feature Branches** (like `WEB-123-new-carousel`):
+**Feature Branches** (like `feature/new-carousel`):
 ```bash
-npm run dev
+pnpm run dev
 # → Prompts for shop context
 # → Prompts for environment (staging/production)  
 # → Your code stays on feature branch
@@ -83,7 +230,7 @@ npm run dev
 
 **Shop Branches** (like `shop-a/custom-checkout`):
 ```bash
-npm run dev  
+pnpm run dev  
 # → Auto-detects "shop-a" 
 # → Skips shop selection
 # → Starts development immediately
@@ -92,20 +239,28 @@ npm run dev
 ### Automated Shop Syncing (GitHub Flow)
 
 When you merge features to main:
-1. **GitHub Action automatically creates PRs**: `main → shop-a/staging, main → shop-b/staging`
-2. **Shop teams review and approve** shop-specific PRs
-3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`
+1. **GitHub Action automatically creates PRs**: `main → shop-a/staging, main → shop-b/staging, main → shop-c/staging, main → shop-d/staging`
+2. **Each shop team reviews** their shop-specific PRs
+3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`, `shop-b/staging → shop-b/main`, etc.
 
-### Campaign Management
+### Campaign Management (Per Shop)
 
 ```bash
-# Create promo campaign  
-npm run shop → Campaign Tools → Create Promo Branch
+# Create promo for specific shop
+pnpm run shop → Campaign Tools → Create Promo Branch
+# → Select shop: shop-a
+# → Promo name: summer-sale
+# → Creates: shop-a/promo-summer-sale
 
-# Launch promo theme in Shopify admin
+# Connect promo theme in Shopify admin (shop-a only)
+# → Add theme → Connect from GitHub → shop-a/promo-summer-sale
 
-# Push content back to main (keeps main current)
-npm run shop → Campaign Tools → Push Promo to Main
+# Launch promo (shop-a only)
+# → Publish theme or use Launchpad app
+
+# Push content back to shop main (keeps shop-a/main current)
+pnpm run shop → Campaign Tools → Push Promo to Main
+# → Creates PR: shop-a/promo-summer-sale → shop-a/main
 ```
 
 ---
@@ -160,11 +315,17 @@ main (core theme)
 │
 ├── shop-a/main                  # Connected to shop-a
 │   ├── shop-a/staging           # Connected to staging-shop-a  
-│   └── shop-a/promo-spring-sale # Campaign branches
+│   └── shop-a/promo-summer      # Campaign branches
 │
-└── shop-b/main                  # Connected to shop-b
-    ├── shop-b/staging           # Connected to staging-shop-b
-    └── shop-b/promo-holiday     # Campaign branches
+├── shop-b/main                  # Connected to shop-b
+│   ├── shop-b/staging           # Connected to staging-shop-b
+│   └── shop-b/promo-holiday     # Campaign branches
+│
+├── shop-c/main                  # Connected to shop-c
+│   └── shop-c/staging           # Connected to staging-shop-c
+│
+└── shop-d/main                  # Connected to shop-d
+    └── shop-d/staging           # Connected to staging-shop-d
 ```
 
 ### Security Model
@@ -230,6 +391,62 @@ pnpm run test:pr         # Comprehensive PR testing
 ```
 
 All tests use **real Shopify preview themes** instead of mocks, providing realistic testing conditions.
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Setup Issues
+
+**"No shops configured yet"**
+```bash
+# Make sure you've created shop configurations:
+pnpm run shop → Create New Shop
+# Check: ls shops/ should show *.config.json files
+```
+
+**"No credentials found for shop-x"**  
+```bash
+# Create credential file manually:
+# shops/credentials/shop-x.credentials.json
+# Get theme tokens from Shopify admin or theme access app
+```
+
+**"Shopify CLI not found"**
+```bash
+# Install Shopify CLI globally:
+pnpm add -g @shopify/cli
+
+# Verify installation:
+shopify version
+```
+
+**"Permission denied" (Unix/Linux/macOS)**
+```bash
+# Fix credential file permissions:
+chmod 600 shops/credentials/*.credentials.json
+```
+
+### Workflow Issues
+
+**"Can't connect theme to GitHub branch"**
+- Ensure branch exists: `git branch -r | grep shop-a/main`
+- Check Shopify admin → Themes → Add theme → Connect from GitHub
+- Verify repository connection in Shopify
+
+**"Development server won't start"**
+```bash
+# Check your credentials and domain:
+pnpm run shop → List Shops
+# Verify tokens are correct in credential files
+```
+
+**"Feature branch not detecting context"**
+```bash
+# Check branch name pattern:
+git branch --show-current
+# Should be: feature/name or shop-a/name for auto-detection
+```
 
 ---
 
