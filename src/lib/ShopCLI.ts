@@ -176,11 +176,7 @@ export class ShopCLI {
         note(`⚠️ Found ${report.issues.length} issues to review`, "Issues Found");
         
         report.issues.forEach((issue, index) => {
-          console.log(`\n${index + 1}. [${issue.level.toUpperCase()}] ${issue.message}`);
-          if (issue.shopId) {
-            console.log(`   Shop: ${issue.shopId}`);
-          }
-          console.log(`   Fix: ${issue.recommendation}`);
+          console.log(`\n${index + 1}. ${issue}`);
         });
       }
     } catch (error) {

@@ -41,7 +41,7 @@ export class SimplePerformanceMonitor {
       timestamp: Date.now()
     });
 
-    // Keep only recent operations
+    // Limit operations stored
     if (this.completedOperations.length > config.performance.maxMetricsRetention) {
       this.completedOperations = this.completedOperations.slice(-config.performance.maxMetricsRetention);
     }

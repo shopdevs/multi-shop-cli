@@ -70,11 +70,6 @@ export interface CredentialMetadata {
 
 export type Environment = 'production' | 'staging';
 
-// ShopCreationData, BranchInfo, ShopValidationResult, ValidationError removed
-// These were defined but never used in the actual implementation
-
-// PerformanceMetrics and MemoryDelta removed - not used in implementation
-
 export interface SecurityAuditReport {
   readonly timestamp: string;
   readonly shops: readonly ShopSecurityAudit[];
@@ -137,11 +132,7 @@ export interface ShopManagerOptions {
   readonly performanceMonitor?: PerformanceMonitor;
 }
 
-// GitRepository, GitOperationOptions, ErrorContext removed - not used in implementation
-
-// Branded types removed - they were defined but never used for actual type safety
-
-// Simple validation functions (no branded types needed)
+// Simple validation functions
 export const isValidShopId = (value: string): boolean => {
   return /^[a-z0-9-]+$/.test(value) && value.length >= 1 && value.length <= 50;
 };

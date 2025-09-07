@@ -2,8 +2,7 @@ import { execSync } from "child_process";
 import { ShopBranchError, ShopCommandError } from "../errors/ShopError.js";
 
 /**
- * Enterprise-grade Git operations with comprehensive error handling
- * Implements Git best practices and safety checks
+ * Git operations for multi-shop workflow
  */
 export class GitOperations {
   constructor() {

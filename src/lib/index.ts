@@ -11,10 +11,10 @@ export { ShopDev } from "./ShopDev.js";
 export { ShopCRUD } from "./ShopCRUD.js";
 export { ShopCLI } from "./ShopCLI.js";
 export { ContextualDev } from "./ContextualDev.js";
+export { BranchDetector } from "./BranchDetector.js";
+export { ShopSelector } from "./ShopSelector.js";
 export { Initializer } from "./Initializer.js";
 export { SyncMain } from "./SyncMain.js";
-export { TestRunner } from "./TestRunner.js";
-
 // Core infrastructure
 export { SecurityManager } from "./core/SecurityManager.js";
 export { GitOperations } from "./core/GitOperations.js";
@@ -64,5 +64,3 @@ export const PACKAGE_NAME = "@shopdevs/multi-shop-cli";
 /**
  * Creates a new ShopManager instance
  */
-// Utility functions removed to eliminate circular import issues
-// These can be accessed directly through the classes if needed

@@ -8,7 +8,6 @@ import { ShopManager } from "../lib/ShopManager.js";
 import { ContextualDev } from "../lib/ContextualDev.js";
 import { Initializer } from "../lib/Initializer.js";
 import { SyncMain } from "../lib/SyncMain.js";
-import { TestRunner } from "../lib/TestRunner.js";
 import { logger } from "../lib/core/SimpleLogger.js";
 import { performanceMonitor } from "../lib/core/SimplePerformanceMonitor.js";
 
@@ -127,37 +126,11 @@ program
     }
   });
 
-// Test shop sync PR
-program
-  .command("test-pr")
-  .description("Test shop sync PR with comprehensive suite")
-  .argument("[shop]", "Shop name")
-  .argument("[pr]", "PR number")
-  .action(async (shop?: string, pr?: string) => {
-    const endOperation = logger.startOperation('test_pr', { shop, pr });
-    
-    try {
-      const options: { shop?: string; pr?: string } = {};
-      if (shop) options.shop = shop;
-      if (pr) options.pr = pr;
-      const tester = new TestRunner(options);
-      await tester.run();
-      endOperation('success');
-    } catch (error) {
-      logger.error('PR testing failed', { 
-        error: error instanceof Error ? error.message : String(error),
-        shop,
-        pr
-      });
-      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
-      process.exit(1);
-    }
-  });
 
 // Security audit command
 program
   .command("audit")
-  .description("Run comprehensive security audit")
+  .description("Run security audit")
   .action(async () => {
     const endOperation = logger.startOperation('security_audit');
     

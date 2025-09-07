@@ -157,7 +157,7 @@ export class WorkflowManager {
       // Check if we're in a git repo
       execSync('git rev-parse --git-dir', { cwd: this.cwd, stdio: 'ignore' });
       
-      // Check for main branch (GitHub Flow only needs main)
+      // Check for main branch
       const branches = execSync('git branch -r', { 
         cwd: this.cwd, 
         encoding: 'utf8' 

@@ -1,6 +1,5 @@
 /**
  * Simple logging for CLI tools
- * Replaces the over-engineered 362-line Logger with basic needs
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -44,7 +43,6 @@ export class SimpleLogger {
   }
 
   async flush(): Promise<void> {
-    // Simple logger doesn't need flushing
     return Promise.resolve();
   }
 
@@ -54,5 +52,5 @@ export class SimpleLogger {
   }
 }
 
-// Export singleton for consistency with existing code
+// Export singleton instance
 export const logger = new SimpleLogger();
