@@ -1,21 +1,18 @@
 import fs from "fs";
 import path from "path";
-import crypto from "crypto";
+import crypto from "crypto"; // Used for checksum validation only
 import { ShopCredentialError, ShopConfigurationError } from "../errors/ShopError.js";
 import type { ShopCredentials, SecurityAuditReport } from "../../types/shop.js";
 import { config } from "./Config.js";
 
 /**
- * Enterprise-grade security manager for credential handling
- * Implements security best practices for sensitive data
+ * Manages shop credentials with secure file operations
  */
 export class SecurityManager {
   private readonly credentialsDir: string;
-  private readonly encryptionKey: string;
 
   constructor(credentialsDir: string) {
     this.credentialsDir = credentialsDir;
-    this.encryptionKey = this.getOrCreateEncryptionKey();
   }
 
   /**
@@ -477,69 +474,4 @@ export class SecurityManager {
     return hash.digest('hex').substring(0, 16);
   }
 
-  private getOrCreateEncryptionKey(): string {
-    // Note: This is for future encryption implementation
-    // Currently credentials are stored as plain JSON with file permissions
-    const keyPath = path.join(this.credentialsDir, '.key');
-    
-    if (fs.existsSync(keyPath)) {
-      try {
-        const key = fs.readFileSync(keyPath, 'utf8');
-        if (key.length !== 64) { // 32 bytes = 64 hex characters
-          throw new ShopCredentialError(
-            'Invalid encryption key length',
-            'system',
-            'key_validation_error',
-            { expectedLength: 64, actualLength: key.length }
-          );
-        }
-        return key;
-      } catch (error) {
-        throw new ShopCredentialError(
-          'Failed to read encryption key',
-          'system',
-          'key_read_error',
-          { error: error instanceof Error ? error.message : String(error) }
-        );
-      }
-    }
-
-    // Generate new key for future encryption features
-    const key = crypto.randomBytes(32).toString('hex');
-    
-    try {
-      this.ensureCredentialsDirectory();
-      fs.writeFileSync(keyPath, key);
-      
-      // Set file permissions after creation (cross-platform safe)
-      try {
-        fs.chmodSync(keyPath, 0o600);
-      } catch (permError) {
-        // Permission setting failed - not critical on Windows
-      }
-      
-      // Verify write was successful
-      if (!fs.existsSync(keyPath)) {
-        throw new ShopCredentialError(
-          'Encryption key file was not created',
-          'system',
-          'key_create_error',
-          { keyPath }
-        );
-      }
-      
-      return key;
-    } catch (error) {
-      throw new ShopCredentialError(
-        'Failed to create encryption key - credentials directory may not be writable',
-        'system',
-        'key_create_error',
-        { 
-          error: error instanceof Error ? error.message : String(error),
-          keyPath,
-          credentialsDir: this.credentialsDir
-        }
-      );
-    }
-  }
 }
