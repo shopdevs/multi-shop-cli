@@ -74,7 +74,7 @@ git commit -m "Initial commit"
 
 ```bash
 # From your package directory
-cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
+cd /path/to/@shopdevs/multi-shop-cli
 pnpm run build
 npm link
 
@@ -238,7 +238,7 @@ cd /tmp/test-multi-shop-theme
 npm unlink @shopdevs/multi-shop-cli
 
 # Unlink global package
-cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
+cd /path/to/@shopdevs/multi-shop-cli
 npm unlink
 
 # Clean up test directories
@@ -257,10 +257,10 @@ rm -f @shopdevs/multi-shop-cli-*.tgz
 ```bash
 # Use file: protocol for rapid iteration
 cd /path/to/test-theme
-pnpm add -D file:/Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
+pnpm add -D file:/path/to/@shopdevs/multi-shop-cli
 
 # Each time you make changes:
-cd /Users/brandt/codes/meyer/@shopdevs/multi-shop-cli
+cd /path/to/@shopdevs/multi-shop-cli
 pnpm run build
 
 cd /path/to/test-theme  

@@ -464,7 +464,7 @@ Comprehensive guides included:
 
 ## 🤝 Contributing
 
-This package extracts the multi-shop innovations from [Horizon Meyer](https://github.com/MeyerCorporation/horizon-meyer) to make them available to any Shopify theme.
+This package provides proven multi-shop workflow patterns for any Shopify theme development team.
 
 ### Development
 
@@ -492,6 +492,6 @@ MIT © [ShopDevs](https://shopdevs.com)
 
 ## 🙏 Acknowledgments
 
-- Built on innovations from [Horizon Meyer](https://github.com/MeyerCorporation/horizon-meyer)
+- Built for modern multi-shop Shopify development workflows
 - Inspired by the need for better multi-shop Shopify development workflows
 - Powered by [@clack/prompts](https://www.npmjs.com/package/@clack/prompts) for beautiful CLI experiences
