@@ -6,6 +6,10 @@
 
 // Core classes
 export { ShopManager } from "./ShopManager.js";
+export { ShopConfigManager } from "./ShopConfig.js";
+export { ShopDev } from "./ShopDev.js";
+export { ShopCRUD } from "./ShopCRUD.js";
+export { ShopCLI } from "./ShopCLI.js";
 export { ContextualDev } from "./ContextualDev.js";
 export { Initializer } from "./Initializer.js";
 export { SyncMain } from "./SyncMain.js";
