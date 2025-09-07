@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { ShopConfig } from "../types/shop.js";
-import { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
+import { ShopConfigValidator } from "./validators/ShopConfigValidator.js";
 import { ShopConfigurationError } from "./errors/ShopError.js";
 import { config as systemConfig } from "./core/Config.js";
 

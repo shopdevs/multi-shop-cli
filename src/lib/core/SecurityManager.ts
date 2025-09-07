@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto"; // Used for checksum validation only
 import { ShopCredentialError, ShopConfigurationError } from "../errors/ShopError.js";
-import type { ShopCredentials, SecurityAuditReport } from "../../types/shop.js";
+import type { ShopCredentials, SecurityAuditReport, ShopSecurityAudit, SecurityIssue } from "../../types/shop.js";
 import { config } from "./Config.js";
 
 /**
@@ -47,8 +47,8 @@ export class SecurityManager {
       throw new ShopCredentialError(
         `Failed to load credentials for ${shopId}`,
         shopId,
-        null,
-        { originalError: error.message }
+        'load_error',
+        { originalError: error instanceof Error ? error.message : String(error) }
       );
     }
   }
@@ -88,10 +88,8 @@ export class SecurityManager {
       } catch (error) {
         // Permissions may not be supported on all platforms (e.g., Windows)
         // This is not a critical failure for functionality
-        this.logger?.warn?.('Could not set file permissions', {
-          file: credPath,
-          error: error instanceof Error ? error.message : String(error)
-        });
+        // Note: Could not set file permissions (not critical on Windows)
+        console.warn('Could not set file permissions:', credPath);
       }
 
       // Verify write success
@@ -104,17 +102,15 @@ export class SecurityManager {
         );
       }
 
-      // Log successful save (using proper logging interface when available)
-      if (typeof console !== 'undefined') {
-        console.log(`   🔐 Securely saved to: shops/credentials/${shopId}.credentials.json`);
-      }
+      // Log successful save
+      console.log(`   🔐 Securely saved to: shops/credentials/${shopId}.credentials.json`);
       
     } catch (error) {
       throw new ShopCredentialError(
         `Failed to save credentials for ${shopId}`,
         shopId,
-        null,
-        { originalError: error.message }
+        'save_error',
+        { originalError: error instanceof Error ? error.message : String(error) }
       );
     }
   }
@@ -174,16 +170,20 @@ export class SecurityManager {
    * @returns Security audit report
    */
   auditCredentialSecurity(): SecurityAuditReport {
-    const report = {
+    const shops: ShopSecurityAudit[] = [];
+    const issues: SecurityIssue[] = [];
+    const recommendations: string[] = [];
+    
+    const report: SecurityAuditReport = {
       timestamp: new Date().toISOString(),
-      shops: [],
-      issues: [],
-      recommendations: []
+      shops,
+      issues,
+      recommendations
     };
 
     try {
       if (!fs.existsSync(this.credentialsDir)) {
-        report.issues.push({
+        issues.push({
           level: "info",
           message: "No credentials directory found",
           recommendation: "Run shop setup to create credentials"
@@ -213,7 +213,7 @@ export class SecurityManager {
 
           // Check file permissions
           if ((stats.mode & parseInt('077', 8)) !== 0) {
-            report.issues.push({
+            issues.push({
               level: "warning",
               shopId,
               message: `Credential file has overly permissive permissions: ${shopAudit.filePermissions}`,
@@ -225,7 +225,7 @@ export class SecurityManager {
           const sixMonthsAgo = new Date();
           sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
           if (stats.mtime < sixMonthsAgo) {
-            report.issues.push({
+            issues.push({
               level: "info",
               shopId,
               message: "Credentials are older than 6 months",
@@ -233,13 +233,13 @@ export class SecurityManager {
             });
           }
 
-          report.shops.push(shopAudit);
+          shops.push(shopAudit);
 
         } catch (error) {
-          report.issues.push({
+          issues.push({
             level: "error",
             shopId,
-            message: `Failed to audit credentials: ${error.message}`,
+            message: `Failed to audit credentials: ${error instanceof Error ? error.message : String(error)}`,
             recommendation: "Recreate credentials for this shop"
           });
         }
@@ -247,17 +247,17 @@ export class SecurityManager {
 
       // Generate recommendations
       if (report.issues.length === 0) {
-        report.recommendations.push("✅ All credential security checks passed");
+        recommendations.push("✅ All credential security checks passed");
       } else {
-        report.recommendations.push(
+        recommendations.push(
           `Found ${report.issues.length} security issues that should be addressed`
         );
       }
 
     } catch (error) {
-      report.issues.push({
+      issues.push({
         level: "error",
-        message: `Security audit failed: ${error.message}`,
+        message: `Security audit failed: ${error instanceof Error ? error.message : String(error)}`,
         recommendation: "Contact support if this persists"
       });
     }
@@ -339,16 +339,17 @@ export class SecurityManager {
       throw new ShopCredentialError(
         `Invalid credentials structure for ${shopId}`,
         shopId,
-        null,
+        'structure_error',
         { receivedType: typeof credentials }
       );
     }
 
-    if (!credentials.shopify?.stores) {
+    const creds = credentials as { shopify?: { stores?: unknown } };
+    if (!creds.shopify?.stores) {
       throw new ShopCredentialError(
         `Missing Shopify store credentials for ${shopId}`,
         shopId,
-        null,
+        'missing_stores',
         { structure: Object.keys(credentials) }
       );
     }

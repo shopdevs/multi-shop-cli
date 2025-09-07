@@ -149,24 +149,25 @@ Example credential file format:
 }
 ```
 
-### Step 4: Create GitHub Branches
+### Step 4: GitHub Branches (Automated!)
+
+When creating each shop, you'll be prompted:
 
 ```bash
-# Create shop-specific branches for each store:
+# During shop creation:
+# "Create GitHub branches for this shop?"
+# → Yes, create branches automatically (Recommended)
+
+# This automatically creates:
+# shop-a/main and shop-a/staging
+# shop-b/main and shop-b/staging  
+# shop-c/main and shop-c/staging
+# shop-d/main and shop-d/staging
+
+# If you chose "No" during setup, create manually:
 git checkout -b shop-a/main && git push -u origin shop-a/main
 git checkout -b shop-a/staging && git push -u origin shop-a/staging
-
-git checkout -b shop-b/main && git push -u origin shop-b/main  
-git checkout -b shop-b/staging && git push -u origin shop-b/staging
-
-git checkout -b shop-c/main && git push -u origin shop-c/main
-git checkout -b shop-c/staging && git push -u origin shop-c/staging
-
-git checkout -b shop-d/main && git push -u origin shop-d/main
-git checkout -b shop-d/staging && git push -u origin shop-d/staging
-
-# Return to main
-git checkout main
+# Repeat for other shops...
 ```
 
 ### Step 5: Connect Branches to Shopify Themes
@@ -176,7 +177,7 @@ For each shop, connect the Git branches to Shopify themes:
 1. **Shopify Admin** → your-shop.myshopify.com → Online Store → Themes
 2. **Add theme** → Connect from GitHub
 3. **Select branch**: `shop-a/main` (for production) or `shop-a/staging`
-4. **Repeat for all 4 shops**
+4. **Repeat for all 4 shops** (branches already created automatically!)
 
 ### Step 6: Verify Setup
 

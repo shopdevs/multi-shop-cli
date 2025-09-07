@@ -59,7 +59,7 @@ export class ShopManager {
    * Run security audit
    */
   async auditSecurity(): Promise<SecurityAuditReport> {
-    const endOperation = this.logger.startOperation('security_audit');
+    const endOperation = logger.startOperation('security_audit');
 
     try {
       const report = this.security.auditCredentialSecurity();

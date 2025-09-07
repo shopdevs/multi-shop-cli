@@ -16,7 +16,7 @@ import {
 import type { ShopConfig, Environment, ShopCredentials } from "../types/shop.js";
 import { SecurityManager } from "./core/SecurityManager.js";
 import { GitOperations } from "./core/GitOperations.js";
-import { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
+import { ShopConfigValidator } from "./validators/ShopConfigValidator.js";
 import { logger } from "./core/SimpleLogger.js";
 import { ShopConfigurationError, ShopCredentialError } from "./errors/ShopError.js";
 
@@ -137,14 +137,22 @@ export class ContextualShopManager {
           shopify: { stores: { production: { themeToken: "" }, staging: { themeToken: "" } } },
         };
 
-        // Type-safe credential update
-        if (environment === 'production') {
-          credentials.shopify.stores.production.themeToken = themeToken;
-        } else {
-          credentials.shopify.stores.staging.themeToken = themeToken;
-        }
+        // Type-safe credential update - create new object to respect readonly properties
+        const updatedCredentials: ShopCredentials = {
+          ...credentials,
+          shopify: {
+            stores: {
+              production: environment === 'production' 
+                ? { themeToken } 
+                : credentials.shopify.stores.production,
+              staging: environment === 'staging'
+                ? { themeToken }
+                : credentials.shopify.stores.staging
+            }
+          }
+        };
 
-        this.securityManager.saveCredentials(shop, credentials);
+        this.securityManager.saveCredentials(shop, updatedCredentials);
         log.success(`✅ Credentials saved locally (NOT committed to git)`);
       }
 
@@ -228,12 +236,15 @@ export class ContextualShopManager {
     const shops = this.listShops();
 
     if (shops.length === 0) {
-      cancel("No shops configured yet. Please create a shop first using 'npm run shop'.");
+      cancel("No shops configured yet. Please create a shop first using 'pnpm run shop'.");
       return null;
     }
 
     if (shops.length === 1) {
       const shop = shops[0];
+      if (!shop) {
+        return null;
+      }
       note(`Using shop: ${shop}`, "Auto-selected");
       return shop;
     }

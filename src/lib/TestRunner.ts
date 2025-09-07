@@ -38,8 +38,8 @@ export class TestRunner {
   private testDir: string | null = null;
   private readonly gitOps: GitOperations;
   private readonly logger = logger;
-  private readonly prefilledShop?: string;
-  private readonly prefilledPR?: string;
+  private readonly prefilledShop: string | undefined;
+  private readonly prefilledPR: string | undefined;
 
   constructor(options: TestRunnerOptions = {}) {
     this.gitOps = new GitOperations();
@@ -76,19 +76,23 @@ export class TestRunner {
     let prNumber = this.prefilledPR;
 
     if (!shop) {
-      shop = await text({
+      const shopResult = await text({
         message: "Shop name:",
         placeholder: "e.g., anolon",
         validate: (value) => (!value?.trim() ? "Shop name is required" : undefined),
       });
-
-      if (isCancel(shop)) {
-        throw new Error("Testing cancelled");
+      
+      if (typeof shopResult === 'string') {
+        shop = shopResult;
+      } else {
+        throw new Error('Shop selection was cancelled');
       }
+
+      // Shop selection is already handled above
     }
 
     if (!prNumber) {
-      prNumber = await text({
+      const prResult = await text({
         message: "PR number:",
         placeholder: "e.g., 123",
         validate: (value) => {
@@ -97,10 +101,14 @@ export class TestRunner {
           return undefined;
         },
       });
-
-      if (isCancel(prNumber)) {
-        throw new Error("Testing cancelled");
+      
+      if (typeof prResult === 'string') {
+        prNumber = prResult;
+      } else {
+        throw new Error('PR number selection was cancelled');
       }
+
+      // PR number selection is already handled above
     }
 
     return { shop, prNumber };
@@ -282,8 +290,8 @@ export class TestRunner {
   }
 
   private async runTestSuite(shop: string, prNumber: string, previewUrl: string): Promise<TestResults> {
-    const baseUrl = previewUrl.split('?')[0].replace(/\/$/, '');
-    const themeId = previewUrl.match(/preview_theme_id=([^&]*)/)?.[1];
+    const baseUrl = (previewUrl.split('?')[0] || previewUrl).replace(/\/$/, '');
+    const themeId = previewUrl.match(/preview_theme_id=([^&]*)/)?.[1] || 'unknown';
 
     console.log();
     note(`Base URL: ${baseUrl}\nTheme ID: ${themeId}`, "🧪 Testing Configuration");
@@ -332,7 +340,7 @@ export class TestRunner {
     results: TestResults, 
     resultKey: keyof TestResults
   ): Promise<void> {
-    const endTestOperation = performanceMonitor.startOperation(`test_${resultKey}`, { command });
+    const operationId = performanceMonitor.startOperation(`test_${resultKey}`, { command });
     const s = spinner();
     s.start(`Running ${testName} tests...`);
 
@@ -344,13 +352,13 @@ export class TestRunner {
       
       s.stop(`✅ ${testName} tests passed`);
       results[resultKey] = true;
-      endTestOperation('success');
+      performanceMonitor.endOperation(operationId, 'success');
       
     } catch (error) {
       s.stop(`❌ ${testName} tests failed`);
       results[resultKey] = false;
       log.error(`${testName} test failure - check ${logFile} for details`);
-      endTestOperation('failed');
+      performanceMonitor.endOperation(operationId, 'failed');
     }
   }
 

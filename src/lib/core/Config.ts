@@ -73,21 +73,21 @@ export const DEFAULT_CONFIG: SystemConfig = {
 export function loadConfig(): SystemConfig {
   const config: SystemConfig = {
     security: {
-      maxConfigFileSize: parseInt(process.env.MULTI_SHOP_MAX_CONFIG_SIZE || '') || DEFAULT_CONFIG.security.maxConfigFileSize,
-      minTokenLength: parseInt(process.env.MULTI_SHOP_MIN_TOKEN_LENGTH || '') || DEFAULT_CONFIG.security.minTokenLength,
-      maxTokenLength: parseInt(process.env.MULTI_SHOP_MAX_TOKEN_LENGTH || '') || DEFAULT_CONFIG.security.maxTokenLength,
-      maxShopIdLength: parseInt(process.env.MULTI_SHOP_MAX_SHOP_ID_LENGTH || '') || DEFAULT_CONFIG.security.maxShopIdLength,
+      maxConfigFileSize: parseInt(process.env['MULTI_SHOP_MAX_CONFIG_SIZE'] || '') || DEFAULT_CONFIG.security.maxConfigFileSize,
+      minTokenLength: parseInt(process.env['MULTI_SHOP_MIN_TOKEN_LENGTH'] || '') || DEFAULT_CONFIG.security.minTokenLength,
+      maxTokenLength: parseInt(process.env['MULTI_SHOP_MAX_TOKEN_LENGTH'] || '') || DEFAULT_CONFIG.security.maxTokenLength,
+      maxShopIdLength: parseInt(process.env['MULTI_SHOP_MAX_SHOP_ID_LENGTH'] || '') || DEFAULT_CONFIG.security.maxShopIdLength,
     },
     logging: {
-      maxLogFiles: parseInt(process.env.MULTI_SHOP_MAX_LOG_FILES || '') || DEFAULT_CONFIG.logging.maxLogFiles,
-      maxLogSizeBytes: parseInt(process.env.MULTI_SHOP_MAX_LOG_SIZE || '') || DEFAULT_CONFIG.logging.maxLogSizeBytes,
-      defaultLogLevel: process.env.LOG_LEVEL || DEFAULT_CONFIG.logging.defaultLogLevel,
+      maxLogFiles: parseInt(process.env['MULTI_SHOP_MAX_LOG_FILES'] || '') || DEFAULT_CONFIG.logging.maxLogFiles,
+      maxLogSizeBytes: parseInt(process.env['MULTI_SHOP_MAX_LOG_SIZE'] || '') || DEFAULT_CONFIG.logging.maxLogSizeBytes,
+      defaultLogLevel: process.env['LOG_LEVEL'] || DEFAULT_CONFIG.logging.defaultLogLevel,
     },
     performance: {
-      slowOperationThresholdMs: parseInt(process.env.MULTI_SHOP_SLOW_THRESHOLD_MS || '') || DEFAULT_CONFIG.performance.slowOperationThresholdMs,
-      highMemoryThresholdBytes: parseInt(process.env.MULTI_SHOP_HIGH_MEMORY_BYTES || '') || DEFAULT_CONFIG.performance.highMemoryThresholdBytes,
-      maxMetricsRetention: parseInt(process.env.MULTI_SHOP_MAX_METRICS || '') || DEFAULT_CONFIG.performance.maxMetricsRetention,
-      memoryCheckIntervalMs: parseInt(process.env.MULTI_SHOP_MEMORY_CHECK_INTERVAL || '') || DEFAULT_CONFIG.performance.memoryCheckIntervalMs,
+      slowOperationThresholdMs: parseInt(process.env['MULTI_SHOP_SLOW_THRESHOLD_MS'] || '') || DEFAULT_CONFIG.performance.slowOperationThresholdMs,
+      highMemoryThresholdBytes: parseInt(process.env['MULTI_SHOP_HIGH_MEMORY_BYTES'] || '') || DEFAULT_CONFIG.performance.highMemoryThresholdBytes,
+      maxMetricsRetention: parseInt(process.env['MULTI_SHOP_MAX_METRICS'] || '') || DEFAULT_CONFIG.performance.maxMetricsRetention,
+      memoryCheckIntervalMs: parseInt(process.env['MULTI_SHOP_MEMORY_CHECK_INTERVAL'] || '') || DEFAULT_CONFIG.performance.memoryCheckIntervalMs,
     },
   };
 

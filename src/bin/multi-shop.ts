@@ -25,10 +25,10 @@ program
     const options = thisCommand.opts();
     
     // Configure logging based on options
-    if (options.debug) {
-      process.env.LOG_LEVEL = 'debug';
-    } else if (options.verbose) {
-      process.env.LOG_LEVEL = 'info';
+    if (options['debug']) {
+      process.env['LOG_LEVEL'] = 'debug';
+    } else if (options['verbose']) {
+      process.env['LOG_LEVEL'] = 'info';
     }
     
     // Start performance monitoring for the command
@@ -137,7 +137,10 @@ program
     const endOperation = logger.startOperation('test_pr', { shop, pr });
     
     try {
-      const tester = new TestRunner({ shop, pr });
+      const options: { shop?: string; pr?: string } = {};
+      if (shop) options.shop = shop;
+      if (pr) options.pr = pr;
+      const tester = new TestRunner(options);
       await tester.run();
       endOperation('success');
     } catch (error) {
@@ -193,12 +196,10 @@ program
       console.log(`   Memory: ${Math.round(summary.memoryUsage.heapUsed / 1024 / 1024)}MB`);
       console.log(`   Active Operations: ${summary.activeOperations}`);
       
-      if (summary.metrics.commands) {
-        console.log(`\n⚡ Command Performance:`);
-        console.log(`   Total Commands: ${summary.metrics.commands.total}`);
-        console.log(`   Average Duration: ${summary.metrics.commands.averageDuration}ms`);
-        console.log(`   Success Rate: ${(summary.metrics.commands.successRate * 100).toFixed(1)}%`);
-      }
+      // SimplePerformanceMonitor doesn't have metrics.commands
+      console.log(`\n⚡ Recent Performance:`);
+      console.log(`   Recent Operations: ${summary.recentOperations}`);
+      console.log(`   Average Duration: ${summary.averageDuration}ms`);
       
       outro("📊 Performance diagnostics complete");
     } catch (error) {

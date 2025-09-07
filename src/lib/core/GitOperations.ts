@@ -14,7 +14,7 @@ export class GitOperations {
    * Validates Git environment and repository state
    * @throws {ShopCommandError} If Git environment is invalid
    */
-  validateGitEnvironment() {
+  validateGitEnvironment(): void {
     try {
       // Check if Git is available
       execSync("git --version", { stdio: "ignore" });
@@ -45,7 +45,7 @@ export class GitOperations {
    * @returns {string} Current branch name
    * @throws {ShopBranchError} If branch detection fails
    */
-  getCurrentBranch() {
+  getCurrentBranch(): string {
     try {
       const branch = execSync("git branch --show-current", { 
         encoding: "utf8" 
@@ -54,7 +54,7 @@ export class GitOperations {
       if (!branch) {
         throw new ShopBranchError(
           "Could not determine current branch",
-          null,
+          "unknown",
           { 
             possibleCauses: ["Detached HEAD state", "No commits yet"],
             resolution: "Ensure you're on a proper branch" 
@@ -70,18 +70,18 @@ export class GitOperations {
       
       throw new ShopBranchError(
         "Failed to get current branch",
-        null,
-        { originalError: error.message }
+        "unknown",
+        { originalError: error instanceof Error ? error.message : String(error) }
       );
     }
   }
 
   /**
    * Checks if branch exists locally or remotely
-   * @param {string} branch - Branch name to check
-   * @returns {Object} Branch existence info
+   * @param branch - Branch name to check
+   * @returns Branch existence info
    */
-  checkBranchExists(branch) {
+  checkBranchExists(branch: string): { local: boolean; remote: boolean; branch: string } {
     const result = {
       local: false,
       remote: false,
@@ -109,11 +109,11 @@ export class GitOperations {
 
   /**
    * Creates branch safely with validation
-   * @param {string} branchName - New branch name
-   * @param {string} baseBranch - Base branch to create from
-   * @throws {ShopBranchError} If creation fails
+   * @param branchName - New branch name
+   * @param baseBranch - Base branch to create from
+   * @throws ShopBranchError If creation fails
    */
-  createBranch(branchName, baseBranch = "main") {
+  createBranch(branchName: string, baseBranch: string = "main"): void {
     try {
       // Validate branch name
       this.validateBranchName(branchName);
@@ -162,7 +162,7 @@ export class GitOperations {
         branchName,
         { 
           baseBranch,
-          originalError: error.message 
+          originalError: error instanceof Error ? error.message : String(error) 
         }
       );
     }
@@ -173,7 +173,7 @@ export class GitOperations {
    * @param {string} branch - Branch to switch to
    * @throws {ShopBranchError} If switch fails
    */
-  switchToBranch(branch) {
+  switchToBranch(branch: string): void {
     try {
       this.ensureCleanWorkingDirectory();
 
@@ -203,7 +203,7 @@ export class GitOperations {
       throw new ShopBranchError(
         `Failed to switch to branch ${branch}`,
         branch,
-        { originalError: error.message }
+        { originalError: error instanceof Error ? error.message : String(error) }
       );
     }
   }
@@ -212,14 +212,14 @@ export class GitOperations {
    * Fetches latest changes with error handling
    * @throws {ShopCommandError} If fetch fails
    */
-  fetchLatest() {
+  fetchLatest(): void {
     try {
       execSync("git fetch origin", { stdio: "ignore" });
     } catch (error) {
       throw new ShopCommandError(
         "Failed to fetch latest changes from origin",
         "git fetch origin",
-        error.status || 1,
+        (error as any)?.status || 1,
         { 
           possibleCauses: ["Network connectivity", "Authentication", "Remote repository issues"],
           resolution: "Check network connection and Git credentials"
@@ -232,7 +232,7 @@ export class GitOperations {
    * Ensures working directory is clean before operations
    * @throws {ShopBranchError} If working directory is dirty
    */
-  ensureCleanWorkingDirectory() {
+  ensureCleanWorkingDirectory(): void {
     try {
       const status = execSync("git status --porcelain", { encoding: "utf8" });
       
@@ -240,7 +240,7 @@ export class GitOperations {
         const changes = status.split("\n").filter(line => line.trim());
         throw new ShopBranchError(
           "Working directory has uncommitted changes",
-          null,
+          "dirty_working_directory",
           {
             changes: changes.slice(0, 5), // Show first 5 changes
             totalChanges: changes.length,
@@ -257,7 +257,7 @@ export class GitOperations {
         "Failed to check repository status",
         "git status --porcelain",
         1,
-        { originalError: error.message }
+        { originalError: error instanceof Error ? error.message : String(error) }
       );
     }
   }
@@ -267,7 +267,7 @@ export class GitOperations {
    * @param {string} branchName - Branch name to validate
    * @throws {ShopBranchError} If branch name is invalid
    */
-  validateBranchName(branchName) {
+  validateBranchName(branchName: string): void {
     if (!branchName || typeof branchName !== 'string') {
       throw new ShopBranchError(
         "Branch name is required",
@@ -310,7 +310,7 @@ export class GitOperations {
    * Gets repository information for context
    * @returns {Object} Repository info
    */
-  getRepositoryInfo() {
+  getRepositoryInfo(): { remoteUrl: string; currentBranch: string; isClean: boolean; currentCommit?: string; error?: string } {
     try {
       const remoteUrl = execSync("git remote get-url origin", { encoding: "utf8" }).trim();
       const currentCommit = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
@@ -324,8 +324,10 @@ export class GitOperations {
       };
     } catch (error) {
       return {
-        error: error.message,
-        currentBranch: "unknown"
+        remoteUrl: "",
+        currentBranch: "unknown",
+        isClean: false,
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -334,7 +336,7 @@ export class GitOperations {
    * Checks if working directory is clean
    * @returns {boolean} True if clean
    */
-  isWorkingDirectoryClean() {
+  isWorkingDirectoryClean(): boolean {
     try {
       const status = execSync("git status --porcelain", { encoding: "utf8" });
       return !status.trim();

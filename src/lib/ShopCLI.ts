@@ -1,4 +1,4 @@
-import { intro, outro, select, isCancel, note } from "@clack/prompts";
+import { intro, outro, select, isCancel, note, log } from "@clack/prompts";
 import { ShopConfigManager } from "./ShopConfig.js";
 import { ShopCRUD } from "./ShopCRUD.js";
 import { ShopDev } from "./ShopDev.js";
@@ -32,8 +32,8 @@ export class ShopCLI {
       intro("🚀 Multi-Shop Manager");
 
       // Auto-dev mode (from contextual development)
-      if (process.env.AUTO_SELECT_DEV === "true") {
-        delete process.env.AUTO_SELECT_DEV;
+      if (process.env['AUTO_SELECT_DEV'] === "true") {
+        delete process.env['AUTO_SELECT_DEV'];
         await this.dev.start();
         endOperation('success', { autodev: true });
         return;
@@ -71,7 +71,7 @@ export class ShopCLI {
 
     note(status, "Current Status");
 
-    return await select({
+    const result = await select({
       message: "What would you like to do?",
       options: [
         { value: "dev", label: "Start Development Server", hint: "Most common" },
@@ -81,7 +81,9 @@ export class ShopCLI {
         { value: "audit", label: "Security Audit", hint: "Check security" },
         { value: "exit", label: "Exit", hint: "Close manager" }
       ]
-    }) as Promise<string>;
+    });
+    
+    return result as string;
   }
 
   private async handleChoice(choice: string): Promise<boolean> {

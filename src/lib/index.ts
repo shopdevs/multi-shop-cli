@@ -22,7 +22,7 @@ export { SimpleLogger as Logger, logger } from "./core/SimpleLogger.js";
 export { SimplePerformanceMonitor, performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 
 // Validation and error handling
-export { ShopConfigValidator } from "../validators/ShopConfigValidator.js";
+export { ShopConfigValidator } from "./validators/ShopConfigValidator.js";
 export {
   ShopError,
   ShopConfigurationError,
@@ -64,51 +64,5 @@ export const PACKAGE_NAME = "shopdevs-multi-shop";
 /**
  * Creates a new ShopManager instance
  */
-export function createShopManager(options: ShopManagerOptions = {}): ShopManager {
-  return new ShopManager(options);
-}
-
-/**
- * Initializes multi-shop in the current directory
- * 
- * @param options - Initialization options
- * @returns Promise that resolves when initialization is complete
- * 
- * @example
- * ```typescript
- * import { initializeMultiShop } from 'shopdevs-multi-shop';
- * 
- * await initializeMultiShop({ force: true });
- * ```
- */
-export async function initializeMultiShop(options: { force?: boolean } = {}): Promise<void> {
-  const initializer = new Initializer(options);
-  await initializer.run();
-}
-
-/**
- * Validates shop configuration
- * 
- * @param config - Shop configuration to validate
- * @param shopId - Shop identifier for error context
- * @returns Validated configuration
- * @throws ShopValidationError if validation fails
- * 
- * @example
- * ```typescript
- * import { validateShopConfig } from 'shopdevs-multi-shop';
- * 
- * try {
- *   const validConfig = validateShopConfig(userInput, 'my-shop');
- *   // Use validConfig safely
- * } catch (error) {
- *   if (error instanceof ShopValidationError) {
- *     console.error('Validation failed:', error.details);
- *   }
- * }
- * ```
- */
-export function validateShopConfig(config: unknown, shopId: string): ShopConfig {
-  const validator = new ShopConfigValidator();
-  return validator.validateConfig(config, shopId);
-}
+// Utility functions removed to eliminate circular import issues
+// These can be accessed directly through the classes if needed

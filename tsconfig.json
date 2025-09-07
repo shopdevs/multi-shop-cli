@@ -35,12 +35,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": false,
     
     /* Completeness */
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true,
-    "noUncheckedSideEffectImports": true,
     
     /* Advanced */
     "resolveJsonModule": true,

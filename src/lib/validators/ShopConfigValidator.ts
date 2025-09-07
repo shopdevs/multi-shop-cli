@@ -1,4 +1,4 @@
-import Ajv from "ajv";
+import Ajv, { type ValidateFunction } from "ajv";
 import { ShopValidationError } from "../errors/ShopError.js";
 import type { ShopConfig, ShopCredentials, AuthenticationMethod } from "../../types/shop.js";
 
@@ -7,8 +7,10 @@ import type { ShopConfig, ShopCredentials, AuthenticationMethod } from "../../ty
  */
 export class ShopConfigValidator {
   private readonly ajv: Ajv;
-  private readonly validateShopConfig: Ajv.ValidateFunction;
-  private readonly validateCredentials: Ajv.ValidateFunction;
+  private readonly validateShopConfig: ValidateFunction;
+  private readonly validateCredentials: ValidateFunction;
+  private readonly shopConfigSchema: object;
+  private readonly credentialSchema: object;
 
   constructor() {
     this.ajv = new Ajv({ 
@@ -146,7 +148,7 @@ export class ShopConfigValidator {
     const isValid = this.validateShopConfig(config);
     
     if (!isValid) {
-      const errors = this.validateShopConfig.errors.map(error => ({
+      const errors = (this.validateShopConfig.errors || []).map((error: any) => ({
         field: error.instancePath || error.dataPath,
         message: error.message,
         value: error.data,
@@ -175,7 +177,7 @@ export class ShopConfigValidator {
     const isValid = this.validateCredentials(credentials);
     
     if (!isValid) {
-      const errors = this.validateCredentials.errors.map(error => ({
+      const errors = (this.validateCredentials.errors || []).map((error: any) => ({
         field: error.instancePath || error.dataPath,
         message: error.message,
         value: error.data

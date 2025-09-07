@@ -29,7 +29,7 @@ export class ContextualDev {
         console.log();
         
         // Call the shop manager with auto-dev mode
-        process.env.AUTO_SELECT_DEV = "true";
+        process.env['AUTO_SELECT_DEV'] = "true";
         
         const { ShopManager } = await import("./ShopManager.js");
         const manager = new ShopManager();
