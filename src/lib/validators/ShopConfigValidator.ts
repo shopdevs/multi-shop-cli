@@ -3,8 +3,7 @@ import { ShopValidationError } from "../errors/ShopError.js";
 import type { ShopConfig, ShopCredentials, AuthenticationMethod } from "../../types/shop.js";
 
 /**
- * Enterprise-grade schema validation for shop configurations
- * Uses JSON Schema with comprehensive validation rules
+ * Validates shop configurations using JSON Schema
  */
 export class ShopConfigValidator {
   private readonly ajv: Ajv;

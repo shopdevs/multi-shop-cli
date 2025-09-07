@@ -1,6 +1,5 @@
 /**
- * Core type definitions for shop management
- * Provides comprehensive type safety for the entire system
+ * Type definitions for shop management
  */
 
 export interface ShopConfig {
@@ -71,53 +70,10 @@ export interface CredentialMetadata {
 
 export type Environment = 'production' | 'staging';
 
-export interface ShopCreationData {
-  readonly shopId: string;
-  readonly name: string;
-  readonly productionDomain: string;
-  readonly stagingDomain: string;
-  readonly authMethod: AuthenticationMethod;
-  readonly productionToken: string;
-  readonly stagingToken: string;
-}
+// ShopCreationData, BranchInfo, ShopValidationResult, ValidationError removed
+// These were defined but never used in the actual implementation
 
-export interface BranchInfo {
-  readonly name: string;
-  readonly exists: boolean;
-  readonly local: boolean;
-  readonly remote: boolean;
-  readonly current: boolean;
-}
-
-export interface ShopValidationResult {
-  readonly valid: boolean;
-  readonly errors: readonly ValidationError[];
-}
-
-export interface ValidationError {
-  readonly field: string;
-  readonly message: string;
-  readonly value?: unknown;
-  readonly code?: string;
-}
-
-// Performance and monitoring types
-export interface PerformanceMetrics {
-  readonly operationId: string;
-  readonly name: string;
-  readonly duration: number;
-  readonly startTime: number;
-  readonly endTime: number;
-  readonly memoryDelta: MemoryDelta;
-  readonly context: Record<string, unknown>;
-  readonly result: unknown;
-}
-
-export interface MemoryDelta {
-  readonly heapUsed: number;
-  readonly heapTotal: number;
-  readonly external: number;
-}
+// PerformanceMetrics and MemoryDelta removed - not used in implementation
 
 export interface SecurityAuditReport {
   readonly timestamp: string;
@@ -181,45 +137,20 @@ export interface ShopManagerOptions {
   readonly performanceMonitor?: PerformanceMonitor;
 }
 
-// Git operation types
-export interface GitRepository {
-  readonly remoteUrl: string;
-  readonly currentCommit: string;
-  readonly currentBranch: string;
-  readonly isClean: boolean;
-}
+// GitRepository, GitOperationOptions, ErrorContext removed - not used in implementation
 
-export interface GitOperationOptions {
-  readonly cwd?: string;
-  readonly timeout?: number;
-  readonly silent?: boolean;
-}
+// Branded types removed - they were defined but never used for actual type safety
 
-// Error types
-export interface ErrorContext {
-  readonly code: string;
-  readonly timestamp: string;
-  readonly details: Record<string, unknown>;
-  readonly stack?: string;
-}
-
-// Utility types
-export type NonEmptyString = string & { readonly __brand: 'NonEmptyString' };
-export type ShopId = string & { readonly __brand: 'ShopId' };
-export type DomainName = string & { readonly __brand: 'DomainName' };
-export type ThemeToken = string & { readonly __brand: 'ThemeToken' };
-export type BranchName = string & { readonly __brand: 'BranchName' };
-
-// Type guards
-export const isValidShopId = (value: string): value is ShopId => {
+// Simple validation functions (no branded types needed)
+export const isValidShopId = (value: string): boolean => {
   return /^[a-z0-9-]+$/.test(value) && value.length >= 1 && value.length <= 50;
 };
 
-export const isValidDomain = (value: string): value is DomainName => {
+export const isValidDomain = (value: string): boolean => {
   return value.endsWith('.myshopify.com') && value.length > '.myshopify.com'.length;
 };
 
-export const isValidThemeToken = (value: string, authMethod: AuthenticationMethod): value is ThemeToken => {
+export const isValidThemeToken = (value: string, authMethod: AuthenticationMethod): boolean => {
   if (!value || value.length < 10) return false;
   if (authMethod === 'manual-tokens') {
     return value.startsWith('shptka_');
@@ -227,7 +158,7 @@ export const isValidThemeToken = (value: string, authMethod: AuthenticationMetho
   return true;
 };
 
-export const isValidBranchName = (value: string): value is BranchName => {
+export const isValidBranchName = (value: string): boolean => {
   const invalidPatterns = [
     /^\.|\/\.|\.\.|@\{/,  // No leading dots, no /./, no .., no @{
     /\s|~|\^|:|\?|\*|\[/, // No spaces or special chars

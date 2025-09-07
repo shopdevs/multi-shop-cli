@@ -1,7 +1,7 @@
 /**
- * ShopDevs Multi-Shop - Enterprise contextual development for Shopify themes
+ * ShopDevs Multi-Shop - Contextual development for Shopify themes
  * 
- * Main package exports with comprehensive type definitions
+ * Main package exports
  */
 
 // Core classes
@@ -37,30 +37,16 @@ export {
 export type {
   ShopConfig,
   ShopCredentials,
-  ShopCreationData,
   Environment,
   ShopManagerOptions,
   AuthenticationMethod,
   AuthenticationConfig,
   ShopifyConfig,
   ShopifyStore,
-  ShopMetadata,
-  BranchInfo,
-  ShopValidationResult,
-  ValidationError,
-  PerformanceMetrics,
-  MemoryDelta,
   SecurityAuditReport,
   ShopSecurityAudit,
   SecurityIssue,
-  CLIOptions,
-  GitRepository,
-  GitOperationOptions,
-  ErrorContext,
-  ShopId,
-  DomainName,
-  ThemeToken,
-  BranchName
+  CLIOptions
 } from "../types/shop.js";
 
 // Type guards and utilities
@@ -76,22 +62,7 @@ export const VERSION = "1.0.0";
 export const PACKAGE_NAME = "shopdevs-multi-shop";
 
 /**
- * Creates a new ShopManager instance with enterprise defaults
- * 
- * @param options - Configuration options
- * @returns Configured ShopManager instance
- * 
- * @example
- * ```typescript
- * import { createShopManager } from 'shopdevs-multi-shop';
- * 
- * const manager = createShopManager({
- *   cwd: '/path/to/theme',
- *   logger: customLogger
- * });
- * 
- * await manager.run();
- * ```
+ * Creates a new ShopManager instance
  */
 export function createShopManager(options: ShopManagerOptions = {}): ShopManager {
   return new ShopManager(options);

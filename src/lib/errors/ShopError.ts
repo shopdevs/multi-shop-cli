@@ -1,6 +1,5 @@
 /**
- * Custom error classes for structured error handling
- * Following enterprise error handling best practices
+ * Custom error classes for shop operations
  */
 
 export class ShopError extends Error {

@@ -1,4 +1,4 @@
-import type { ShopManagerOptions, SecurityAuditReport } from "../types/shop.js";
+import type { ShopManagerOptions, SecurityAuditReport, ShopConfig } from "../types/shop.js";
 import { ShopConfigManager } from "./ShopConfig.js";
 import { ShopCLI } from "./ShopCLI.js";
 import { SecurityManager } from "./core/SecurityManager.js";
@@ -12,7 +12,6 @@ export class ShopManager {
   private readonly configManager: ShopConfigManager;
   private readonly cli: ShopCLI;
   private readonly security: SecurityManager;
-  private readonly logger = logger;
 
   constructor(options: ShopManagerOptions = {}) {
     const cwd = options.cwd ?? process.cwd();
@@ -31,14 +30,14 @@ export class ShopManager {
   /**
    * Load shop configuration
    */
-  loadShopConfig(shopId: string) {
+  loadShopConfig(shopId: string): ShopConfig {
     return this.configManager.load(shopId);
   }
 
   /**
    * Save shop configuration  
    */
-  saveShopConfig(shopId: string, config: any) {
+  saveShopConfig(shopId: string, config: ShopConfig) {
     return this.configManager.save(shopId, config);
   }
 
@@ -77,13 +76,8 @@ export class ShopManager {
     }
   }
 
-  // Expose security manager for backward compatibility
+  // Backward compatibility
   get securityManager() {
     return this.security;
-  }
-
-  // Expose validator for backward compatibility  
-  get validator() {
-    return this.configManager['validator'];
   }
 }
