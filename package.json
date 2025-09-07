@@ -1,6 +1,6 @@
 {
   "name": "@shopdevs/multi-shop-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tool for contextual development and automated shop management for multi-shop Shopify themes",
   "keywords": [
     "shopify",
@@ -79,7 +79,7 @@
     "docs:build": "typedoc --out docs src/lib/index.ts",
     "version": "npm run validate && npm run build",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "release:minor": "npm version minor && npm publish && git push --follow-tags", 
+    "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:major": "npm version major && npm publish && git push --follow-tags",
     "size-check": "npm pack --dry-run && du -sh *.tgz 2>/dev/null || echo 'Package size check complete'"
   },
