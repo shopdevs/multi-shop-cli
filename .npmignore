@@ -1,0 +1,56 @@
+# Source files (published package only includes dist/)
+src/
+tsconfig.json
+vitest.config.ts
+vitest.setup.ts
+eslint.config.js
+typedoc.json
+.prettierrc
+
+# Development files
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+.vitest/
+
+# CI/CD
+.github/
+.git/
+
+# Documentation source (keep README.md)
+CONTRIBUTING.md
+CHANGELOG.md
+
+# Development dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Build artifacts during development
+.tsbuildinfo
+.vitest/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+.multi-shop/
+
+# Temporary
+tmp/
+temp/
+
+# Package artifacts
+*.tgz

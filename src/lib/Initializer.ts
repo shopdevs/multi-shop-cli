@@ -1,0 +1,299 @@
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import {
+  intro,
+  outro,
+  select,
+  text,
+  spinner,
+  isCancel,
+  cancel,
+  note,
+  log,
+} from "@clack/prompts";
+
+import { logger } from "./core/Logger.js";
+import { ShopConfigurationError } from "./errors/ShopError.js";
+
+/**
+ * Initializes multi-shop setup in existing Shopify theme projects
+ * Sets up directory structure, package.json scripts, and GitHub workflows
+ */
+export class Initializer {
+  private readonly cwd: string;
+  private readonly packageJsonPath: string;
+  private readonly gitignorePath: string;
+  private readonly force: boolean;
+  private readonly logger = logger;
+
+  constructor(options: { cwd?: string; force?: boolean } = {}) {
+    this.cwd = options.cwd ?? process.cwd();
+    this.packageJsonPath = path.join(this.cwd, "package.json");
+    this.gitignorePath = path.join(this.cwd, ".gitignore");
+    this.force = options.force ?? false;
+  }
+
+  async run(): Promise<void> {
+    const endOperation = this.logger.startOperation('initialization', { cwd: this.cwd, force: this.force });
+
+    try {
+      // Check if we're in a valid project
+      await this.validateProject();
+
+      // Create directory structure
+      await this.createDirectories();
+
+      // Update package.json
+      await this.updatePackageJson();
+
+      // Update .gitignore
+      await this.updateGitignore();
+
+      // Create GitHub workflow
+      await this.createGithubWorkflow();
+
+      // Create example configuration
+      await this.createExampleConfig();
+
+      // Success message
+      await this.showSuccessMessage();
+
+      endOperation('success');
+
+    } catch (error) {
+      this.logger.error('Initialization failed', {
+        cwd: this.cwd,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
+      throw new ShopConfigurationError(
+        `Initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+        'initialization',
+        { cwd: this.cwd }
+      );
+    }
+  }
+
+  private async validateProject(): Promise<void> {
+    const s = spinner();
+    s.start("Validating project structure...");
+
+    // Check if package.json exists
+    if (!fs.existsSync(this.packageJsonPath)) {
+      s.stop("❌ No package.json found");
+      throw new Error("This doesn't appear to be a Node.js project. Run 'npm init' first.");
+    }
+
+    // Check if this looks like a Shopify theme
+    const shopifyDirs = ["config", "sections", "templates", "assets"];
+    const hasShopifyStructure = shopifyDirs.some(dir =>
+      fs.existsSync(path.join(this.cwd, dir))
+    );
+
+    if (!hasShopifyStructure && !this.force) {
+      s.stop("⚠️ No Shopify theme structure detected");
+      const proceed = await select({
+        message: "This doesn't look like a Shopify theme. Continue anyway?",
+        options: [
+          { value: "yes", label: "Yes, continue", hint: "Initialize anyway" },
+          { value: "no", label: "No, cancel", hint: "Exit initialization" }
+        ]
+      });
+
+      if (isCancel(proceed) || proceed === "no") {
+        throw new Error("Initialization cancelled");
+      }
+    }
+
+    // Check if already initialized
+    if (fs.existsSync(path.join(this.cwd, "shops")) && !this.force) {
+      s.stop("⚠️ Multi-shop already initialized");
+      const proceed = await select({
+        message: "Multi-shop appears to already be set up. Reinitialize?",
+        options: [
+          { value: "yes", label: "Yes, reinitialize", hint: "Update existing setup" },
+          { value: "no", label: "No, cancel", hint: "Keep current setup" }
+        ]
+      });
+
+      if (isCancel(proceed) || proceed === "no") {
+        throw new Error("Initialization cancelled");
+      }
+    }
+
+    s.stop("✅ Project validation complete");
+  }
+
+  private async createDirectories(): Promise<void> {
+    const s = spinner();
+    s.start("Creating directory structure...");
+
+    const directories = [
+      "shops",
+      "shops/credentials",
+      ".github/workflows"
+    ];
+
+    directories.forEach(dir => {
+      const dirPath = path.join(this.cwd, dir);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        this.logger.debug('Created directory', { path: dirPath });
+      }
+    });
+
+    s.stop("✅ Directories created");
+  }
+
+  private async updatePackageJson(): Promise<void> {
+    const s = spinner();
+    s.start("Updating package.json...");
+
+    const packageJson = JSON.parse(fs.readFileSync(this.packageJsonPath, "utf8"));
+
+    // Add multi-shop scripts
+    const newScripts = {
+      "dev": "multi-shop dev",
+      "shop": "multi-shop shop",
+      "sync-main": "multi-shop sync-main",
+      "test:pr": "multi-shop test-pr"
+    };
+
+    packageJson.scripts = { ...packageJson.scripts, ...newScripts };
+
+    // Add devDependency if not already present
+    if (!packageJson.devDependencies?.["shopdevs-multi-shop"]) {
+      packageJson.devDependencies = packageJson.devDependencies || {};
+      packageJson.devDependencies["shopdevs-multi-shop"] = "^1.0.0";
+    }
+
+    fs.writeFileSync(this.packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+    s.stop("✅ package.json updated");
+  }
+
+  private async updateGitignore(): Promise<void> {
+    const s = spinner();
+    s.start("Updating .gitignore...");
+
+    const gitignoreEntries = [
+      "# Multi-shop credentials (NEVER COMMIT)",
+      "shops/credentials/",
+      "*.credentials.json"
+    ];
+
+    let gitignoreContent = "";
+    if (fs.existsSync(this.gitignorePath)) {
+      gitignoreContent = fs.readFileSync(this.gitignorePath, "utf8");
+    }
+
+    // Add entries if not already present
+    gitignoreEntries.forEach(entry => {
+      if (!gitignoreContent.includes(entry)) {
+        gitignoreContent += `\n${entry}`;
+      }
+    });
+
+    fs.writeFileSync(this.gitignorePath, gitignoreContent);
+
+    s.stop("✅ .gitignore updated");
+  }
+
+  private async createGithubWorkflow(): Promise<void> {
+    const s = spinner();
+    s.start("Creating GitHub workflow...");
+
+    const workflowPath = path.join(this.cwd, ".github/workflows/shop-sync.yml");
+
+    const workflowContent = `name: Create Shop Sync PRs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  create-shop-sync-prs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: \${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Create shop sync PRs
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Auto-create shop sync PRs using package
+          npx multi-shop sync-all --auto
+`;
+
+    fs.writeFileSync(workflowPath, workflowContent);
+
+    s.stop("✅ GitHub workflow created");
+  }
+
+  private async createExampleConfig(): Promise<void> {
+    const s = spinner();
+    s.start("Creating example configuration...");
+
+    const exampleConfig = {
+      shopId: "example-shop",
+      name: "Example Shop",
+      shopify: {
+        stores: {
+          staging: {
+            domain: "staging-example-shop.myshopify.com",
+            branch: "example-shop/staging"
+          },
+          production: {
+            domain: "example-shop.myshopify.com",
+            branch: "example-shop/main"
+          }
+        },
+        authentication: {
+          method: "theme-access-app",
+          notes: {
+            setup: "Install Theme Access app from Shopify App Store",
+            credentials: "⚠️ SECURITY: Theme tokens stored in shops/credentials/ (NOT committed to git)"
+          }
+        }
+      }
+    };
+
+    const examplePath = path.join(this.cwd, "shops", "shop.config.example.json");
+    fs.writeFileSync(examplePath, JSON.stringify(exampleConfig, null, 2));
+
+    s.stop("✅ Example configuration created");
+  }
+
+  private async showSuccessMessage(): Promise<void> {
+    console.log();
+    note(
+      `🎉 Multi-shop initialization complete!\n\n` +
+      `Created:\n` +
+      `✅ shops/ directory for shop configurations\n` +
+      `✅ GitHub workflow for automated shop syncing\n` +
+      `✅ Updated package.json with multi-shop scripts\n` +
+      `✅ Updated .gitignore for credential security\n\n` +
+      `Next steps:\n` +
+      `1. Create your first shop: npm run shop\n` +
+      `2. Start development: npm run dev\n` +
+      `3. Read the documentation for advanced workflows`,
+      "✨ Setup Complete"
+    );
+  }
+}
+
+export default Initializer;
