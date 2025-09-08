@@ -1,6 +1,6 @@
 {
   "name": "@shopdevs/multi-shop-cli",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "CLI tool for contextual development and automated shop management for multi-shop Shopify themes",
   "keywords": [
     "shopify",
