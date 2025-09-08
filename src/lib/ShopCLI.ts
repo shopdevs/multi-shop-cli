@@ -169,7 +169,8 @@ export class ShopCLI {
     const toolChoice = await select({
       message: "Select tool:",
       options: [
-        { value: "sync", label: "Sync Shops", hint: "Create PRs to deploy main branch changes to shops" }
+        { value: "sync", label: "Sync Shops", hint: "Create PRs to deploy main branch changes to shops" },
+        { value: "themes", label: "Link Themes", hint: "Connect Git branches to Shopify themes" }
       ]
     });
 
@@ -177,6 +178,8 @@ export class ShopCLI {
 
     if (toolChoice === "sync") {
       await this.handleSyncShops();
+    } else if (toolChoice === "themes") {
+      await this.handleLinkThemes();
     }
 
     await this.waitForKey();
@@ -289,6 +292,124 @@ export class ShopCLI {
     shops.forEach(shop => {
       console.log(`3. Create: main → ${shop}/staging`);
     });
+  }
+
+  private async handleLinkThemes(): Promise<void> {
+    const shops = this.configManager.list();
+    
+    if (shops.length === 0) {
+      note("No shops configured yet. Create shops first.", "🔗 Link Themes");
+      return;
+    }
+
+    note("Connect Git branches to Shopify themes for automatic syncing", "🔗 Theme Linking");
+    console.log("\nThis helps you set up GitHub integration for each shop's branches.");
+    console.log("Once linked, changes in Shopify admin sync back to Git automatically.\n");
+
+    // Shop selection
+    const shopChoice = await select({
+      message: "Select shop to link themes:",
+      options: shops.map(shop => ({ 
+        value: shop, 
+        label: shop, 
+        hint: `Set up theme linking for ${shop}` 
+      }))
+    });
+
+    if (isCancel(shopChoice)) return;
+
+    await this.setupShopThemes(shopChoice as string);
+  }
+
+  private async setupShopThemes(shopId: string): Promise<void> {
+    try {
+      const config = this.configManager.load(shopId);
+      
+      note(`Setting up themes for ${config.name}`, `🎨 ${shopId}`);
+      
+      // Check available themes using Shopify CLI
+      const s = spinner();
+      s.start("Checking existing themes...");
+      
+      try {
+        // Try to list themes for the shop
+        const credentials = this.security.loadCredentials(shopId);
+        
+        if (!credentials) {
+          s.stop("❌ No credentials found");
+          note("Set up credentials first using 'Edit Shop'", "⚠️ Credentials Required");
+          return;
+        }
+
+        // Check themes for production store
+        await this.checkAndLinkThemes(shopId, config, credentials);
+        
+      } catch (error) {
+        s.stop("❌ Unable to check themes automatically");
+        this.showManualThemeLinkingInstructions(shopId, config);
+      }
+
+    } catch (error) {
+      log.error(`Failed to set up themes: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async checkAndLinkThemes(shopId: string, config: any, credentials: any): Promise<void> {
+    const prodToken = credentials.shopify.stores.production.themeToken;
+    const prodDomain = config.shopify.stores.production.domain;
+    
+    const s = spinner();
+    s.start(`Checking themes for ${prodDomain}...`);
+
+    try {
+      // Use Shopify CLI to list themes
+      const env = {
+        ...process.env,
+        SHOPIFY_CLI_THEME_TOKEN: prodToken,
+        SHOPIFY_STORE: prodDomain.replace('.myshopify.com', '')
+      };
+
+      const output = execSync('shopify theme list', { 
+        env, 
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+
+      s.stop("✅ Retrieved theme list");
+      
+      console.log(`\n📋 Current themes for ${prodDomain}:`);
+      console.log(output);
+      
+      note("Manual theme linking required", "📝 Setup Instructions");
+      this.showManualThemeLinkingInstructions(shopId, config);
+
+    } catch (error) {
+      s.stop("❌ Could not retrieve themes");
+      note("Shopify CLI failed - using manual instructions", "📝 Manual Setup");
+      this.showManualThemeLinkingInstructions(shopId, config);
+    }
+  }
+
+  private showManualThemeLinkingInstructions(shopId: string, config: any): void {
+    console.log(`\n🔗 Manual Theme Linking for ${config.name}:`);
+    console.log(`\n1. Go to Shopify Admin:`);
+    console.log(`   Production: https://${config.shopify.stores.production.domain}/admin/themes`);
+    console.log(`   Staging: https://${config.shopify.stores.staging.domain}/admin/themes`);
+    
+    console.log(`\n2. Add theme → Connect from GitHub:`);
+    console.log(`   Production branch: ${config.shopify.stores.production.branch}`);
+    console.log(`   Staging branch: ${config.shopify.stores.staging.branch}`);
+    
+    console.log(`\n3. Theme names (suggested):`);
+    console.log(`   Production: "${config.name} Main"`);
+    console.log(`   Staging: "${config.name} Staging"`);
+    
+    console.log(`\n4. After connecting:`);
+    console.log(`   - Changes in Shopify admin sync to Git automatically`);
+    console.log(`   - Changes in Git sync to Shopify automatically`);
+    console.log(`   - Use 'shopify theme dev' to preview changes`);
+    
+    console.log(`\n💡 Pro tip: Connect staging branch first to test the integration`);
   }
 
   private async waitForKey(): Promise<void> {
