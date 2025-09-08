@@ -69,9 +69,9 @@ npx multi-shop dev
 
 ---
 
-## 🚀 Complete Setup for 4 Shops
+## 🚀 Complete Setup for Multiple Shops
 
-Here's the step-by-step process to set up multi-shop on a new Shopify theme for 4 different stores:
+Here's the step-by-step process to set up multi-shop on a new Shopify theme (example shows 4 shops, but you can use any number):
 
 ### Step 1: Initialize Project
 
@@ -170,7 +170,7 @@ For each shop, connect the Git branches to Shopify themes:
 1. **Shopify Admin** → your-shop.myshopify.com → Online Store → Themes
 2. **Add theme** → Connect from GitHub
 3. **Select branch**: `shop-a/main` (for production) or `shop-a/staging`
-4. **Repeat for all 4 shops** (branches already created automatically!)
+4. **Repeat for all shops** (branches already created automatically!)
 
 ### Step 6: Verify Setup
 
@@ -233,8 +233,8 @@ pnpm run dev
 ### Automated Shop Syncing (GitHub Flow)
 
 When you merge features to main:
-1. **GitHub Action automatically creates PRs**: `main → shop-a/staging, main → shop-b/staging, main → shop-c/staging, main → shop-d/staging`
-2. **Each shop team reviews** their shop-specific PRs
+1. **Use Tools → Sync Shops**: Select shops and create PRs `main → shop-*/staging`
+2. **Each shop team reviews** their shop-specific PRs  
 3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`, `shop-b/staging → shop-b/main`, etc.
 
 ### Campaign Management (Per Shop)

@@ -53,9 +53,6 @@ export class Initializer {
       // Update .gitignore
       await this.updateGitignore();
 
-      // Create GitHub workflow
-      await this.createGithubWorkflow();
-
       // Create example configuration
       await this.createExampleConfig();
 
@@ -250,49 +247,6 @@ export class Initializer {
     }
   }
 
-  private async createGithubWorkflow(): Promise<void> {
-    const s = spinner();
-    s.start("Creating GitHub workflow...");
-
-    const workflowPath = path.join(this.cwd, ".github/workflows/shop-sync.yml");
-
-    const workflowContent = `name: Create Shop Sync PRs
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  create-shop-sync-prs:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: \${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Create shop sync PRs
-        env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Auto-create shop sync PRs using package
-          npx multi-shop sync-all --auto
-`;
-
-    fs.writeFileSync(workflowPath, workflowContent);
-
-    s.stop("✅ GitHub workflow created");
-  }
 
   private async createExampleConfig(): Promise<void> {
     const s = spinner();
@@ -334,7 +288,6 @@ jobs:
       `🎉 Multi-shop initialization complete!\n\n` +
       `Created:\n` +
       `✅ shops/ directory for shop configurations\n` +
-      `✅ GitHub workflow for automated shop syncing\n` +
       `✅ Updated package.json with multi-shop scripts\n` +
       `✅ Updated .gitignore for credential security\n\n` +
       `Next steps:\n` +

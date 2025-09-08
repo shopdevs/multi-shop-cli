@@ -164,7 +164,7 @@ main (core theme code)
 2. Contextual development: `pnpm run dev` (select shop context for testing)
 3. Sync with main: `pnpm run sync-main` (if needed)
 4. Create PR directly to main: `gh pr create --base main` (GitHub Flow)
-5. Auto-created shop sync PRs: `main → shop-a/staging → shop-a/main, main → shop-b/staging → shop-b/main`
+5. Use Tools → Sync Shops: Create PRs `main → shop-a/staging, main → shop-b/staging`
 
 #### Campaign Management (Complex Promo Workflow)
 1. Create promo branch: `pnpm run shop → Campaign Tools → Create Promo Branch` (shop-a/main → shop-a/promo-123)
@@ -283,6 +283,10 @@ This is a clean, maintainable NPM package. When working on it:
 - **Cross-platform support** - File operations that work on Windows/macOS/Linux
 - **Integration ready** - Works with existing Shopify themes, no theme modifications
 - **Workflow management** - Focus on GitHub Flow and multi-shop branching
+- **Scalable shop management** - Works with 1 shop (for promo workflow) to many shops (no practical limit)
 
-The complexity is in the workflow design, not the code implementation.
-- Always update the changelog when we're ready for a new version
+## Important Context
+- **Shop flexibility** - Tool works for any number of shops (1 to 50+), don't assume 4 shops in examples
+- **Promo workflow value** - Even single-shop setups benefit from promo branch management
+- **No backward compatibility** - This is a new package, always check before adding compatibility layers
+- **Always update the changelog** when ready for a new version
