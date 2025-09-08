@@ -67,8 +67,8 @@ export class ShopConfigValidator {
                   properties: {
                     domain: {
                       type: "string",
-                      pattern: "^staging-[a-z0-9-]+\\.myshopify\\.com$",
-                      description: "Staging Shopify store domain"
+                      pattern: "^[a-z0-9-]+\\.myshopify\\.com$",
+                      description: "Staging Shopify store domain (can be same as production)"
                     },
                     branch: {
                       type: "string",
