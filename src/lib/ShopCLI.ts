@@ -265,12 +265,12 @@ export class ShopCLI {
       if (failures.length > 0) {
         note(`Failed for: ${failures.map(r => r.shop).join(', ')}`, "⚠️ Manual Required");
         console.log("\nManual PR commands for failed shops:");
-        failures.forEach(result => {
-          console.log(`gh pr create --base ${result.shop}/staging --head main --title "${title}"`);
+        failures.forEach(failure => {
+          console.log(`gh pr create --base ${failure.shop}/staging --head main --title "${title}"`);
         });
       }
 
-    } catch (error) {
+    } catch (err) {
       s.stop("❌ Failed to create PRs");
       note("Creating PRs manually:", "📝 Manual Setup");
       this.showManualPRInstructions(shops, title);
