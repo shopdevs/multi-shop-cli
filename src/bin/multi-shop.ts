@@ -15,8 +15,8 @@ const program = new Command();
 
 program
   .name("multi-shop")
-  .description("Enterprise contextual development and shop management for multi-shop Shopify themes")
-  .version("1.0.0")
+  .description("CLI tool for contextual development and automated shop management for multi-shop Shopify themes")
+  .version("1.0.16")
   .option("-v, --verbose", "Enable verbose logging")
   .option("--debug", "Enable debug logging") 
   .option("--dry-run", "Show what would be done without executing")
