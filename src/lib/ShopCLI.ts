@@ -149,7 +149,7 @@ export class ShopCLI {
       message: "What would you like to edit?",
       options: [
         { value: "delete", label: "Delete Shop", hint: "Remove completely" },
-        { value: "credentials", label: "View Credentials Path", hint: "Show file location" }
+        { value: "credentials", label: "Edit Credentials", hint: "Update theme access passwords" }
       ]
     });
 
@@ -158,7 +158,7 @@ export class ShopCLI {
     if (editChoice === "delete") {
       await this.crud.delete(shopChoice as string);
     } else if (editChoice === "credentials") {
-      note(`Edit manually: shops/credentials/${shopChoice}.credentials.json`, "📁 Credentials");
+      await this.crud.editCredentials(shopChoice as string);
     }
 
     await this.waitForKey();

@@ -286,3 +286,4 @@ This is a clean, maintainable NPM package. When working on it:
 - **Workflow management** - Focus on GitHub Flow and multi-shop branching
 
 The complexity is in the workflow design, not the code implementation.
+- Always update the changelog when we're ready for a new version

@@ -1,7 +1,8 @@
 import { intro, text, select, isCancel, note, log, spinner } from "@clack/prompts";
 import { execSync } from "child_process";
-import type { ShopConfig, AuthenticationMethod } from "../types/shop.js";
+import type { ShopConfig, AuthenticationMethod, ShopCredentials } from "../types/shop.js";
 import { ShopConfigManager } from "./ShopConfig.js";
+import { SecurityManager } from "./core/SecurityManager.js";
 
 /**
  * Handles shop creation, editing, and deletion
@@ -9,9 +10,11 @@ import { ShopConfigManager } from "./ShopConfig.js";
  */
 export class ShopCRUD {
   private readonly configManager: ShopConfigManager;
+  private readonly securityManager: SecurityManager;
 
   constructor(cwd: string = process.cwd()) {
     this.configManager = new ShopConfigManager(cwd);
+    this.securityManager = new SecurityManager(`${cwd}/shops/credentials`);
   }
 
   /**
@@ -121,7 +124,8 @@ export class ShopCRUD {
         console.log(`git checkout -b ${shopId}/staging && git push -u origin ${shopId}/staging`);
       }
       
-      note("Don't forget: Set up credentials using 'Edit Shop'", "📝 Final Step");
+      // Collect credentials immediately
+      await this.setupCredentials(shopId as string, authMethod as AuthenticationMethod, config);
       
     } catch (error) {
       log.error(`Failed to create shop: ${error instanceof Error ? error.message : String(error)}`);
@@ -255,6 +259,141 @@ export class ShopCRUD {
       note("Create branches manually:", "📝 Manual Setup");
       console.log(`git checkout -b ${shopId}/main && git push -u origin ${shopId}/main`);
       console.log(`git checkout -b ${shopId}/staging && git push -u origin ${shopId}/staging`);
+    }
+  }
+
+  /**
+   * Set up credentials immediately during shop creation
+   */
+  private async setupCredentials(shopId: string, authMethod: AuthenticationMethod, config: ShopConfig): Promise<void> {
+    try {
+      note(`Setting up credentials for ${config.name}`, "🔐 Credentials");
+
+      if (authMethod === 'theme-access-app') {
+        console.log(`\n📋 Theme Access App Setup:`);
+        console.log(`1. Ask a shop admin to add your email to the Theme Access app`);
+        console.log(`2. Check your email for the access link`);
+        console.log(`3. Click the link to view your theme access password`);
+        console.log(`4. Enter the passwords below\n`);
+      }
+
+      const productionToken = await text({
+        message: `Production theme access password (${config.shopify.stores.production.domain}):`,
+        placeholder: "Enter your theme access password",
+        validate: (value) => {
+          if (!value) return "Production password is required";
+          if (value.length < 8) return "Password seems too short";
+          return undefined;
+        }
+      });
+
+      if (isCancel(productionToken)) return;
+
+      let stagingToken = productionToken; // Default to same as production
+
+      // Only ask for staging if different domain
+      if (config.shopify.stores.staging.domain !== config.shopify.stores.production.domain) {
+        const stagingTokenInput = await text({
+          message: `Staging theme access password (${config.shopify.stores.staging.domain}):`,
+          placeholder: "Enter staging password (or press Enter to use same as production)",
+          validate: (value) => {
+            if (!value) return undefined; // Allow empty to use production token
+            if (value.length < 8) return "Password seems too short";
+            return undefined;
+          }
+        });
+
+        if (!isCancel(stagingTokenInput) && stagingTokenInput) {
+          stagingToken = stagingTokenInput;
+        }
+      }
+
+      // Create credentials
+      const credentials: ShopCredentials = {
+        developer: process.env['USER'] || process.env['USERNAME'] || 'developer',
+        shopify: {
+          stores: {
+            production: { themeToken: productionToken as string },
+            staging: { themeToken: stagingToken as string }
+          }
+        },
+        notes: `Theme access app credentials for ${shopId}`
+      };
+
+      this.securityManager.saveCredentials(shopId, credentials);
+      note(`✅ Credentials saved securely`, "Complete");
+      note(`Shop ${config.name} is ready for development!`, "🎉 Success");
+
+    } catch (error) {
+      log.error(`Failed to set up credentials: ${error instanceof Error ? error.message : String(error)}`);
+      note("You can set up credentials later using 'Edit Shop'", "⚠️ Manual Setup");
+    }
+  }
+
+  /**
+   * Interactive credential editing for existing shop
+   */
+  async editCredentials(shopId: string): Promise<void> {
+    try {
+      const config = this.configManager.load(shopId);
+      const existingCredentials = this.securityManager.loadCredentials(shopId);
+      
+      note(`Editing credentials for ${config.name}`, "🔐 Edit Credentials");
+      
+      console.log(`\n📋 Theme Access App Setup:`);
+      console.log(`1. Ask a shop admin to add your email to the Theme Access app`);
+      console.log(`2. Check your email for the access link`);
+      console.log(`3. Click the link to view your theme access password`);
+      console.log(`4. Update the passwords below\n`);
+
+      const productionToken = await text({
+        message: `Production password (${config.shopify.stores.production.domain}):`,
+        placeholder: existingCredentials?.shopify.stores.production.themeToken || "Enter your theme access password",
+        validate: (value) => {
+          if (!value) return "Production password is required";
+          if (value.length < 8) return "Password seems too short";
+          return undefined;
+        }
+      });
+
+      if (isCancel(productionToken)) return;
+
+      let stagingToken = productionToken; // Default to same as production
+
+      // Only ask for staging if different domain
+      if (config.shopify.stores.staging.domain !== config.shopify.stores.production.domain) {
+        const stagingTokenInput = await text({
+          message: `Staging password (${config.shopify.stores.staging.domain}):`,
+          placeholder: existingCredentials?.shopify.stores.staging.themeToken || "Enter staging password (or press Enter to use production)",
+          validate: (value) => {
+            if (!value) return undefined; // Allow empty to use production token
+            if (value.length < 8) return "Password seems too short";
+            return undefined;
+          }
+        });
+
+        if (!isCancel(stagingTokenInput) && stagingTokenInput) {
+          stagingToken = stagingTokenInput;
+        }
+      }
+
+      // Create updated credentials
+      const credentials: ShopCredentials = {
+        developer: existingCredentials?.developer || process.env['USER'] || process.env['USERNAME'] || 'developer',
+        shopify: {
+          stores: {
+            production: { themeToken: productionToken as string },
+            staging: { themeToken: stagingToken as string }
+          }
+        },
+        notes: existingCredentials?.notes || `Theme access app credentials for ${shopId}`
+      };
+
+      this.securityManager.saveCredentials(shopId, credentials);
+      note(`✅ Credentials updated for ${config.name}`, "Complete");
+
+    } catch (error) {
+      log.error(`Failed to edit credentials: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
