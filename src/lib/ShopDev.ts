@@ -129,9 +129,28 @@ export class ShopDev {
         stdio: 'inherit'
       });
 
+      // Handle Ctrl+C and other signals to properly terminate Shopify CLI
+      const cleanup = () => {
+        if (!devProcess.killed) {
+          devProcess.kill('SIGTERM');
+          setTimeout(() => {
+            if (!devProcess.killed) {
+              devProcess.kill('SIGKILL');
+            }
+          }, 5000); // Force kill after 5 seconds if graceful shutdown fails
+        }
+      };
+
+      process.on('SIGINT', cleanup);  // Ctrl+C
+      process.on('SIGTERM', cleanup); // Termination signal
+
       return new Promise<void>((resolve, reject) => {
         devProcess.on('close', (code) => {
-          if (code === 0 || code === null) {
+          // Remove signal handlers
+          process.off('SIGINT', cleanup);
+          process.off('SIGTERM', cleanup);
+          
+          if (code === 0 || code === null || code === 2) { // 2 = SIGINT
             note("Development server stopped", "ℹ️ Info");
             resolve();
           } else {
@@ -140,6 +159,9 @@ export class ShopDev {
         });
 
         devProcess.on('error', (error) => {
+          // Remove signal handlers
+          process.off('SIGINT', cleanup);
+          process.off('SIGTERM', cleanup);
           reject(error);
         });
       });

@@ -177,7 +177,7 @@ For each shop, connect the Git branches to Shopify themes:
 ```bash
 # Check all shops are configured
 pnpm run shop → List Shops
-# Should show: shop-a, shop-b, shop-c, shop-d
+# Should show your configured shops (e.g., shop-a, shop-b, shop-c, shop-d)
 
 # Check branches exist
 git branch -r
@@ -185,7 +185,7 @@ git branch -r
 
 # Check credential files exist (each developer)
 ls shops/credentials/
-# Should show: shop-a.credentials.json, shop-b.credentials.json, etc.
+# Should show your shop credential files (e.g., shop-a.credentials.json, shop-b.credentials.json)
 ```
 
 ### Step 7: Start Developing!
@@ -199,9 +199,7 @@ pnpm run dev
 # → Shopify CLI starts with selected shop's credentials
 
 # Test different shops with same code
-pnpm run dev  # Try shop-b staging
-pnpm run dev  # Try shop-c staging
-pnpm run dev  # Try shop-d staging
+pnpm run dev  # Try different shop contexts
 # Same feature code, different shop contexts!
 ```
 
