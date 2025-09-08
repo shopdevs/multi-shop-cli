@@ -55,29 +55,4 @@ export class ShopManager {
     return this.configManager.count();
   }
 
-  /**
-   * Run security audit
-   */
-  async auditSecurity(): Promise<{ timestamp: string; shops: string[]; issues: string[] }> {
-    const endOperation = logger.startOperation('security_audit');
-
-    try {
-      const report = this.security.auditCredentialSecurity();
-      
-      endOperation('success', { 
-        shopsAudited: report.shops.length,
-        issuesFound: report.issues.length 
-      });
-      
-      return report;
-    } catch (error) {
-      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
-      throw error;
-    }
-  }
-
-  // Backward compatibility
-  get securityManager() {
-    return this.security;
-  }
 }

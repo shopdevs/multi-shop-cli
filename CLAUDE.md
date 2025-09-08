@@ -54,16 +54,17 @@ src/
 │   ├── ShopManager.ts             # Main coordinator (82 lines)
 │   ├── ShopConfig.ts              # Configuration file operations (137 lines)
 │   ├── ShopDev.ts                 # Shopify CLI integration (151 lines)
-│   ├── ShopCRUD.ts                # Shop lifecycle management (163 lines)
+│   ├── ShopCRUD.ts                # Shop lifecycle management (243 lines)
 │   ├── ShopCLI.ts                 # User interface (208 lines)
 │   ├── ContextualDev.ts           # Branch detection and routing
-│   ├── ContextualShopManager.ts   # Feature branch development
+│   ├── ContextualShopManager.ts   # Feature branch development (49 lines)
+│   ├── BranchDetector.ts          # Git branch logic (32 lines)
+│   ├── ShopSelector.ts            # Shop selection UI (95 lines)
 │   ├── WorkflowManager.ts         # Multi-shop workflow orchestration
 │   ├── Initializer.ts             # Project initialization
 │   ├── SyncMain.ts                # Git sync operations
-│   ├── TestRunner.ts              # PR testing functionality
 │   ├── core/
-│   │   ├── SecurityManager.ts     # Credential security (476 lines)
+│   │   ├── SecurityManager.ts     # Credential security (183 lines)
 │   │   ├── GitOperations.ts       # Git operations with error handling
 │   │   ├── SimpleLogger.ts        # Simple CLI logging (57 lines)
 │   │   ├── Config.ts              # Configuration management (100 lines)
@@ -112,7 +113,6 @@ src/
 - **Safe JSON Parsing** - Size limits and validation before parsing untrusted input
 - **Cross-Platform File Permissions** - Secure file permissions (600) where supported
 - **Input Validation** - JSON schema validation with reasonable limits
-- **Audit Capabilities** - Security scanning and reporting for credentials
 - **No Secret Exposure** - Sanitized logging and error messages
 
 ### Performance Requirements
@@ -238,7 +238,7 @@ main (core theme code)
 
 ### Release Process
 
-1. **Quality Gates** - lint + typecheck + test + security audit
+1. **Quality Gates** - lint + typecheck + test
 2. **Version Management** - Semantic versioning with conventional commits
 3. **Documentation** - Auto-generated API docs with TypeDoc
 4. **CI/CD** - Automated testing across platforms and Node versions
@@ -274,6 +274,8 @@ This is a clean, maintainable NPM package. When working on it:
 - **Write direct comments** - No "enterprise-grade" buzzwords or AI jargon
 - **Remove unused code** - Don't export types/functions that aren't used
 - **Real functionality only** - No security theater or placeholder methods
+- **No removal comments** - Never add comments about what was removed or optimized
+- **No backward compatibility** - This is a new package, always check before adding compatibility layers
 
 ## Package Focus
 - **CLI tool architecture** - Clean command patterns, not menu systems

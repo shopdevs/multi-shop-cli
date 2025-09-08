@@ -128,49 +128,6 @@ export class SecurityManager {
     return sanitized;
   }
 
-  /**
-   * Basic security audit - check file permissions and existence
-   */
-  auditCredentialSecurity(): { timestamp: string; shops: string[]; issues: string[] } {
-    const report = {
-      timestamp: new Date().toISOString(),
-      shops: [] as string[],
-      issues: [] as string[]
-    };
-
-    try {
-      if (!fs.existsSync(this.credentialsDir)) {
-        report.issues.push("No credentials directory found");
-        return report;
-      }
-
-      const credFiles = fs.readdirSync(this.credentialsDir)
-        .filter(file => file.endsWith('.credentials.json'));
-
-      credFiles.forEach(file => {
-        const shopId = file.replace('.credentials.json', '');
-        report.shops.push(shopId);
-
-        try {
-          const credPath = path.join(this.credentialsDir, file);
-          const stats = fs.statSync(credPath);
-          
-          // Check file permissions
-          if (process.platform !== 'win32' && (stats.mode & parseInt('077', 8)) !== 0) {
-            report.issues.push(`${shopId}: File permissions too permissive`);
-          }
-
-        } catch (error) {
-          report.issues.push(`${shopId}: Failed to audit - ${error instanceof Error ? error.message : String(error)}`);
-        }
-      });
-
-    } catch (error) {
-      report.issues.push(`Security audit failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-
-    return report;
-  }
 
   /**
    * Get secure file path for shop credentials

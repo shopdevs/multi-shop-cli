@@ -127,33 +127,6 @@ program
   });
 
 
-// Security audit command
-program
-  .command("audit")
-  .description("Run security audit")
-  .action(async () => {
-    const endOperation = logger.startOperation('security_audit');
-    
-    try {
-      intro("🔒 Security Audit");
-      const manager = new ShopManager();
-      const auditResult = await manager.auditSecurity();
-      
-      if (auditResult.issues.length === 0) {
-        outro("✅ Security audit passed - no issues found");
-      } else {
-        outro(`⚠️ Security audit found ${auditResult.issues.length} issues to review`);
-      }
-      
-      endOperation('success', { issuesFound: auditResult.issues.length });
-    } catch (error) {
-      logger.error('Security audit failed', { 
-        error: error instanceof Error ? error.message : String(error) 
-      });
-      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
-      process.exit(1);
-    }
-  });
 
 // Performance diagnostics
 program

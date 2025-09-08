@@ -78,7 +78,6 @@ export class ShopCLI {
         { value: "list", label: "List Shops", hint: "View all shops" },
         { value: "create", label: "Create New Shop", hint: "Set up new shop" },
         { value: "edit", label: "Edit Shop", hint: "Update shop" },
-        { value: "audit", label: "Security Audit", hint: "Check security" },
         { value: "exit", label: "Exit", hint: "Close manager" }
       ]
     });
@@ -104,9 +103,6 @@ export class ShopCLI {
           break;
         case "edit":
           await this.handleEdit();
-          break;
-        case "audit":
-          await this.handleAudit();
           break;
         case "exit":
           endOperation('success');
@@ -164,27 +160,6 @@ export class ShopCLI {
     await this.waitForKey();
   }
 
-  private async handleAudit(): Promise<void> {
-    try {
-      const report = await this.security.auditCredentialSecurity();
-      
-      note("Security audit completed", "🔒 Results");
-      
-      if (report.issues.length === 0) {
-        note("✅ No security issues found", "All Good");
-      } else {
-        note(`⚠️ Found ${report.issues.length} issues to review`, "Issues Found");
-        
-        report.issues.forEach((issue, index) => {
-          console.log(`\n${index + 1}. ${issue}`);
-        });
-      }
-    } catch (error) {
-      log.error(`Security audit failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-
-    await this.waitForKey();
-  }
 
   private async waitForKey(): Promise<void> {
     return new Promise((resolve) => {
