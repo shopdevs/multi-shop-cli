@@ -5,6 +5,7 @@ import { ShopCRUD } from "./ShopCRUD.js";
 import { ShopDev } from "./ShopDev.js";
 import { SecurityManager } from "./core/SecurityManager.js";
 import { logger } from "./core/SimpleLogger.js";
+import { VERSION } from "./index.js";
 
 /**
  * Main CLI interface for shop management
@@ -170,7 +171,8 @@ export class ShopCLI {
       message: "Select tool:",
       options: [
         { value: "sync", label: "Sync Shops", hint: "Create PRs to deploy main branch changes to shops" },
-        { value: "themes", label: "Link Themes", hint: "Connect Git branches to Shopify themes" }
+        { value: "themes", label: "Link Themes", hint: "Connect Git branches to Shopify themes" },
+        { value: "versions", label: "Version Check", hint: "Check versions of key tools and packages" }
       ]
     });
 
@@ -180,6 +182,8 @@ export class ShopCLI {
       await this.handleSyncShops();
     } else if (toolChoice === "themes") {
       await this.handleLinkThemes();
+    } else if (toolChoice === "versions") {
+      await this.handleVersionCheck();
     }
 
     await this.waitForKey();
@@ -327,27 +331,16 @@ export class ShopCLI {
       
       note(`Setting up themes for ${config.name}`, `🎨 ${shopId}`);
       
-      // Check available themes using Shopify CLI
-      const s = spinner();
-      s.start("Checking existing themes...");
+      // Try to list themes for the shop
+      const credentials = this.security.loadCredentials(shopId);
       
-      try {
-        // Try to list themes for the shop
-        const credentials = this.security.loadCredentials(shopId);
-        
-        if (!credentials) {
-          s.stop("❌ No credentials found");
-          note("Set up credentials first using 'Edit Shop'", "⚠️ Credentials Required");
-          return;
-        }
-
-        // Check themes for production store
-        await this.checkAndLinkThemes(shopId, config, credentials);
-        
-      } catch (error) {
-        s.stop("❌ Unable to check themes automatically");
-        this.showManualThemeLinkingInstructions(shopId, config);
+      if (!credentials) {
+        note("Set up credentials first using 'Edit Shop'", "⚠️ Credentials Required");
+        return;
       }
+
+      // Check themes for production store
+      await this.checkAndLinkThemes(shopId, config, credentials);
 
     } catch (error) {
       log.error(`Failed to set up themes: ${error instanceof Error ? error.message : String(error)}`);
@@ -372,20 +365,28 @@ export class ShopCLI {
       const output = execSync('shopify theme list', { 
         env, 
         encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe']
+        timeout: 10000
       });
 
       s.stop("✅ Retrieved theme list");
       
       console.log(`\n📋 Current themes for ${prodDomain}:`);
-      console.log(output);
+      if (output.trim()) {
+        console.log(output);
+      } else {
+        console.log("No themes found or command returned empty result");
+        console.log("Possible causes:");
+        console.log("- Authentication issue with theme access token");  
+        console.log("- Shopify CLI version compatibility");
+        console.log("- Store access permissions");
+      }
       
-      note("Manual theme linking required", "📝 Setup Instructions");
+      note("Manual theme linking instructions below", "📝 Setup Required");
       this.showManualThemeLinkingInstructions(shopId, config);
 
     } catch (error) {
       s.stop("❌ Could not retrieve themes");
-      note("Shopify CLI failed - using manual instructions", "📝 Manual Setup");
+      note(`Shopify CLI failed: ${error instanceof Error ? error.message : String(error)}`, "📝 Manual Setup");
       this.showManualThemeLinkingInstructions(shopId, config);
     }
   }
@@ -410,6 +411,96 @@ export class ShopCLI {
     console.log(`   - Use 'shopify theme dev' to preview changes`);
     
     console.log(`\n💡 Pro tip: Connect staging branch first to test the integration`);
+  }
+
+  private async handleVersionCheck(): Promise<void> {
+    note("Checking versions of key tools and packages", "📋 Version Check");
+    
+    const tools = [
+      { name: "Shopify CLI", command: "shopify version", updateCmd: "pnpm update -g @shopify/cli", installCmd: "pnpm add -g @shopify/cli" },
+      { name: "@shopdevs/multi-shop-cli", package: "@shopdevs/multi-shop-cli", current: VERSION, updateCmd: "pnpm update -D @shopdevs/multi-shop-cli" },
+      { name: "Node.js", current: process.version },
+      { name: "pnpm", command: "pnpm --version", updateCmd: "npm install -g pnpm@latest", installCmd: "npm install -g pnpm" }
+    ];
+
+    console.log(`\n📋 Tool Versions:`);
+    
+    for (const tool of tools) {
+      const result = await this.checkVersion(tool);
+      console.log(`\n${tool.name}:`);
+      console.log(`  Version: ${result.current}`);
+      console.log(`  Status: ${result.status}`);
+      if (result.updateCmd) {
+        console.log(`  Update: ${result.updateCmd}`);
+      }
+    }
+  }
+
+  private async checkVersion(tool: { 
+    name: string; 
+    command?: string; 
+    package?: string; 
+    current?: string; 
+    updateCmd?: string; 
+    installCmd?: string 
+  }): Promise<{ current: string; status: string; updateCmd?: string }> {
+    
+    // Handle tools with fixed current version (Node.js, local package)
+    if (tool.current) {
+      if (tool.package) {
+        // Check NPM registry for updates
+        try {
+          const latestVersion = execSync(`npm view ${tool.package} version`, {
+            encoding: 'utf8',
+            timeout: 5000
+          }).trim().replace(/"/g, '');
+
+          if (tool.current === latestVersion) {
+            return { current: `${tool.current}`, status: "✅ Up to date" };
+          } else {
+            return { 
+              current: `Local: ${tool.current}, NPM: ${latestVersion}`, 
+              status: "⚠️ Update available", 
+              ...(tool.updateCmd && { updateCmd: tool.updateCmd })
+            };
+          }
+        } catch {
+          return { 
+            current: tool.current, 
+            status: "❌ Update check failed", 
+            ...(tool.updateCmd && { updateCmd: tool.updateCmd })
+          };
+        }
+      } else {
+        // Just show current version (Node.js)
+        return { current: tool.current, status: "✅ Available" };
+      }
+    }
+
+    // Handle tools that need command execution
+    if (tool.command) {
+      try {
+        const version = execSync(tool.command, {
+          encoding: 'utf8',
+          timeout: 5000
+        }).trim();
+
+        return { 
+          current: version, 
+          status: "✅ Available", 
+          ...(tool.updateCmd && { updateCmd: tool.updateCmd })
+        };
+      } catch {
+        const cmd = tool.installCmd || tool.updateCmd;
+        return { 
+          current: "Not installed", 
+          status: "❌ Not installed", 
+          ...(cmd && { updateCmd: cmd })
+        };
+      }
+    }
+
+    return { current: "Unknown", status: "❌ Check failed" };
   }
 
   private async waitForKey(): Promise<void> {
