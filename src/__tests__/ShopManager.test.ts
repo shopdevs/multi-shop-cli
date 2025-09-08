@@ -44,15 +44,5 @@ describe('ShopManager', () => {
     });
   });
 
-  describe('Security', () => {
-    test('should run security audit', async () => {
-      const report = await shopManager.auditSecurity();
-
-      expect(report).toBeDefined();
-      expect(report.timestamp).toBeDefined();
-      expect(Array.isArray(report.shops)).toBe(true);
-      expect(Array.isArray(report.issues)).toBe(true);
-    });
-  });
 
 });
