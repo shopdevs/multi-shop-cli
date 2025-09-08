@@ -24,15 +24,9 @@ Transform any Shopify theme into a sophisticated multi-shop system with **contex
 ### Installation
 
 ```bash
-# Add to your theme project
-pnpm add -D @shopdevs/multi-shop-cli
-```
-
-### Initialize in Your Theme
-
-```bash
+# Add to your theme project and initialize immediately
 cd your-shopify-theme
-npx multi-shop init
+pnpm add -D @shopdevs/multi-shop-cli && npx multi-shop init
 ```
 
 This creates:
@@ -83,8 +77,7 @@ Here's the step-by-step process to set up multi-shop on a new Shopify theme for 
 
 ```bash
 cd your-shopify-theme
-pnpm add -D @shopdevs/multi-shop-cli
-npx multi-shop init
+pnpm add -D @shopdevs/multi-shop-cli && npx multi-shop init
 ```
 
 ### Step 2: Create All 4 Shop Configurations

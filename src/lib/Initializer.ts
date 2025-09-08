@@ -38,6 +38,9 @@ export class Initializer {
     const endOperation = this.logger.startOperation('initialization', { cwd: this.cwd, force: this.force });
 
     try {
+      // Check for git files without .gitignore (safety warning)
+      await this.checkGitSafety();
+
       // Check if we're in a valid project
       await this.validateProject();
 
@@ -335,11 +338,27 @@ jobs:
       `✅ Updated package.json with multi-shop scripts\n` +
       `✅ Updated .gitignore for credential security\n\n` +
       `Next steps:\n` +
-      `1. Create your first shop: npm run shop\n` +
-      `2. Start development: npm run dev\n` +
+      `1. Create your first shop: pnpm run shop\n` +
+      `2. Start development: pnpm run dev\n` +
       `3. Read the documentation for advanced workflows`,
       "✨ Setup Complete"
     );
+  }
+
+  /**
+   * Check if git repository exists without .gitignore (safety warning)
+   */
+  private async checkGitSafety(): Promise<void> {
+    const gitDir = path.join(this.cwd, '.git');
+    const nodeModules = path.join(this.cwd, 'node_modules');
+    
+    if (fs.existsSync(gitDir) && !fs.existsSync(this.gitignorePath) && fs.existsSync(nodeModules)) {
+      note(
+        "⚠️ Git repository detected with node_modules but no .gitignore!\n" +
+        "This initialization will create .gitignore to prevent committing dependencies.",
+        "Safety Check"
+      );
+    }
   }
 }
 

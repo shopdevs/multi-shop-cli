@@ -29,11 +29,8 @@ cd my-multi-shop-dawn
 # Initialize as Node.js project (Dawn doesn't have package.json by default)
 npm init -y
 
-# Install multi-shop package
-pnpm add -D @shopdevs/multi-shop-cli
-
-# Initialize multi-shop
-npx multi-shop init
+# Install multi-shop package and initialize
+pnpm add -D @shopdevs/multi-shop-cli && npx multi-shop init
 ```
 
 ### 2. Create Your Shops
