@@ -178,26 +178,73 @@ export class Initializer {
     s.start("Updating .gitignore...");
 
     const gitignoreEntries = [
+      "",
+      "# System files",
+      ".DS_Store",
+      ".DS_Store?", 
+      "._*",
+      "",
+      "# Dependencies", 
+      "node_modules/",
+      "",
+      "# Environment files",
+      ".env",
+      ".env.local",
+      "",
       "# Multi-shop credentials (NEVER COMMIT)",
       "shops/credentials/",
-      "*.credentials.json"
+      "*.credentials.json",
+      "",
+      "# Testing artifacts",
+      "playwright-report/",
+      "test-results/", 
+      "**/test-results/",
+      "**/*-snapshots/",
+      "lighthouse-results/"
     ];
 
     let gitignoreContent = "";
-    if (fs.existsSync(this.gitignorePath)) {
+    const gitignoreExists = fs.existsSync(this.gitignorePath);
+    
+    if (gitignoreExists) {
       gitignoreContent = fs.readFileSync(this.gitignorePath, "utf8");
+      console.log("   📁 Appending to existing .gitignore");
+    } else {
+      console.log("   📁 Creating new .gitignore");
     }
 
-    // Add entries if not already present
+    // Track what we actually add
+    const addedEntries: string[] = [];
+
+    // Add entries if not already present (simple contains check)
     gitignoreEntries.forEach(entry => {
-      if (!gitignoreContent.includes(entry)) {
-        gitignoreContent += `\n${entry}`;
+      // Skip empty lines and comments for duplicate checking
+      if (entry.trim() === "" || entry.startsWith("#")) {
+        if (!gitignoreContent.includes(entry)) {
+          gitignoreContent += `\n${entry}`;
+          if (entry.trim() !== "") addedEntries.push(entry);
+        }
+      } else {
+        // For actual ignore patterns, check if pattern exists
+        if (!gitignoreContent.includes(entry)) {
+          gitignoreContent += `\n${entry}`;
+          addedEntries.push(entry);
+        }
       }
     });
 
+    // Ensure file ends with newline
+    if (!gitignoreContent.endsWith('\n')) {
+      gitignoreContent += '\n';
+    }
+
     fs.writeFileSync(this.gitignorePath, gitignoreContent);
 
-    s.stop("✅ .gitignore updated");
+    if (addedEntries.length > 0) {
+      s.stop(`✅ .gitignore updated (${addedEntries.length} new entries)`);
+    } else {
+      s.stop("✅ .gitignore already up to date");
+    }
   }
 
   private async createGithubWorkflow(): Promise<void> {

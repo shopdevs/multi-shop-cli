@@ -8,11 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial package development
-- Core shop management functionality
-- Contextual development workflow
-- Security and credential management
-- Comprehensive testing framework
+- **Complete credential workflow** - Collect theme access passwords during shop creation
+- **Interactive credential editing** - Update passwords through Edit Shop menu
+- **Enhanced .gitignore management** - Comprehensive patterns for Shopify theme projects
+- **Theme access app instructions** - Step-by-step setup guidance for getting passwords
+- **Smart staging domain support** - Allow same domain as production for unpublished theme staging
+
+### Fixed
+- **Staging domain validation** - Removed overly strict "staging-" prefix requirement
+- **Enhanced error debugging** - Detailed error information for troubleshooting shop creation
+- **Package name consistency** - All references updated to @shopdevs/multi-shop-cli
+
+### Improved
+- **User experience** - Complete shop setup in single flow (config + branches + credentials)
+- **Error messages** - Clear debugging information when shop creation fails
+- **Documentation** - All references to Horizon Meyer removed
+
+## [1.0.7] - 2025-09-07
+
+### Fixed
+- Various bug fixes and stability improvements
 
 ## [1.0.0] - 2025-09-07
 

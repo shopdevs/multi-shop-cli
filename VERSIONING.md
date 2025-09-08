@@ -33,27 +33,37 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/) strictly:
 
 ### **Automated Releases (Recommended)**
 
-Use our built-in scripts for error-free releases:
+Use our built-in scripts with the required CHANGELOG.md step:
 
 ```bash
+# 1. Update CHANGELOG.md (MANUAL STEP - REQUIRED)
+# Edit CHANGELOG.md:
+# - Move [Unreleased] content to [1.0.8] with current date  
+# - Add new empty [Unreleased] section at top
+# - Commit: git add CHANGELOG.md && git commit -m "Update CHANGELOG for v1.0.8"
+
+# 2. Run release script:
 # For bug fixes and small improvements
-pnpm run release:patch
+pnpm run release:patch  # 1.0.7 → 1.0.8
 
 # For new features (backward compatible)
-pnpm run release:minor
+pnpm run release:minor  # 1.0.7 → 1.1.0
 
 # For breaking changes
-pnpm run release:major
+pnpm run release:major  # 1.0.7 → 2.0.0
 ```
 
-**What these scripts do automatically:**
+**What the automated scripts do:**
 1. ✅ Run quality gates (`pnpm run validate`)
 2. ✅ Build the package (`pnpm run build`)
 3. ✅ Update version in package.json
 4. ✅ Create git commit with version message
-5. ✅ Create git tag (e.g., `v1.0.1`)
+5. ✅ Create git tag (e.g., `v1.0.8`)
 6. ✅ Publish to NPM registry
 7. ✅ Push commit and tags to GitHub
+
+**What you must do manually:**
+- ⚠️ **Update CHANGELOG.md** before running release script (step 1 above)
 
 ### **Manual Workflow (If Needed)**
 
@@ -301,20 +311,26 @@ Before every release, ensure:
 
 ## 🎯 Quick Reference
 
-### **Most Common Commands**
+### **Complete Release Process**
 ```bash
-# Bug fix release
-pnpm run release:patch
+# 1. ALWAYS FIRST: Update CHANGELOG.md manually
+# - Move [Unreleased] → [1.0.8] with date
+# - Create new [Unreleased] section  
+# - Commit: git add CHANGELOG.md && git commit -m "Update CHANGELOG for v1.0.8"
 
-# New feature release  
-pnpm run release:minor
+# 2. Run release script:
+pnpm run release:patch    # Bug fixes: 1.0.7 → 1.0.8
+pnpm run release:minor    # New features: 1.0.7 → 1.1.0
+pnpm run release:major    # Breaking changes: 1.0.7 → 2.0.0
 
-# Check what's published
-npm view @shopdevs/multi-shop-cli
-
-# Test local build
-pnpm run validate && pnpm run build
+# 3. Verify
+npm view @shopdevs/multi-shop-cli@latest
 ```
+
+### **⚠️ Critical Step: CHANGELOG.md**
+- **MUST update manually** before any release
+- **Scripts don't handle** CHANGELOG.md automatically  
+- **Always move [Unreleased]** to versioned section first
 
 ### **Emergency Commands**
 ```bash

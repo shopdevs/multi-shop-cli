@@ -223,18 +223,26 @@ npx multi-shop --version
 git status  # Should show "working tree clean"
 git pull origin main
 
-# 2. Choose appropriate release type:
+# 2. Update CHANGELOG.md (REQUIRED MANUAL STEP)
+# Edit CHANGELOG.md:
+# - Move [Unreleased] content to new version section [1.0.8]
+# - Add current date: ## [1.0.8] - 2025-09-07  
+# - Create new empty [Unreleased] section at top
+# - Save the file
+git add CHANGELOG.md && git commit -m "Update CHANGELOG for v1.0.8"
+
+# 3. Choose appropriate release type:
 
 # PATCH - Bug fixes, documentation updates, small improvements
-pnpm run release:patch  # 1.0.0 → 1.0.1
+pnpm run release:patch  # 1.0.7 → 1.0.8
 
 # MINOR - New features, backward compatible changes
-pnpm run release:minor  # 1.0.1 → 1.1.0
+pnpm run release:minor  # 1.0.7 → 1.1.0
 
 # MAJOR - Breaking changes, API changes
-pnpm run release:major  # 1.1.0 → 2.0.0
+pnpm run release:major  # 1.0.7 → 2.0.0
 
-# 3. Verify publication
+# 4. Verify publication
 npm view @shopdevs/multi-shop-cli@latest
 ```
 
