@@ -126,42 +126,33 @@ export class ShopDev {
           SHOPIFY_CLI_THEME_TOKEN: themeToken,
           SHOPIFY_STORE: storeDomain.replace('.myshopify.com', '')
         },
-        stdio: 'inherit'
+        stdio: 'inherit',
+        detached: false // Ensure child process is in same process group
       });
 
-      // Handle Ctrl+C and other signals to properly terminate Shopify CLI
-      const cleanup = () => {
-        if (!devProcess.killed) {
-          devProcess.kill('SIGTERM');
-          setTimeout(() => {
-            if (!devProcess.killed) {
-              devProcess.kill('SIGKILL');
-            }
-          }, 5000); // Force kill after 5 seconds if graceful shutdown fails
-        }
-      };
-
-      process.on('SIGINT', cleanup);  // Ctrl+C
-      process.on('SIGTERM', cleanup); // Termination signal
-
       return new Promise<void>((resolve, reject) => {
-        devProcess.on('close', (code) => {
-          // Remove signal handlers
-          process.off('SIGINT', cleanup);
-          process.off('SIGTERM', cleanup);
+        // Handle Ctrl+C to properly terminate child process
+        const handleSignal = (signal: NodeJS.Signals) => {
+          console.log(`\nReceived ${signal}, stopping development server...`);
+          devProcess.kill(signal);
+        };
+
+        process.on('SIGINT', handleSignal);
+        process.on('SIGTERM', handleSignal);
+
+        devProcess.on('close', (code, signal) => {
+          // Clean up signal handlers
+          process.off('SIGINT', handleSignal);
+          process.off('SIGTERM', handleSignal);
           
-          if (code === 0 || code === null || code === 2) { // 2 = SIGINT
-            note("Development server stopped", "ℹ️ Info");
-            resolve();
-          } else {
-            reject(new Error(`Shopify CLI exited with code ${code}`));
-          }
+          note("Development server stopped", "ℹ️ Info");
+          resolve();
         });
 
         devProcess.on('error', (error) => {
-          // Remove signal handlers
-          process.off('SIGINT', cleanup);
-          process.off('SIGTERM', cleanup);
+          // Clean up signal handlers  
+          process.off('SIGINT', handleSignal);
+          process.off('SIGTERM', handleSignal);
           reject(error);
         });
       });
