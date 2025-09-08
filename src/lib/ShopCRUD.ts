@@ -59,7 +59,7 @@ export class ShopCRUD {
 
     const stagingDomain = await text({
       message: "Staging domain:",
-      placeholder: "staging-my-shop.myshopify.com",
+      placeholder: "staging-my-shop.myshopify.com (can be same as production)",
       validate: (value) => {
         if (!value) return "Staging domain is required";
         if (!value.endsWith('.myshopify.com')) return "Domain must end with .myshopify.com";
@@ -114,7 +114,7 @@ export class ShopCRUD {
       });
 
       if (createBranches === "yes") {
-        await this.createShopBranches(shopId as string);
+        await this.createShopBranches(shopId as string, config);
       } else {
         note("Create branches manually:", "📝 Next Steps");
         console.log(`git checkout -b ${shopId}/main && git push -u origin ${shopId}/main`);
@@ -125,6 +125,15 @@ export class ShopCRUD {
       
     } catch (error) {
       log.error(`Failed to create shop: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Show additional details for debugging
+      if (error instanceof Error && error.message.includes('details')) {
+        try {
+          console.log('\nError details:', JSON.stringify((error as any).details, null, 2));
+        } catch {
+          // Ignore if no details available
+        }
+      }
     }
   }
 
@@ -184,7 +193,7 @@ export class ShopCRUD {
   /**
    * Creates GitHub branches for a shop automatically
    */
-  private async createShopBranches(shopId: string): Promise<void> {
+  private async createShopBranches(shopId: string, config: ShopConfig): Promise<void> {
     const s = spinner();
     
     try {
@@ -211,7 +220,7 @@ export class ShopCRUD {
         note(`Branch ${shopId}/main might already exist`, "ℹ️ Info");
       }
 
-      // Create shop/staging branch  
+      // Create shop/staging branch
       try {
         execSync(`git checkout -b ${shopId}/staging`, { stdio: 'ignore' });
         execSync(`git push -u origin ${shopId}/staging`, { stdio: 'ignore' });

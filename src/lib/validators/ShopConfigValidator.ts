@@ -244,13 +244,7 @@ export class ShopConfigValidator {
       );
     }
 
-    if (type === 'staging' && !domain.startsWith('staging-')) {
-      throw new ShopValidationError(
-        'Staging domain should start with "staging-"',
-        'domain',
-        domain
-      );
-    }
+    // Note: Staging domain can be same as production (for unpublished theme staging)
 
     return domain;
   }

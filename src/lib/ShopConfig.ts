@@ -84,13 +84,34 @@ export class ShopConfigManager {
       this.validator.validateConfig(config, shopId);
       
       const configPath = path.join(this.shopsDir, `${shopId}.config.json`);
-      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      
+      // Check if shops directory exists
+      if (!fs.existsSync(this.shopsDir)) {
+        throw new Error(`Shops directory does not exist: ${this.shopsDir}`);
+      }
+      
+      // Check write permissions
+      try {
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      } catch (writeError) {
+        throw new Error(`Cannot write to file ${configPath}: ${writeError instanceof Error ? writeError.message : String(writeError)}`);
+      }
+      
+      // Verify file was created
+      if (!fs.existsSync(configPath)) {
+        throw new Error(`File was not created: ${configPath}`);
+      }
       
     } catch (error) {
       throw new ShopConfigurationError(
         `Failed to save shop configuration: ${shopId}`,
         shopId,
-        { originalError: error instanceof Error ? error.message : String(error) }
+        { 
+          originalError: error instanceof Error ? error.message : String(error),
+          configPath: path.join(this.shopsDir, `${shopId}.config.json`),
+          shopsDir: this.shopsDir,
+          shopsDirExists: fs.existsSync(this.shopsDir)
+        }
       );
     }
   }
