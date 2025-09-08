@@ -83,7 +83,7 @@ Here's the step-by-step process to set up multi-shop on a new Shopify theme for 
 
 ```bash
 cd your-shopify-theme
-pnpm add -D shopdevs-multi-shop
+pnpm add -D @shopdevs/multi-shop-cli
 npx multi-shop init
 ```
 

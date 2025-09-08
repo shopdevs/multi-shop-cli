@@ -163,9 +163,9 @@ export class Initializer {
     packageJson.scripts = { ...packageJson.scripts, ...newScripts };
 
     // Add devDependency if not already present
-    if (!packageJson.devDependencies?.["shopdevs-multi-shop"]) {
+    if (!packageJson.devDependencies?.["@shopdevs/multi-shop-cli"]) {
       packageJson.devDependencies = packageJson.devDependencies || {};
-      packageJson.devDependencies["shopdevs-multi-shop"] = "^1.0.0";
+      packageJson.devDependencies["@shopdevs/multi-shop-cli"] = "^1.0.0";
     }
 
     fs.writeFileSync(this.packageJsonPath, JSON.stringify(packageJson, null, 2));

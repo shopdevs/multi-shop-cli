@@ -74,13 +74,13 @@ cat .npmignore
 ```bash
 # Test local installation
 npm pack
-# Creates: shopdevs-multi-shop-x.x.x.tgz
+# Creates: @shopdevs/multi-shop-cli-x.x.x.tgz
 
 # Test in separate directory
 cd /tmp
 mkdir test-install && cd test-install
 npm init -y
-npm install /path/to/shopdevs-multi-shop-x.x.x.tgz
+npm install /path/to/@shopdevs/multi-shop-cli-x.x.x.tgz
 
 # Test CLI works
 npx multi-shop --help
@@ -507,7 +507,7 @@ npm view @shopdevs/multi-shop-cli@latest
 npm view @shopdevs/multi-shop-cli
 
 # Check dependents (who's using your package)
-# Visit: https://www.npmjs.com/package/shopdevs-multi-shop?activeTab=dependents
+# Visit: https://www.npmjs.com/package/@shopdevs/multi-shop-cli?activeTab=dependents
 ```
 
 ### Success Metrics
@@ -572,7 +572,7 @@ npm view @shopdevs/multi-shop-cli
 
 # Try alternative names:
 # @your-org/multi-shop
-# shopdevs-multi-shop-v2
+# @shopdevs/multi-shop-cli-v2
 ```
 
 **"Authentication failed"**
@@ -624,7 +624,7 @@ ls -la dist/bin/multi-shop.js
 npm view @shopdevs/multi-shop-cli
 
 # Monitor downloads
-# https://npm-stat.com/charts.html?package=shopdevs-multi-shop
+# https://npm-stat.com/charts.html?package=@shopdevs/multi-shop-cli
 
 # Check for issues
 # Monitor GitHub issues and NPM feedback

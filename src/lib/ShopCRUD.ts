@@ -126,12 +126,19 @@ export class ShopCRUD {
     } catch (error) {
       log.error(`Failed to create shop: ${error instanceof Error ? error.message : String(error)}`);
       
-      // Show additional details for debugging
-      if (error instanceof Error && error.message.includes('details')) {
-        try {
-          console.log('\nError details:', JSON.stringify((error as any).details, null, 2));
-        } catch {
-          // Ignore if no details available
+      // Always show detailed error information for debugging
+      if (error instanceof Error) {
+        console.log(`\nDetailed Error Information:`);
+        console.log(`Error type: ${error.constructor.name}`);
+        console.log(`Error message: ${error.message}`);
+        
+        // Show error details if available (our custom error types)
+        if ('details' in error && error.details) {
+          console.log(`Error details:`, JSON.stringify(error.details, null, 2));
+        }
+        
+        if (error.stack) {
+          console.log(`Stack trace:\n${error.stack}`);
         }
       }
     }

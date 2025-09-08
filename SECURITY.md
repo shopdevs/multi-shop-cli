@@ -13,7 +13,7 @@ We actively support security updates for the following versions:
 
 ### Credential Protection
 
-**shopdevs-multi-shop** implements enterprise-grade security for sensitive Shopify theme access credentials:
+**@shopdevs/multi-shop-cli** implements security for sensitive Shopify theme access credentials:
 
 #### 🔐 **Local-Only Storage**
 - Theme tokens stored in `shops/credentials/` (never committed)
@@ -60,7 +60,7 @@ We take security seriously. If you discover a security vulnerability, please fol
 
 ### 🚨 **For Critical Vulnerabilities**
 - **Email**: security@shopdevs.com  
-- **Subject**: [SECURITY] Critical vulnerability in shopdevs-multi-shop
+- **Subject**: [SECURITY] Critical vulnerability in @shopdevs/multi-shop-cli
 - **Response Time**: Within 24 hours
 
 ### 📧 **For General Security Issues**

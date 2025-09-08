@@ -80,29 +80,39 @@ export class ShopConfigManager {
    */
   save(shopId: string, config: ShopConfig): void {
     try {
+      // Debug: Log what we're trying to save
+      console.log(`\nDEBUG: Attempting to save shop config:`);
+      console.log(`  Shop ID: ${shopId}`);
+      console.log(`  Config:`, JSON.stringify(config, null, 2));
+      
       this.validator.validateShopId(shopId);
+      console.log(`  ✅ Shop ID validation passed`);
+      
       this.validator.validateConfig(config, shopId);
+      console.log(`  ✅ Config validation passed`);
       
       const configPath = path.join(this.shopsDir, `${shopId}.config.json`);
+      console.log(`  Target path: ${configPath}`);
       
       // Check if shops directory exists
       if (!fs.existsSync(this.shopsDir)) {
-        throw new Error(`Shops directory does not exist: ${this.shopsDir}`);
+        console.log(`  Creating shops directory: ${this.shopsDir}`);
+        fs.mkdirSync(this.shopsDir, { recursive: true });
       }
+      console.log(`  ✅ Shops directory exists: ${this.shopsDir}`);
       
-      // Check write permissions
-      try {
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-      } catch (writeError) {
-        throw new Error(`Cannot write to file ${configPath}: ${writeError instanceof Error ? writeError.message : String(writeError)}`);
-      }
+      // Write file
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      console.log(`  ✅ File written successfully`);
       
       // Verify file was created
       if (!fs.existsSync(configPath)) {
         throw new Error(`File was not created: ${configPath}`);
       }
+      console.log(`  ✅ File verified: ${configPath}`);
       
     } catch (error) {
+      console.log(`\n❌ Save failed at validation or file operation`);
       throw new ShopConfigurationError(
         `Failed to save shop configuration: ${shopId}`,
         shopId,
@@ -110,7 +120,8 @@ export class ShopConfigManager {
           originalError: error instanceof Error ? error.message : String(error),
           configPath: path.join(this.shopsDir, `${shopId}.config.json`),
           shopsDir: this.shopsDir,
-          shopsDirExists: fs.existsSync(this.shopsDir)
+          shopsDirExists: fs.existsSync(this.shopsDir),
+          configData: config
         }
       );
     }
