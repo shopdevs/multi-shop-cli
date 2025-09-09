@@ -56,14 +56,19 @@ src/
 │   ├── Initializer.ts             # Project initialization
 │   ├── core/
 │   │   ├── index.ts               # Core composition (32 lines)
-│   │   ├── cli.ts                 # CLI interface (157 lines)
+│   │   ├── cli.ts                 # CLI coordination (153 lines)
+│   │   ├── tools.ts               # Tools menu coordination (33 lines)
 │   │   ├── shop-creation.ts       # Shop creation workflow (51 lines)
 │   │   ├── shop-input.ts          # Input collection (100 lines)
 │   │   ├── shop-setup.ts          # Resource setup (149 lines)
+│   │   ├── shop-editing.ts        # Shop editing operations (153 lines)
 │   │   ├── shop-operations.ts     # File operations (105 lines)
+│   │   ├── shop-sync.ts           # PR creation operations (85 lines)
+│   │   ├── theme-linking.ts       # Theme linking operations (70 lines)
+│   │   ├── version-check.ts       # Version checking (67 lines)
 │   │   ├── credential-operations.ts # Credential handling (101 lines)
-│   │   ├── dev-operations.ts      # Development server (74 lines)
-│   │   ├── validation.ts          # Validation functions (62 lines)
+│   │   ├── dev-operations.ts      # Development server (150 lines)
+│   │   ├── validation.ts          # Validation functions (66 lines)
 │   │   ├── logger.ts              # Simple logging (50 lines)
 │   │   └── types.ts               # Core type definitions (43 lines)
 │   ├── validators/
@@ -273,6 +278,7 @@ This is a clean, maintainable NPM package. When working on it:
 - **Immutable data** - All data structures should be readonly
 - **Result types** - Use Result<T> pattern instead of throwing exceptions
 - **Single responsibility** - Each function has one clear purpose, under 160 lines
+- **One function per file** - Each major operation gets its own focused file, coordination files just import and call
 - **Write direct comments** - Describe purpose, not implementation paradigm
 - **Remove unused code** - Don't export functions that aren't used
 - **No fallback patterns** - Be declarative and clear, single approach
