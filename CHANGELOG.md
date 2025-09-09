@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-09-09
+
+### Fixed
+
+- **Start Dev Server** - The starting of this has been broken
+
 ## [2.0.0] - 2025-09-09
 
 ### Changed
