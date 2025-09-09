@@ -5,11 +5,8 @@ import { intro, outro } from "@clack/prompts";
 import process from "node:process";
 
 import { ShopManager } from "../lib/ShopManager.js";
-import { ContextualDev } from "../lib/ContextualDev.js";
 import { Initializer } from "../lib/Initializer.js";
-import { SyncMain } from "../lib/SyncMain.js";
-import { logger } from "../lib/core/SimpleLogger.js";
-import { performanceMonitor } from "../lib/core/SimplePerformanceMonitor.js";
+import { logger } from "../lib/core/logger.js";
 
 const program = new Command();
 
@@ -29,14 +26,6 @@ program
     } else if (options['verbose']) {
       process.env['LOG_LEVEL'] = 'info';
     }
-    
-    // Start performance monitoring for the command
-    const commandName = thisCommand.name();
-    performanceMonitor.startOperation(`cli_${commandName}`, { 
-      command: commandName,
-      args: thisCommand.args,
-      options 
-    });
   });
 
 // Initialize multi-shop in current theme project
@@ -89,72 +78,19 @@ program
   .command("dev")
   .description("Start contextual development server")
   .action(async () => {
-    const endOperation = logger.startOperation('contextual_development');
-    
     try {
+      const { ContextualDev } = await import("../lib/ContextualDev.js");
       const dev = new ContextualDev();
       await dev.run();
-      endOperation('success');
     } catch (error) {
       logger.error('Development server failed', { 
         error: error instanceof Error ? error.message : String(error) 
       });
-      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
-      process.exit(1);
-    }
-  });
-
-// Sync feature branch with main
-program
-  .command("sync-main")
-  .description("Sync current branch with latest main")
-  .option("--method <method>", "Sync method: rebase or merge", "rebase")
-  .action(async (options) => {
-    const endOperation = logger.startOperation('sync_main', options);
-    
-    try {
-      const sync = new SyncMain({ method: options.method });
-      await sync.run();
-      endOperation('success');
-    } catch (error) {
-      logger.error('Sync failed', { 
-        error: error instanceof Error ? error.message : String(error),
-        method: options.method
-      });
-      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
       process.exit(1);
     }
   });
 
 
-
-// Performance diagnostics
-program
-  .command("perf")
-  .description("Show performance diagnostics and metrics")
-  .action(async () => {
-    try {
-      intro("📊 Performance Diagnostics");
-      const summary = performanceMonitor.getPerformanceSummary();
-      
-      console.log("\n📈 Performance Summary:");
-      console.log(`   Uptime: ${Math.round(summary.uptime)}s`);
-      console.log(`   Memory: ${Math.round(summary.memoryUsage.heapUsed / 1024 / 1024)}MB`);
-      console.log(`   Active Operations: ${summary.activeOperations}`);
-      
-      // SimplePerformanceMonitor doesn't have metrics.commands
-      console.log(`\n⚡ Recent Performance:`);
-      console.log(`   Recent Operations: ${summary.recentOperations}`);
-      console.log(`   Average Duration: ${summary.averageDuration}ms`);
-      
-      outro("📊 Performance diagnostics complete");
-    } catch (error) {
-      logger.error('Performance diagnostics failed', { 
-        error: error instanceof Error ? error.message : String(error) 
-      });
-      process.exit(1);
-    }
-  });
 
 // Global error handler
 process.on('uncaughtException', (error) => {
@@ -162,7 +98,7 @@ process.on('uncaughtException', (error) => {
     error: error.message, 
     stack: error.stack 
   });
-  console.error('\n💥 Fatal error occurred. Check logs for details.');
+  console.error('\n💥 Fatal error occurred.');
   process.exit(1);
 });
 
@@ -170,21 +106,19 @@ process.on('unhandledRejection', (reason) => {
   logger.error('Unhandled promise rejection', { 
     reason: reason instanceof Error ? reason.message : String(reason) 
   });
-  console.error('\n💥 Unhandled promise rejection. Check logs for details.');
+  console.error('\n💥 Unhandled promise rejection.');
   process.exit(1);
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n👋 Shutting down gracefully...');
-  await performanceMonitor.cleanup();
   await logger.flush();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('\n👋 Shutting down gracefully...');
-  await performanceMonitor.cleanup();
   await logger.flush();  
   process.exit(0);
 });

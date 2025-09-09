@@ -36,21 +36,21 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/) strictly:
 Use our built-in scripts with the required CHANGELOG.md step:
 
 ```bash
-# 1. Update CHANGELOG.md (MANUAL STEP - REQUIRED)
-# Edit CHANGELOG.md:
-# - Move [Unreleased] content to [1.0.8] with current date  
-# - Add new empty [Unreleased] section at top
-# - Commit: git add CHANGELOG.md && git commit -m "Update CHANGELOG for v1.0.8"
+# Enhanced release scripts with automated changelog prompts:
 
-# 2. Run release script:
 # For bug fixes and small improvements
-pnpm run release:patch  # 1.0.7 → 1.0.8
+pnpm run release:patch  # Prompts for CHANGELOG.md, then 1.0.16 → 1.0.17
 
 # For new features (backward compatible)
-pnpm run release:minor  # 1.0.7 → 1.1.0
+pnpm run release:minor  # Prompts for CHANGELOG.md, then 1.0.16 → 1.1.0
 
-# For breaking changes
-pnpm run release:major  # 1.0.7 → 2.0.0
+# For breaking changes  
+pnpm run release:major  # Prompts for CHANGELOG.md, then 1.0.16 → 2.0.0
+
+# Each script will:
+# 1. Display CHANGELOG.md update instructions
+# 2. Wait for you to update and commit CHANGELOG.md
+# 3. Continue with version bump and publish
 ```
 
 **What the automated scripts do:**
@@ -63,7 +63,7 @@ pnpm run release:major  # 1.0.7 → 2.0.0
 7. ✅ Push commit and tags to GitHub
 
 **What you must do manually:**
-- ⚠️ **Update CHANGELOG.md** before running release script (step 1 above)
+- ⚠️ **Update CHANGELOG.md** when prompted (script will wait for you)
 
 ### **Manual Workflow (If Needed)**
 

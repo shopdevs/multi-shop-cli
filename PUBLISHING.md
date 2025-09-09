@@ -223,38 +223,32 @@ npx multi-shop --version
 git status  # Should show "working tree clean"
 git pull origin main
 
-# 2. Update CHANGELOG.md (REQUIRED MANUAL STEP)
-# Edit CHANGELOG.md:
-# - Move [Unreleased] content to new version section [1.0.8]
-# - Add current date: ## [1.0.8] - 2025-09-07  
-# - Create new empty [Unreleased] section at top
-# - Save the file
-git add CHANGELOG.md && git commit -m "Update CHANGELOG for v1.0.8"
-
-# 3. Choose appropriate release type:
+# 2. Choose release type (changelog update is now automated):
 
 # PATCH - Bug fixes, documentation updates, small improvements
-pnpm run release:patch  # 1.0.7 → 1.0.8
+pnpm run release:patch  # Will prompt for CHANGELOG.md update, then 1.0.16 → 1.0.17
 
 # MINOR - New features, backward compatible changes
-pnpm run release:minor  # 1.0.7 → 1.1.0
+pnpm run release:minor  # Will prompt for CHANGELOG.md update, then 1.0.16 → 1.1.0
 
-# MAJOR - Breaking changes, API changes
-pnpm run release:major  # 1.0.7 → 2.0.0
+# MAJOR - Breaking changes, API changes  
+pnpm run release:major  # Will prompt for CHANGELOG.md update, then 1.0.16 → 2.0.0
 
-# 4. Verify publication
+# 3. Verify publication
 npm view @shopdevs/multi-shop-cli@latest
 ```
 
-**What the automated scripts do:**
+**What the automated scripts now do:**
 
-1. Run `npm run validate` (lint + typecheck + test)
-2. Run `npm run build` (TypeScript compilation)
-3. Update version in package.json
-4. Create git commit with version
-5. Create git tag (e.g., v1.0.1)
-6. Publish to NPM registry
-7. Push commit and tags to GitHub
+1. **Prompt for CHANGELOG.md update** (mandatory step)
+2. Wait for you to update and commit CHANGELOG.md
+3. Run `npm run validate` (lint + typecheck + test)
+4. Run `npm run build` (TypeScript compilation)
+5. Update version in package.json
+6. Create git commit with version
+7. Create git tag (e.g., v1.0.17)
+8. Publish to NPM registry
+9. Push commit and tags to GitHub
 
 ---
 

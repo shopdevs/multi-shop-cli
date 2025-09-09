@@ -4,28 +4,21 @@
  * Main package exports
  */
 
-// Core classes
+// Main interface
 export { ShopManager } from "./ShopManager.js";
-export { ShopConfigManager } from "./ShopConfig.js";
-export { ShopDev } from "./ShopDev.js";
-export { ShopCRUD } from "./ShopCRUD.js";
-export { ShopCLI } from "./ShopCLI.js";
-export { PRManager } from "./PRManager.js";
-export { ThemeLinker } from "./ThemeLinker.js";
-export { VersionChecker } from "./VersionChecker.js";
-export { ContextualDev } from "./ContextualDev.js";
-export { BranchDetector } from "./BranchDetector.js";
-export { ShopSelector } from "./ShopSelector.js";
-export { Initializer } from "./Initializer.js";
-export { SyncMain } from "./SyncMain.js";
-// Core infrastructure
-export { SecurityManager } from "./core/SecurityManager.js";
-export { GitOperations } from "./core/GitOperations.js";
-export { SimpleLogger as Logger, logger } from "./core/SimpleLogger.js";
-export { SimplePerformanceMonitor, performanceMonitor } from "./core/SimplePerformanceMonitor.js";
 
-// Validation and error handling
-export { ShopConfigValidator } from "./validators/ShopConfigValidator.js";
+// Core operations
+export { createMultiShopCLI, runMultiShopManager } from "./core/index.js";
+export { createNewShop } from "./core/shop-creation.js";
+export { startDevelopmentWorkflow } from "./core/dev-operations.js";
+
+// Contextual development
+export { ContextualDev } from "./ContextualDev.js";
+
+// Project initialization
+export { Initializer } from "./Initializer.js";
+
+// Error handling
 export {
   ShopError,
   ShopConfigurationError,
@@ -46,13 +39,10 @@ export type {
   AuthenticationConfig,
   ShopifyConfig,
   ShopifyStore,
-  SecurityAuditReport,
-  ShopSecurityAudit,
-  SecurityIssue,
   CLIOptions
 } from "../types/shop.js";
 
-// Type guards and utilities
+// Validation utilities
 export {
   isValidShopId,
   isValidDomain,
@@ -60,10 +50,6 @@ export {
   isValidBranchName
 } from "../types/shop.js";
 
-// Package metadata
-export const VERSION = "1.0.0";
+// Package metadata  
+export const VERSION = "1.0.16";
 export const PACKAGE_NAME = "@shopdevs/multi-shop-cli";
-
-/**
- * Creates a new ShopManager instance
- */

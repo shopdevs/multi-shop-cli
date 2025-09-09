@@ -51,30 +51,27 @@ src/
 ├── bin/multi-shop.ts              # CLI entry point with Commander.js
 ├── lib/
 │   ├── index.ts                   # Main package exports
-│   ├── ShopManager.ts             # Main coordinator (82 lines)
-│   ├── ShopConfig.ts              # Configuration file operations (137 lines)
-│   ├── ShopDev.ts                 # Shopify CLI integration (151 lines)
-│   ├── ShopCRUD.ts                # Shop lifecycle management (243 lines)
-│   ├── ShopCLI.ts                 # User interface (208 lines)
+│   ├── ShopManager.ts             # Entry point compatibility layer
 │   ├── ContextualDev.ts           # Branch detection and routing
-│   ├── ContextualShopManager.ts   # Feature branch development (49 lines)
-│   ├── BranchDetector.ts          # Git branch logic (32 lines)
-│   ├── ShopSelector.ts            # Shop selection UI (95 lines)
-│   ├── WorkflowManager.ts         # Multi-shop workflow orchestration
 │   ├── Initializer.ts             # Project initialization
-│   ├── SyncMain.ts                # Git sync operations
 │   ├── core/
-│   │   ├── SecurityManager.ts     # Credential security (183 lines)
-│   │   ├── GitOperations.ts       # Git operations with error handling
-│   │   ├── SimpleLogger.ts        # Simple CLI logging (57 lines)
-│   │   ├── Config.ts              # Configuration management (100 lines)
-│   │   └── SimplePerformanceMonitor.ts # Basic performance tracking (87 lines)
+│   │   ├── index.ts               # Core composition (32 lines)
+│   │   ├── cli.ts                 # CLI interface (157 lines)
+│   │   ├── shop-creation.ts       # Shop creation workflow (51 lines)
+│   │   ├── shop-input.ts          # Input collection (100 lines)
+│   │   ├── shop-setup.ts          # Resource setup (149 lines)
+│   │   ├── shop-operations.ts     # File operations (105 lines)
+│   │   ├── credential-operations.ts # Credential handling (101 lines)
+│   │   ├── dev-operations.ts      # Development server (74 lines)
+│   │   ├── validation.ts          # Validation functions (62 lines)
+│   │   ├── logger.ts              # Simple logging (50 lines)
+│   │   └── types.ts               # Core type definitions (43 lines)
 │   ├── validators/
 │   │   └── ShopConfigValidator.ts # JSON schema validation
 │   └── errors/
-│       └── ShopError.ts           # Custom error hierarchy
-├── types/shop.ts                  # Focused type definitions (169 lines)
-└── __tests__/                     # Focused test suite (57 lines)
+│       └── ShopError.ts           # Error hierarchy
+├── types/shop.ts                  # Type definitions (160 lines)
+└── __tests__/                     # Test suite (47 lines)
 ```
 
 ### Technology Stack
@@ -88,23 +85,25 @@ src/
 
 ### Design Principles
 
-1. **Single Responsibility** - Each class has one clear purpose, under 200 lines where possible
-2. **Type Safety** - Proper TypeScript throughout, no JavaScript masquerading as TS
-3. **Real Security** - Path traversal protection, safe file operations, no security theater
-4. **Cross-Platform** - Works reliably on Windows, macOS, and Linux
-5. **Simple Solutions** - Use existing libraries or simple wrappers, avoid custom frameworks
-6. **Clean Code** - Direct comments, no buzzwords, focused functionality
-7. **Maintainability** - Easy for senior engineers to understand and modify
+1. **Pure Functions** - All operations are pure functions with clear inputs/outputs
+2. **Immutable Data** - All data structures are readonly, no mutations
+3. **Composition** - Complex operations built from simple, composable functions
+4. **Type Safety** - Strict TypeScript throughout with Result types for error handling
+5. **Single Responsibility** - Each function has one clear purpose, under 160 lines
+6. **Real Security** - Path traversal protection, safe file operations
+7. **Cross-Platform** - Works reliably on Windows, macOS, and Linux
+8. **Maintainability** - Easy for developers to understand, test, and modify
 
 ## Key Implementation Details
 
 ### TypeScript Patterns
 
+- **Pure Functions** - All operations as composable functions with clear contracts
+- **Result Types** - Elegant error handling without exceptions
 - **Readonly Interfaces** - Immutable data structures throughout
-- **Simple Type Guards** - Boolean validation functions for runtime checks
-- **Focused Error Types** - Structured error hierarchy with context
-- **Strict Type Safety** - All parameters and returns properly typed
-- **Clean API** - Only export types that are actually used
+- **Dependency Injection** - Pure function factories for testability
+- **Type Guards** - Boolean validation functions for runtime checks
+- **Clean API** - Only export functions and types that are used
 
 ### Security Model
 
@@ -269,15 +268,15 @@ The multi-shop workflow complexity is managed through clean architecture, not co
 This is a clean, maintainable NPM package. When working on it:
 
 ## Code Quality Standards
-- **Keep classes focused** - Single responsibility, under 200 lines where possible
-- **Avoid custom frameworks** - Use existing libraries or simple solutions
-- **Write direct comments** - No "enterprise-grade" buzzwords or AI jargon
-- **Remove unused code** - Don't export types/functions that aren't used
-- **Real functionality only** - No security theater or placeholder methods
-- **No removal comments** - Never add comments about what was removed or optimized
+- **Pure functions only** - No mutable state, no side effects in core operations
+- **Composition over inheritance** - Build complexity through function composition
+- **Immutable data** - All data structures should be readonly
+- **Result types** - Use Result<T> pattern instead of throwing exceptions
+- **Single responsibility** - Each function has one clear purpose, under 160 lines
+- **Write direct comments** - Describe purpose, not implementation paradigm
+- **Remove unused code** - Don't export functions that aren't used
+- **No fallback patterns** - Be declarative and clear, single approach
 - **No backward compatibility** - This is a new package, always check before adding compatibility layers
-- **No fallback patterns** - Be declarative and clear, avoid "try X then fallback to Y" complexity
-- **Single approach** - Choose one way to do things, not multiple approaches with fallbacks
 
 ## Package Focus
 - **CLI tool architecture** - Clean command patterns, not menu systems

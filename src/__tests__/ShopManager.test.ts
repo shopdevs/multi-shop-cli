@@ -23,22 +23,22 @@ describe('ShopManager', () => {
   });
 
   describe('Basic Shop Operations', () => {
-    test('should load shop configuration', () => {
+    test('should load shop configuration', async () => {
       const mockConfig = createMockShopConfig();
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(mockConfig));
 
-      const config = shopManager.loadShopConfig('test-shop');
+      const config = await shopManager.loadShopConfig('test-shop');
 
       expect(config.shopId).toBe('test-shop');
       expect(fs.readFileSync).toHaveBeenCalled();
     });
 
-    test('should list shops', () => {
+    test('should list shops', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.readdirSync).mockReturnValue(['shop-a.config.json', 'shop-b.config.json']);
 
-      const shops = shopManager.listShops();
+      const shops = await shopManager.listShops();
 
       expect(shops).toEqual(['shop-a', 'shop-b']);
     });

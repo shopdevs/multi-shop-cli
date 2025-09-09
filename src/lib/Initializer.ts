@@ -13,7 +13,7 @@ import {
   log,
 } from "@clack/prompts";
 
-import { logger } from "./core/SimpleLogger.js";
+import { logger } from "./core/logger.js";
 import { ShopConfigurationError } from "./errors/ShopError.js";
 
 /**
