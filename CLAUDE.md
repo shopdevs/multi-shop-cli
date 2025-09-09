@@ -277,6 +277,7 @@ This is a clean, maintainable NPM package. When working on it:
 - **Remove unused code** - Don't export functions that aren't used
 - **No fallback patterns** - Be declarative and clear, single approach
 - **No backward compatibility** - This is a new package, always check before adding compatibility layers
+- **No shortcuts or technical debt** - Always implement properly, never add temporary fixes or workarounds
 
 ## Package Focus
 - **CLI tool architecture** - Clean command patterns, not menu systems
