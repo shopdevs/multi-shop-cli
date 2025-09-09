@@ -2,6 +2,8 @@ import { intro, outro, select, isCancel, note } from "@clack/prompts";
 import type { CLIContext, Result } from "./types.js";
 import { createNewShop } from "./shop-creation.js";
 import { startDevelopmentWorkflow } from "./dev-operations.js";
+import { editShop } from "./shop-editing.js";
+import { handleTools } from "./tools.js";
 
 /**
  * CLI interface for shop management
@@ -130,13 +132,7 @@ const createShop = async (context: CLIContext): Promise<void> => {
   }
 };
 
-const editShop = async (context: CLIContext): Promise<void> => {
-  note("Shop editing functionality", "🚧 Implementation");
-};
-
-const handleTools = async (context: CLIContext): Promise<void> => {
-  note("Tools functionality", "🚧 Implementation");
-};
+// Import implementations are at the top of the file
 
 const waitForKey = async (): Promise<void> => {
   return new Promise((resolve) => {
