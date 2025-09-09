@@ -5,8 +5,8 @@ import type { Result } from "./types.js";
 // Important packages to monitor - update this list as needed
 const IMPORTANT_PACKAGES = [
   { name: "@shopdevs/multi-shop-cli", updateCmd: "pnpm update -D @shopdevs/multi-shop-cli" },
-  { name: "@shopify/cli", updateCmd: "pnpm update -g @shopify/cli" },
-  { name: "pnpm", updateCmd: "npm install -g pnpm@latest" }
+  { name: "@shopify/cli", updateCmd: "npm install -g @shopify/cli@latest" },
+  { name: "pnpm", updateCmd: "pnpm self-update" }
 ] as const;
 
 export const checkVersions = async (): Promise<Result<void>> => {
