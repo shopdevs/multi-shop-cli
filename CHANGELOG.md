@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.3] - 2025-09-09
+
+### Fixed
+
+- **Fix version checking tool** - It should now use the same function for all
+  packages for consistent results
+
 ## [2.0.2] - 2025-09-09
 
 ### Added
