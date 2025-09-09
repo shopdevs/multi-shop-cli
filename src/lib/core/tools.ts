@@ -252,7 +252,7 @@ const checkVersions = async (): Promise<Result<void>> => {
   
   const tools = [
     { name: "Shopify CLI", command: "shopify version" },
-    { name: "@shopdevs/multi-shop-cli", command: "npx multi-shop --version", package: "@shopdevs/multi-shop-cli" },
+    { name: "@shopdevs/multi-shop-cli", command: "npx multi-shop --version" },
     { name: "Node.js", version: process.version },
     { name: "pnpm", command: "pnpm --version" }
   ];
@@ -277,29 +277,9 @@ const displayToolVersion = async (tool: { name: string; command?: string; packag
 
   if (tool.command) {
     try {
-      const localVersion = execSync(tool.command, { encoding: 'utf8', timeout: 5000 }).trim();
-      
-      // If it also has a package field, check for updates
-      if (tool.package) {
-        try {
-          const latestVersion = execSync(`npm view ${tool.package} version`, { encoding: 'utf8', timeout: 5000 }).trim().replace(/"/g, '');
-          
-          if (localVersion === latestVersion) {
-            console.log(`  Version: ${localVersion}`);
-            console.log(`  Status: ✅ Up to date`);
-          } else {
-            console.log(`  Version: Local: ${localVersion}, NPM: ${latestVersion}`);
-            console.log(`  Status: ⚠️ Update available`);
-            console.log(`  Update: pnpm update -D ${tool.package}`);
-          }
-        } catch {
-          console.log(`  Version: ${localVersion}`);
-          console.log(`  Status: ✅ Available (update check failed)`);
-        }
-      } else {
-        console.log(`  Version: ${localVersion}`);
-        console.log(`  Status: ✅ Up to date`);
-      }
+      const version = execSync(tool.command, { encoding: 'utf8', timeout: 5000 }).trim();
+      console.log(`  Version: ${version}`);
+      console.log(`  Status: ✅ Available`);
     } catch {
       console.log(`  Version: Not installed`);
       console.log(`  Status: ❌ Not installed`);
@@ -307,25 +287,5 @@ const displayToolVersion = async (tool: { name: string; command?: string; packag
     return;
   }
 
-  if (tool.package) {
-    try {
-      const localOutput = execSync(`pnpm list ${tool.package} --depth=0 --json`, { encoding: 'utf8', timeout: 5000 });
-      const localResult = JSON.parse(localOutput);
-      const localVersion = localResult.dependencies?.[tool.package]?.version;
-
-      const latestVersion = execSync(`npm view ${tool.package} version`, { encoding: 'utf8', timeout: 5000 }).trim().replace(/"/g, '');
-
-      if (localVersion === latestVersion) {
-        console.log(`  Version: ${localVersion}`);
-        console.log(`  Status: ✅ Up to date`);
-      } else {
-        console.log(`  Version: Local: ${localVersion}, NPM: ${latestVersion}`);
-        console.log(`  Status: ⚠️ Update available`);
-        console.log(`  Update: pnpm update -D ${tool.package}`);
-      }
-    } catch {
-      console.log(`  Version: Not installed locally`);
-      console.log(`  Status: ❌ Not installed locally`);
-    }
-  }
+  // All tools now use command-based version checking only
 };

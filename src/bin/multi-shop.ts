@@ -3,17 +3,27 @@
 import { Command } from "commander";
 import { intro, outro } from "@clack/prompts";
 import process from "node:process";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 import { ShopManager } from "../lib/ShopManager.js";
 import { Initializer } from "../lib/Initializer.js";
 import { logger } from "../lib/core/logger.js";
+
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJsonPath = join(__dirname, '../../package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+const VERSION = packageJson.version;
 
 const program = new Command();
 
 program
   .name("multi-shop")
   .description("CLI tool for contextual development and automated shop management for multi-shop Shopify themes")
-  .version("1.0.16")
+  .version(VERSION)
   .option("-v, --verbose", "Enable verbose logging")
   .option("--debug", "Enable debug logging") 
   .option("--dry-run", "Show what would be done without executing")
