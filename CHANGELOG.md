@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-09-09
+
 ### Changed
 
 - **Architecture transformation** - Converted from class-based to pure
