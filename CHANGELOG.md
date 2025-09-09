@@ -10,6 +10,12 @@ and this project adheres to
 
 ## [2.0.4] - 2025-09-09
 
+### Added
+
+- **Blank bump just to test version check**
+
+## [2.0.4] - 2025-09-09
+
 ### Fixed
 
 - **Fix version checking tool** - Fixed a bug in self reporting the version
