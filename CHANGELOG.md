@@ -7,22 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Architecture
+- **Complete functional transformation** - Converted from class-based to pure functional programming
+- **Immutable data patterns** - All data structures readonly, no mutations
+- **Composable functions** - Clean function composition with Result types
+- **Reduced complexity** - 56% code reduction (4,668 → 2,094 lines)
+- **Enhanced maintainability** - All functions under 160 lines, single responsibility
+
 ### Added
+- **Tools menu** - Sync Shops, Link Themes, Version Check functionality
 - **Complete credential workflow** - Collect theme access passwords during shop creation
-- **Interactive credential editing** - Update passwords through Edit Shop menu
-- **Enhanced .gitignore management** - Comprehensive patterns for Shopify theme projects
-- **Theme access app instructions** - Step-by-step setup guidance for getting passwords
-- **Smart staging domain support** - Allow same domain as production for unpublished theme staging
+- **Enhanced .gitignore management** - Comprehensive patterns for development
+- **Shopify CLI termination** - Proper signal handling for development server
 
 ### Fixed
-- **Staging domain validation** - Removed overly strict "staging-" prefix requirement
-- **Enhanced error debugging** - Detailed error information for troubleshooting shop creation
+- **Staging domain validation** - Allow same domain as production
 - **Package name consistency** - All references updated to @shopdevs/multi-shop-cli
+- **Error debugging** - Detailed error information for troubleshooting
 
 ### Improved
-- **User experience** - Complete shop setup in single flow (config + branches + credentials)
-- **Error messages** - Clear debugging information when shop creation fails
-- **Documentation** - All references to Horizon Meyer removed
+- **Code maintainability** - Pure functional architecture with clear composition
+- **User experience** - Complete shop setup in single flow
+- **Development workflow** - Enhanced Tools menu for common operations
 
 ## [1.0.7] - 2025-09-07
 

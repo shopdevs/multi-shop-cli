@@ -78,9 +78,10 @@
     "security:outdated": "npm outdated",
     "docs:build": "typedoc --out docs src/lib/index.ts",
     "version": "npm run validate && npm run build",
-    "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "release:minor": "npm version minor && npm publish && git push --follow-tags",
-    "release:major": "npm version major && npm publish && git push --follow-tags",
+    "update-changelog": "echo '\n⚠️  REQUIRED: Update CHANGELOG.md before continuing:\n1. Move [Unreleased] content to new version section\n2. Add current date\n3. Create new empty [Unreleased] section\n4. Save and commit CHANGELOG.md\n' && echo 'Press Enter when CHANGELOG.md is updated and committed...' && read dummy",
+    "release:patch": "npm run update-changelog && npm version patch && npm publish && git push --follow-tags",
+    "release:minor": "npm run update-changelog && npm version minor && npm publish && git push --follow-tags",
+    "release:major": "npm run update-changelog && npm version major && npm publish && git push --follow-tags",
     "size-check": "npm pack --dry-run && du -sh *.tgz 2>/dev/null || echo 'Package size check complete'"
   },
   "dependencies": {
