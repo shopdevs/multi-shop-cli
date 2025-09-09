@@ -10,6 +10,13 @@ and this project adheres to
 
 ## [2.0.1] - 2025-09-09
 
+### Added
+
+- **More Test Coverage on common functions** - Test coverage for shop related
+  functions
+
+## [2.0.1] - 2025-09-09
+
 ### Fixed
 
 - **Start Dev Server** - The starting of this has been broken
