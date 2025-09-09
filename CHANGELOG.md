@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.7] - 2025-09-09
+
+- Fix incorrect upgrade commands
+
 ## [2.0.6] - 2025-09-09
 
 - Move tools functions into their own files and update the plan so that
