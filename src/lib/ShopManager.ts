@@ -1,58 +1,52 @@
-import type { ShopManagerOptions, SecurityAuditReport, ShopConfig } from "../types/shop.js";
-import { ShopConfigManager } from "./ShopConfig.js";
-import { ShopCLI } from "./ShopCLI.js";
-import { SecurityManager } from "./core/SecurityManager.js";
-import { logger } from "./core/SimpleLogger.js";
+import { runMultiShopManager, createMultiShopCLI } from "./core/index.js";
+import type { ShopManagerOptions } from "../types/shop.js";
 
 /**
- * Main entry point for shop management
- * Coordinates between config, CLI, and security components
+ * Shop manager entry point
  */
+export const createShopManager = (options: ShopManagerOptions = {}) => {
+  const cwd = options.cwd ?? process.cwd();
+  
+  return {
+    run: () => runMultiShopManager(cwd),
+    
+    loadShopConfig: async (shopId: string) => {
+      const context = createMultiShopCLI(cwd);
+      const result = await context.shopOps.loadConfig(shopId);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      return result.data!;
+    },
+
+    listShops: async () => {
+      const context = createMultiShopCLI(cwd);
+      const result = await context.shopOps.listShops();
+      
+      return result.success ? result.data || [] : [];
+    },
+
+    getShopCount: async () => {
+      const context = createMultiShopCLI(cwd);
+      const result = await context.shopOps.listShops();
+      
+      return result.success ? result.data?.length || 0 : 0;
+    }
+  };
+};
+
+// Compatibility class wrapper (temporary)
 export class ShopManager {
-  private readonly configManager: ShopConfigManager;
-  private readonly cli: ShopCLI;
-  private readonly security: SecurityManager;
+  private readonly manager: ReturnType<typeof createShopManager>;
 
   constructor(options: ShopManagerOptions = {}) {
-    const cwd = options.cwd ?? process.cwd();
-    this.configManager = new ShopConfigManager(cwd);
-    this.cli = new ShopCLI(cwd);
-    this.security = new SecurityManager(`${cwd}/shops/credentials`);
+    this.manager = createShopManager(options);
   }
 
-  /**
-   * Run interactive shop management
-   */
-  async run(): Promise<void> {
-    await this.cli.run();
-  }
-
-  /**
-   * Load shop configuration
-   */
-  loadShopConfig(shopId: string): ShopConfig {
-    return this.configManager.load(shopId);
-  }
-
-  /**
-   * Save shop configuration  
-   */
-  saveShopConfig(shopId: string, config: ShopConfig) {
-    return this.configManager.save(shopId, config);
-  }
-
-  /**
-   * List all shops
-   */
-  listShops(): string[] {
-    return this.configManager.list();
-  }
-
-  /**
-   * Get shop count
-   */
-  async getShopCount(): Promise<number> {
-    return this.configManager.count();
-  }
-
+  async run() { return this.manager.run(); }
+  async loadShopConfig(shopId: string) { return this.manager.loadShopConfig(shopId); }
+  async listShops() { return this.manager.listShops(); }
+  async getShopCount() { return this.manager.getShopCount(); }
 }

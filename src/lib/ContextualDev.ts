@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import type { ShopManagerOptions } from "../types/shop.js";
-import { logger } from "./core/SimpleLogger.js";
+import { logger } from "./core/logger.js";
 
 /**
  * Contextual development that adapts to branch context
@@ -41,10 +41,16 @@ export class ContextualDev {
         console.log(`🎯 Starting contextual development mode...`);
         console.log();
         
-        // Import and use contextual shop manager
-        const { ContextualShopManager } = await import("./ContextualShopManager.js");
-        const manager = new ContextualShopManager();
-        await manager.handleContextualDev(currentBranch);
+        // Use functional contextual development
+        const { createMultiShopCLI } = await import("./core/index.js");
+        const { startDevelopmentWorkflow } = await import("./core/dev-operations.js");
+        
+        const context = createMultiShopCLI();
+        const result = await startDevelopmentWorkflow(context);
+        
+        if (!result.success && result.error) {
+          logger.error('Contextual development failed', { error: result.error });
+        }
       }
       
       endOperation('success', { branch: currentBranch, type: shopMatch ? 'shop-specific' : 'contextual' });
