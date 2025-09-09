@@ -8,7 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [2.0.4] - 2025-09-09
+## [2.0.6] - 2025-09-09
+
+- Move tools functions into their own files and update the plan so that
+  functions have their own files.
+
+## [2.0.5] - 2025-09-09
 
 ### Added
 
