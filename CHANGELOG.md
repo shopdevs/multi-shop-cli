@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.4] - 2025-09-09
+
+### Fixed
+
+- **Fix version checking tool** - Fixed a bug in self reporting the version
+
 ## [2.0.3] - 2025-09-09
 
 ### Fixed
