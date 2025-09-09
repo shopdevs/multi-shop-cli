@@ -1,5 +1,5 @@
 import { intro, outro, select, isCancel, note } from "@clack/prompts";
-import type { CLIContext, Result } from "./types.js";
+import type { CLIContext } from "./types.js";
 import { createNewShop } from "./shop-creation.js";
 import { startDevelopmentWorkflow } from "./dev-operations.js";
 import { editShop } from "./shop-editing.js";

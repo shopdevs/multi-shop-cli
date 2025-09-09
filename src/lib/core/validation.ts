@@ -10,8 +10,8 @@ export const validateShopId = (shopId: string): Result<void> => {
     return { success: false, error: 'Shop ID is required' };
   }
 
-  if (!/^[a-z0-9-]+$/.test(shopId)) {
-    return { success: false, error: 'Shop ID must contain only lowercase letters, numbers, and hyphens' };
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(shopId)) {
+    return { success: false, error: 'Shop ID must contain only lowercase letters, numbers, and hyphens (no leading/trailing hyphens)' };
   }
 
   if (shopId.length < 1 || shopId.length > 50) {
@@ -28,6 +28,10 @@ export const validateDomain = (domain: string): Result<void> => {
 
   if (!domain.endsWith('.myshopify.com')) {
     return { success: false, error: 'Domain must end with .myshopify.com' };
+  }
+
+  if (domain.length <= '.myshopify.com'.length) {
+    return { success: false, error: 'Domain must have a subdomain before .myshopify.com' };
   }
 
   return { success: true };
