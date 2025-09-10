@@ -8,10 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.10] - 2025-09-10
+
 ### Fixed
-- **Shop Sync status accuracy** - Now shows correct status based on actual results instead of always "PR creation completed"
-- **GitHub CLI command completeness** - Added required --body flag to prevent "must provide title and body" errors
-- **GitHub CLI error detail capture** - Now shows actual stderr/stdout from GitHub CLI commands instead of generic error messages
+
+- **Shop Sync status accuracy** - Now shows correct status based on actual
+  results instead of always "PR creation completed"
+- **GitHub CLI command completeness** - Added required --body flag to prevent
+  "must provide title and body" errors
+- **GitHub CLI error detail capture** - Now shows actual stderr/stdout from
+  GitHub CLI commands instead of generic error messages
 
 ## [2.0.9] - 2025-09-10
 
