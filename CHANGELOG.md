@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.9] - 2025-09-10
+
+### Fixed
+
+- **GitHub CLI error capture** - Shop Sync now shows actual detailed error
+  messages from GitHub CLI instead of generic "Command failed"
+
 ## [2.0.8] - 2025-09-10
 
 ### Added

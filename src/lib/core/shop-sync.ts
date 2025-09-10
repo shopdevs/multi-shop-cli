@@ -59,13 +59,18 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
 
     for (const shop of selectedShops) {
       try {
-        execSync(`gh pr create --base ${shop}/staging --head main --title "${title}"`, { stdio: 'ignore' });
+        execSync(`gh pr create --base ${shop}/staging --head main --title "${title}"`, { 
+          stdio: ['ignore', 'pipe', 'pipe'],
+          encoding: 'utf8' 
+        });
         results.push({ shop, success: true });
-      } catch (error) {
+      } catch (error: any) {
+        // Capture the actual GitHub CLI error output
+        const errorOutput = error.stderr || error.stdout || error.message || 'Unknown error';
         results.push({ 
           shop, 
           success: false, 
-          error: error instanceof Error ? error.message : String(error)
+          error: errorOutput
         });
       }
     }
