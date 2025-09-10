@@ -8,12 +8,19 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.8] - 2025-09-10
+
 ### Added
-- **Enhanced PR creation debugging** - Show error logs and complete manual instructions when automation fails
+
+- **Enhanced PR creation debugging** - Show error logs and complete manual
+  instructions when automation fails
 
 ### Fixed
-- **Shop Sync error handling** - Now captures and displays GitHub CLI error details
-- **Manual instruction completeness** - Shows both CLI commands and web interface methods
+
+- **Shop Sync error handling** - Now captures and displays GitHub CLI error
+  details
+- **Manual instruction completeness** - Shows both CLI commands and web
+  interface methods
 
 ## [2.0.7] - 2025-09-09
 
