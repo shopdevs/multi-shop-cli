@@ -297,4 +297,5 @@ This is a clean, maintainable NPM package. When working on it:
 - **Shop flexibility** - Tool works for any number of shops (1 to 50+), don't assume 4 shops in examples
 - **Promo workflow value** - Even single-shop setups benefit from promo branch management
 - **No backward compatibility** - This is a new package, always check before adding compatibility layers
-- **Always update the changelog** when ready for a new version
+- **Maintain changelog** - Add changes to [Unreleased] section as you work, avoid jargon
+- **Version workflow** - User edits [Unreleased] → [Version] with date during release

@@ -8,20 +8,31 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+- **Enhanced PR creation debugging** - Show error logs and complete manual instructions when automation fails
+
+### Fixed
+- **Shop Sync error handling** - Now captures and displays GitHub CLI error details
+- **Manual instruction completeness** - Shows both CLI commands and web interface methods
+
 ## [2.0.7] - 2025-09-09
 
-- Fix incorrect upgrade commands
+### Fixed
+
+- **Fix incorrect upgrade commands** - Upgrade commands were incorrect
 
 ## [2.0.6] - 2025-09-09
 
-- Move tools functions into their own files and update the plan so that
-  functions have their own files.
+### Fixed
+
+- **Consolidate functions to files** - Move tools functions into their own files
+  and update the plan so that functions have their own files.
 
 ## [2.0.5] - 2025-09-09
 
 ### Added
 
-- **Blank bump just to test version check**
+- **Blank bump just to test version check** - Version checking test irl
 
 ## [2.0.4] - 2025-09-09
 

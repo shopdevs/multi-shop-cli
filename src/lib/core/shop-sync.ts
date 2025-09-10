@@ -55,14 +55,18 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
     s.start("Creating shop sync PRs...");
     execSync('gh --version', { stdio: 'ignore' });
 
-    const results: { shop: string; success: boolean }[] = [];
+    const results: { shop: string; success: boolean; error?: string }[] = [];
 
     for (const shop of selectedShops) {
       try {
         execSync(`gh pr create --base ${shop}/staging --head main --title "${title}"`, { stdio: 'ignore' });
         results.push({ shop, success: true });
-      } catch {
-        results.push({ shop, success: false });
+      } catch (error) {
+        results.push({ 
+          shop, 
+          success: false, 
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
     }
 
@@ -76,8 +80,9 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
     }
 
     if (failures.length > 0) {
-      note(`Failed for: ${failures.map(r => r.shop).join(', ')}`, "⚠️ Manual Required");
-      showManualInstructions(failures.map(f => f.shop), title);
+      note("Automated PR creation failed", "⚠️ Automation Failed");
+      await offerToShowLogs(failures);
+      showCompleteManualInstructions(failures.map(f => f.shop), title);
     }
 
     return { success: true };
@@ -85,14 +90,48 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
   } catch {
     s.stop("❌ GitHub CLI not found");
     note("Install GitHub CLI to automate PR creation", "Manual Setup Required");
-    showManualInstructions(selectedShops, title);
+    showCompleteManualInstructions(selectedShops, title);
     return { success: true };
   }
 };
 
-const showManualInstructions = (shops: string[], title: string): void => {
-  note("Manual PR creation commands:", "📝 Commands");
+const offerToShowLogs = async (failures: { shop: string; error?: string }[]): Promise<void> => {
+  const showLogs = await select({
+    message: "Would you like to see the error details?",
+    options: [
+      { value: "yes", label: "Yes, show error logs", hint: "See why PR creation failed" },
+      { value: "no", label: "No, just continue", hint: "Skip to manual instructions" }
+    ]
+  });
+
+  if (!isCancel(showLogs) && showLogs === "yes") {
+    note("Error details for failed PR creation:", "📋 Debug Info");
+    failures.forEach(failure => {
+      console.log(`\n${failure.shop}:`);
+      console.log(`  Error: ${failure.error || "Unknown error"}`);
+    });
+    console.log();
+  }
+};
+
+const showCompleteManualInstructions = (shops: string[], title: string): void => {
+  note("Manual PR creation options:", "📝 Manual Setup");
+  
+  console.log(`\n🔧 Method 1: GitHub CLI Commands`);
   shops.forEach(shop => {
     console.log(`gh pr create --base ${shop}/staging --head main --title "${title}"`);
   });
+  
+  console.log(`\n🌐 Method 2: GitHub Web Interface`);
+  console.log(`1. Go to your repository on GitHub`);
+  console.log(`2. Click 'Pull requests' → 'New pull request'`);
+  shops.forEach(shop => {
+    console.log(`3. Create PR: main → ${shop}/staging`);
+    console.log(`   Title: ${title}`);
+  });
+  
+  console.log(`\n💡 Common issues:`);
+  console.log(`   - Branch '${shops[0]}/staging' doesn't exist`);
+  console.log(`   - Not authenticated: gh auth login`);
+  console.log(`   - Wrong repository context: check you're in the right directory`);
 };
