@@ -59,7 +59,7 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
 
     for (const shop of selectedShops) {
       try {
-        execSync(`gh pr create --base ${shop}/staging --head main --title "${title}"`, { 
+        execSync(`gh pr create --base ${shop}/staging --head main --title "${title}" --body "Automated deployment of latest changes from main branch"`, { 
           stdio: ['ignore', 'pipe', 'pipe'],
           encoding: 'utf8' 
         });
@@ -75,16 +75,20 @@ const createShopSyncPRs = async (selectedShops: string[], title: string): Promis
       }
     }
 
-    s.stop("✅ PR creation completed");
-    
     const successes = results.filter(r => r.success);
     const failures = results.filter(r => !r.success);
 
-    if (successes.length > 0) {
+    if (successes.length > 0 && failures.length === 0) {
+      s.stop("✅ All PRs created successfully");
       note(`Created PRs for: ${successes.map(r => r.shop).join(', ')}`, "✅ Success");
-    }
-
-    if (failures.length > 0) {
+    } else if (successes.length > 0 && failures.length > 0) {
+      s.stop("⚠️ Some PRs failed");
+      note(`Created PRs for: ${successes.map(r => r.shop).join(', ')}`, "✅ Success");
+      note("Some PR creation failed", "⚠️ Automation Failed");
+      await offerToShowLogs(failures);
+      showCompleteManualInstructions(failures.map(f => f.shop), title);
+    } else {
+      s.stop("❌ All PR creation failed");
       note("Automated PR creation failed", "⚠️ Automation Failed");
       await offerToShowLogs(failures);
       showCompleteManualInstructions(failures.map(f => f.shop), title);
@@ -124,7 +128,7 @@ const showCompleteManualInstructions = (shops: string[], title: string): void =>
   
   console.log(`\n🔧 Method 1: GitHub CLI Commands`);
   shops.forEach(shop => {
-    console.log(`gh pr create --base ${shop}/staging --head main --title "${title}"`);
+    console.log(`gh pr create --base ${shop}/staging --head main --title "${title}" --body "Deployment of latest changes from main branch"`);
   });
   
   console.log(`\n🌐 Method 2: GitHub Web Interface`);
