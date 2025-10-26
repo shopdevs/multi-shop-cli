@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version type (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    name: Release Package
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run validation
+        run: pnpm run validate
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Update changelog reminder
+        run: |
+          echo "⚠️  REMINDER: Ensure CHANGELOG.md has been updated!"
+          echo "The changelog should document all changes for this release."
+          echo ""
+          echo "Format: Keep a Changelog v1.1.0"
+          echo "- Move [Unreleased] content to new version section"
+          echo "- Add release date"
+          echo "- Create new empty [Unreleased] section"
+          echo ""
+
+      - name: Check if changelog updated
+        id: changelog_check
+        run: |
+          # Check if CHANGELOG.md has [Unreleased] section (it should be empty after release prep)
+          if grep -q "\[Unreleased\]" CHANGELOG.md; then
+            echo "Changelog has [Unreleased] section ✓"
+            echo "changelog_ok=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Warning: No [Unreleased] section found in CHANGELOG.md"
+            echo "changelog_ok=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Version bump
+        run: npm version ${{ github.event.inputs.version }} -m "Release %s"
+
+      - name: Get new version
+        id: version
+        run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          release_name: v${{ steps.version.outputs.new_version }}
+          body: |
+            Release ${{ steps.version.outputs.new_version }}
+
+            See [CHANGELOG.md](https://github.com/shopdevs/multi-shop/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Push changes
+        run: |
+          git push
+          git push --tags
+
+      - name: Create release summary
+        run: |
+          echo "## 🎉 Release Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published to:" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 npm: https://www.npmjs.com/package/@shopdevs/multi-shop-cli/v/${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏷️  GitHub: https://github.com/shopdevs/multi-shop/releases/tag/v${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verify package on npm" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test installation: \`pnpm add -D @shopdevs/multi-shop-cli@${{ steps.version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update dependent projects" >> $GITHUB_STEP_SUMMARY

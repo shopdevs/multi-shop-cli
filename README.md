@@ -1,5 +1,10 @@
 # 🚀 ShopDevs Multi-Shop
 
+[![CI](https://github.com/shopdevs/multi-shop/actions/workflows/ci.yml/badge.svg)](https://github.com/shopdevs/multi-shop/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/@shopdevs%2Fmulti-shop-cli.svg)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
+[![codecov](https://codecov.io/gh/shopdevs/multi-shop/branch/main/graph/badge.svg)](https://codecov.io/gh/shopdevs/multi-shop)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > Contextual development and automated shop management for multi-shop Shopify themes
 
 ## What is Multi-Shop?

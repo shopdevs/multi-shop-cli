@@ -1,0 +1,19 @@
+{
+  "shopId": "test-shop",
+  "name": "Test Shop",
+  "shopify": {
+    "stores": {
+      "production": {
+        "domain": "test-shop.myshopify.com",
+        "branch": "test-shop/main"
+      },
+      "staging": {
+        "domain": "staging-test-shop.myshopify.com",
+        "branch": "test-shop/staging"
+      }
+    },
+    "authentication": {
+      "method": "theme-access-app"
+    }
+  }
+}

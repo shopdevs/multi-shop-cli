@@ -294,6 +294,91 @@ npm run validate
 npm run release
 ```
 
+## 🔄 CI/CD Pipeline
+
+### Continuous Integration
+
+Our CI pipeline runs automatically on every push and pull request:
+
+#### Test Matrix
+- **Node versions**: 18, 20, 22
+- **Operating systems**: Ubuntu, macOS, Windows
+- **Total test combinations**: 9 (3 nodes × 3 OSes)
+
+#### CI Jobs
+
+**1. Test Job** (runs on all matrix combinations)
+```bash
+- Checkout code
+- Install dependencies (pnpm)
+- Run linter
+- Run type checking
+- Run test suite
+- Upload coverage (Ubuntu + Node 20 only)
+```
+
+**2. Quality Job** (runs on Ubuntu + Node 20)
+```bash
+- Run full validation (lint + typecheck + test)
+- Check package size
+- Build package
+- Verify build output
+```
+
+**3. Security Job** (runs on Ubuntu + Node 20)
+```bash
+- Run npm audit
+- Check for outdated dependencies
+```
+
+#### CI Status
+
+All PRs must pass CI before merging:
+- ✅ All tests pass on all platforms
+- ✅ No linting errors
+- ✅ No type errors
+- ✅ Build succeeds
+- ✅ Coverage report uploaded
+
+View CI status: [GitHub Actions](https://github.com/shopdevs/multi-shop/actions)
+
+### Automated Releases
+
+Releases are triggered manually via GitHub Actions:
+
+#### Release Process
+1. **Prepare**:
+   - Update `CHANGELOG.md` with release notes
+   - Move `[Unreleased]` content to new version section
+   - Commit changelog changes
+
+2. **Trigger Release**:
+   - Go to Actions → Release workflow
+   - Select version type (patch/minor/major)
+   - Click "Run workflow"
+
+3. **Automated Steps**:
+   - Run full validation
+   - Build package
+   - Version bump (npm version)
+   - Create GitHub release
+   - Publish to npm
+   - Push changes and tags
+
+4. **Post-Release**:
+   - Verify package on npm
+   - Test installation
+   - Update dependent projects
+
+#### Manual Release (if needed)
+```bash
+# Ensure changelog is updated
+npm run update-changelog
+
+# Run release script
+npm run release:patch  # or release:minor, release:major
+```
+
 ## 🤝 Community
 
 ### Communication Channels
