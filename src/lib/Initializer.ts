@@ -1,16 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { execSync } from "child_process";
 import {
-  intro,
-  outro,
   select,
-  text,
   spinner,
   isCancel,
-  cancel,
   note,
-  log,
 } from "@clack/prompts";
 
 import { logger } from "./core/logger.js";

@@ -1,13 +1,10 @@
 /**
  * ShopDevs Multi-Shop - Contextual development for Shopify themes
- * 
+ *
  * Main package exports
  */
 
-// Main interface
-export { ShopManager } from "./ShopManager.js";
-
-// Core operations
+// Core functional API (primary interface)
 export { createMultiShopCLI, runMultiShopManager } from "./core/index.js";
 export { createNewShop } from "./core/shop-creation.js";
 export { startDevelopmentWorkflow } from "./core/dev-operations.js";

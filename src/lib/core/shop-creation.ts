@@ -12,17 +12,17 @@ export const createNewShop = async (context: CLIContext): Promise<Result<void>> 
   intro("🆕 Create New Shop");
   
   const shopDataResult = await collectShopData(context);
-  if (!shopDataResult.success) return { success: false, error: shopDataResult.error || "Failed to collect shop data" };
-  
-  const configResult = await buildShopConfig(shopDataResult.data!);
-  if (!configResult.success) return { success: false, error: configResult.error || "Failed to build config" };
-  
-  const saveResult = await context.shopOps.saveConfig(shopDataResult.data!.shopId, configResult.data!);
+  if (!shopDataResult.success || !shopDataResult.data) return { success: false, error: shopDataResult.error || "Failed to collect shop data" };
+
+  const configResult = await buildShopConfig(shopDataResult.data);
+  if (!configResult.success || !configResult.data) return { success: false, error: configResult.error || "Failed to build config" };
+
+  const saveResult = await context.shopOps.saveConfig(shopDataResult.data.shopId, configResult.data);
   if (!saveResult.success) return saveResult;
 
-  note(`✅ Shop configuration created for ${shopDataResult.data!.shopName}`, "Success");
-  
-  await setupShopResources(shopDataResult.data!, configResult.data!, context);
+  note(`✅ Shop configuration created for ${shopDataResult.data.shopName}`, "Success");
+
+  await setupShopResources(shopDataResult.data, configResult.data, context);
 
   return { success: true };
 };

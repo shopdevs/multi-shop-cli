@@ -1,13 +1,15 @@
 import { intro, outro, select, isCancel, note } from "@clack/prompts";
-import type { CLIContext } from "./types.js";
+import type { CLIContext, Result } from "./types.js";
 import { createNewShop } from "./shop-creation.js";
 import { startDevelopmentWorkflow } from "./dev-operations.js";
 import { editShop } from "./shop-editing.js";
 import { handleTools } from "./tools.js";
 
 /**
- * CLI interface for shop management
+ * CLI interface for shop management using state machine pattern
  */
+
+type MenuAction = 'dev' | 'list' | 'create' | 'edit' | 'tools' | 'exit';
 
 export const runCLI = async (context: CLIContext): Promise<void> => {
   intro("🚀 Multi-Shop Manager");
@@ -22,15 +24,15 @@ export const runCLI = async (context: CLIContext): Promise<void> => {
     return;
   }
 
-  // Recursive menu loop (pure functional)
+  // Iterative state machine loop (no recursion)
   await runMenuLoop(context);
 };
 
 const showMainMenu = async (context: CLIContext): Promise<string> => {
   const shopsResult = await context.shopOps.listShops();
-  const shopCount = shopsResult.success ? shopsResult.data?.length || 0 : 0;
-  
-  const status = shopCount > 0 
+  const shopCount = shopsResult.success ? shopsResult.data?.length ?? 0 : 0;
+
+  const status = shopCount > 0
     ? `📋 ${shopCount} shop${shopCount === 1 ? "" : "s"} configured`
     : "No shops configured yet";
 
@@ -47,23 +49,34 @@ const showMainMenu = async (context: CLIContext): Promise<string> => {
       { value: "exit", label: "Exit", hint: "Close manager" }
     ]
   });
-  
+
   return result as string;
 };
 
+/**
+ * Iterative menu loop using state machine pattern
+ * No recursion - cleaner stack traces and better debugging
+ */
 const runMenuLoop = async (context: CLIContext): Promise<void> => {
-  const choice = await showMainMenu(context);
-  
-  if (isCancel(choice) || choice === "exit") {
-    outro("👋 Goodbye!");
-    return;
+  let shouldContinue = true;
+
+  // Iterative loop - no recursion
+  while (shouldContinue) {
+    const choice = await showMainMenu(context);
+
+    if (isCancel(choice) || choice === "exit") {
+      shouldContinue = false;
+      break;
+    }
+
+    await executeMenuChoice(context, choice as MenuAction);
+    // Loop continues to show menu again
   }
 
-  await executeMenuChoice(context, choice as string);
-  await runMenuLoop(context); // Tail recursion
+  outro("👋 Goodbye!");
 };
 
-const executeMenuChoice = async (context: CLIContext, choice: string): Promise<void> => {
+const executeMenuChoice = async (context: CLIContext, choice: MenuAction): Promise<void> => {
   switch (choice) {
     case "dev":
       await startDevelopmentServer(context);
@@ -88,31 +101,31 @@ const executeMenuChoice = async (context: CLIContext, choice: string): Promise<v
 };
 
 // Pure functional menu handlers
-const startDevelopmentServer = (context: CLIContext) => startDevelopmentWorkflow(context);
+const startDevelopmentServer = (context: CLIContext): Promise<Result<void>> => startDevelopmentWorkflow(context);
 
 const listShops = async (context: CLIContext): Promise<void> => {
   const result = await context.shopOps.listShops();
-  
+
   if (!result.success) {
-    note(result.error || "Failed to list shops", "❌ Error");
+    note(result.error ?? "Failed to list shops", "❌ Error");
     return;
   }
 
-  const shops = result.data || [];
-  
+  const shops = result.data ?? [];
+
   if (shops.length === 0) {
     note("No shops configured yet.", "📋 Shop List");
     return;
   }
 
   note(`Found ${shops.length} configured shop${shops.length === 1 ? '' : 's'}:`, "📋 Shop List");
-  
+
   await Promise.all(shops.map(shopId => displayShopInfo(context, shopId)));
 };
 
 const displayShopInfo = async (context: CLIContext, shopId: string): Promise<void> => {
   const configResult = await context.shopOps.loadConfig(shopId);
-  
+
   if (configResult.success && configResult.data) {
     const config = configResult.data;
     console.log(`\n📦 ${config.name} (${shopId})`);
@@ -131,8 +144,6 @@ const createShop = async (context: CLIContext): Promise<void> => {
     note(result.error, "❌ Error");
   }
 };
-
-// Import implementations are at the top of the file
 
 const waitForKey = async (): Promise<void> => {
   return new Promise((resolve) => {

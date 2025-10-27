@@ -7,7 +7,7 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
-import { ShopManager } from "../lib/ShopManager.js";
+import { runMultiShopManager } from "../lib/core/index.js";
 import { Initializer } from "../lib/Initializer.js";
 import { logger } from "../lib/core/logger.js";
 
@@ -69,14 +69,13 @@ program
   .description("Launch interactive shop management")
   .action(async () => {
     const endOperation = logger.startOperation('shop_management');
-    
+
     try {
-      const manager = new ShopManager();
-      await manager.run();
+      await runMultiShopManager();
       endOperation('success');
     } catch (error) {
-      logger.error('Shop management failed', { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('Shop management failed', {
+        error: error instanceof Error ? error.message : String(error)
       });
       endOperation('error', { error: error instanceof Error ? error.message : String(error) });
       process.exit(1);
@@ -93,14 +92,61 @@ program
       const dev = new ContextualDev();
       await dev.run();
     } catch (error) {
-      logger.error('Development server failed', { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('Development server failed', {
+        error: error instanceof Error ? error.message : String(error)
       });
       process.exit(1);
     }
   });
 
+// Security audit
+program
+  .command("audit")
+  .description("Run security audit on shop configurations and credentials")
+  .option("--json", "Output results as JSON")
+  .action(async (options) => {
+    const endOperation = logger.startOperation('security_audit', options);
 
+    try {
+      const { intro, outro } = await import("@clack/prompts");
+      const { createMultiShopCLI } = await import("../lib/core/index.js");
+      const { runSecurityAudit, formatAuditReport } = await import("../lib/core/security-audit.js");
+
+      intro("🔒 Security Audit");
+
+      const context = createMultiShopCLI();
+      const result = await runSecurityAudit(context.deps);
+
+      if (result.success && result.data) {
+        if (options.json) {
+          console.log(JSON.stringify(result.data, null, 2));
+        } else {
+          console.log(formatAuditReport(result.data));
+        }
+
+        // Exit with error if critical issues found
+        const criticalIssues = result.data.issues.filter(i => i.level === 'error');
+        if (criticalIssues.length > 0) {
+          outro("⚠️  Critical security issues found");
+          endOperation('error', { criticalIssues: criticalIssues.length });
+          process.exit(1);
+        } else {
+          outro("✨ Audit complete");
+          endOperation('success');
+        }
+      } else {
+        logger.error('Security audit failed', { error: result.error });
+        endOperation('error', { error: result.error });
+        process.exit(1);
+      }
+    } catch (error) {
+      logger.error('Security audit failed', {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      endOperation('error', { error: error instanceof Error ? error.message : String(error) });
+      process.exit(1);
+    }
+  });
 
 // Global error handler
 process.on('uncaughtException', (error) => {

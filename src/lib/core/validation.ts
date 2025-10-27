@@ -1,21 +1,32 @@
 import type { ShopConfig } from "../../types/shop.js";
 import type { Result } from "./types.js";
+import {
+  SHOP_ID_RULES,
+  DOMAIN_RULES,
+  VALIDATION_ERRORS,
+  isValidShopId as isShopIdValid,
+  isValidDomain as isDomainValid
+} from "./validation-schemas.js";
 
 /**
- * Pure functional validation
+ * Pure functional validation using centralized validation schemas
  */
 
 export const validateShopId = (shopId: string): Result<void> => {
   if (!shopId || typeof shopId !== 'string') {
-    return { success: false, error: 'Shop ID is required' };
+    return { success: false, error: VALIDATION_ERRORS.shopId.required };
   }
 
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(shopId)) {
-    return { success: false, error: 'Shop ID must contain only lowercase letters, numbers, and hyphens (no leading/trailing hyphens)' };
+  if (shopId.length < SHOP_ID_RULES.minLength) {
+    return { success: false, error: VALIDATION_ERRORS.shopId.tooShort };
   }
 
-  if (shopId.length < 1 || shopId.length > 50) {
-    return { success: false, error: 'Shop ID must be between 1 and 50 characters' };
+  if (shopId.length > SHOP_ID_RULES.maxLength) {
+    return { success: false, error: VALIDATION_ERRORS.shopId.tooLong };
+  }
+
+  if (!SHOP_ID_RULES.pattern.test(shopId)) {
+    return { success: false, error: VALIDATION_ERRORS.shopId.invalid };
   }
 
   return { success: true };
@@ -23,15 +34,19 @@ export const validateShopId = (shopId: string): Result<void> => {
 
 export const validateDomain = (domain: string): Result<void> => {
   if (!domain || typeof domain !== 'string') {
-    return { success: false, error: 'Domain is required' };
+    return { success: false, error: VALIDATION_ERRORS.domain.required };
   }
 
-  if (!domain.endsWith('.myshopify.com')) {
-    return { success: false, error: 'Domain must end with .myshopify.com' };
+  if (!domain.endsWith(DOMAIN_RULES.suffix)) {
+    return { success: false, error: VALIDATION_ERRORS.domain.wrongSuffix };
   }
 
-  if (domain.length <= '.myshopify.com'.length) {
-    return { success: false, error: 'Domain must have a subdomain before .myshopify.com' };
+  if (domain.length <= DOMAIN_RULES.minTotalLength) {
+    return { success: false, error: VALIDATION_ERRORS.domain.noSubdomain };
+  }
+
+  if (!DOMAIN_RULES.pattern.test(domain)) {
+    return { success: false, error: VALIDATION_ERRORS.domain.invalid };
   }
 
   return { success: true };
@@ -39,7 +54,7 @@ export const validateDomain = (domain: string): Result<void> => {
 
 export const validateShopConfig = async (config: unknown, shopId: string): Promise<Result<void>> => {
   if (!config || typeof config !== 'object') {
-    return { success: false, error: 'Configuration must be an object' };
+    return { success: false, error: VALIDATION_ERRORS.config.notObject };
   }
 
   const shopConfig = config as ShopConfig;
@@ -50,7 +65,7 @@ export const validateShopConfig = async (config: unknown, shopId: string): Promi
   }
 
   if (shopConfig.shopId !== shopId) {
-    return { success: false, error: 'Shop ID in config does not match provided shop ID' };
+    return { success: false, error: VALIDATION_ERRORS.shopId.mismatch };
   }
 
   const prodDomainValidation = validateDomain(shopConfig.shopify.stores.production.domain);
@@ -65,3 +80,6 @@ export const validateShopConfig = async (config: unknown, shopId: string): Promi
 
   return { success: true };
 };
+
+// Re-export type guards from validation-schemas
+export { isShopIdValid as isValidShopId, isDomainValid as isValidDomain };

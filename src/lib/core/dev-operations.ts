@@ -24,7 +24,7 @@ export const startDevelopmentWorkflow = async (context: CLIContext): Promise<Res
   const environment = await selectEnvironment();
   if (!environment) return { success: false, error: "No environment selected" };
 
-  return await startShopifyDevelopmentServer(context, selectedShop, environment);
+  return startShopifyDevelopmentServer(context, selectedShop, environment);
 };
 
 const selectShopForDevelopment = async (shops: string[]): Promise<string | null> => {
@@ -71,7 +71,11 @@ const startShopifyDevelopmentServer = async (context: CLIContext, shopId: string
     return { success: false, error: "No credentials available" };
   }
 
-  const config = configResult.data!;
+  const config = configResult.data;
+  if (!config) {
+    return { success: false, error: "Config data is missing" };
+  }
+
   const store = config.shopify.stores[environment];
   const token = credentials.shopify.stores[environment].themeToken;
 
@@ -80,7 +84,7 @@ const startShopifyDevelopmentServer = async (context: CLIContext, shopId: string
     return { success: false, error: "No theme token available" };
   }
 
-  return await executeShopifyCLI(store.domain, token, shopId, environment);
+  return executeShopifyCLI(store.domain, token, shopId, environment);
 };
 
 const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId: string, environment: 'staging' | 'production'): Promise<Result<void>> => {
@@ -116,7 +120,7 @@ const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId
     });
 
     return new Promise<Result<void>>((resolve) => {
-      const handleSignal = (signal: NodeJS.Signals) => {
+      const handleSignal = (signal: NodeJS.Signals): void => {
         console.log(`\nReceived ${signal}, stopping development server...`);
         devProcess.kill(signal);
       };
@@ -145,7 +149,7 @@ const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId
   }
 };
 
-const startDevServer = async (deps: Dependencies, shopId: string, environment: 'production' | 'staging'): Promise<Result<void>> => {
+const startDevServer = async (_deps: Dependencies, _shopId: string, _environment: 'production' | 'staging'): Promise<Result<void>> => {
   // This is called through the DevOperations interface but we use the workflow function instead
   return { success: true };
 };

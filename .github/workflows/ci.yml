@@ -122,7 +122,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run security audit
+      - name: Build package (for audit command)
+        run: pnpm run build
+
+      - name: Run multi-shop security audit
+        run: node dist/bin/multi-shop.js audit --json > security-audit-report.json || true
+
+      - name: Display audit report
+        run: node dist/bin/multi-shop.js audit || true
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-audit-report
+          path: security-audit-report.json
+
+      - name: Run npm security audit
         run: pnpm run security:audit
         continue-on-error: true
 

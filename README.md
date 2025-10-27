@@ -467,8 +467,8 @@ This package provides proven multi-shop workflow patterns for any Shopify theme 
 ```bash
 git clone https://github.com/shopdevs/multi-shop.git
 cd multi-shop
-npm install
-npm test
+pnpm install
+pnpm test
 ```
 
 ### Publishing

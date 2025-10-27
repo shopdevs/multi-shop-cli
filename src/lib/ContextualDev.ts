@@ -1,5 +1,4 @@
 import { execSync } from "child_process";
-import type { ShopManagerOptions } from "../types/shop.js";
 import { logger } from "./core/logger.js";
 
 /**
@@ -27,14 +26,13 @@ export class ContextualDev {
         console.log(`📋 Shop-specific branch detected: ${shopMatch[1]}`);
         console.log(`🚀 Delegating to shop development workflow...`);
         console.log();
-        
+
         // Call the shop manager with auto-dev mode
         process.env['AUTO_SELECT_DEV'] = "true";
-        
-        const { ShopManager } = await import("./ShopManager.js");
-        const manager = new ShopManager();
-        await manager.run();
-        
+
+        const { runMultiShopManager } = await import("./core/index.js");
+        await runMultiShopManager();
+
       } else {
         // Non-shop branch - use contextual development
         console.log(`🛠️  Feature branch detected: ${currentBranch}`);

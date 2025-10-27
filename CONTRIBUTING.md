@@ -288,10 +288,10 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ```bash
 # Validate release
-npm run validate
+pnpm run validate
 
 # Version bump and publish
-npm run release
+pnpm run release
 ```
 
 ## 🔄 CI/CD Pipeline
@@ -373,10 +373,10 @@ Releases are triggered manually via GitHub Actions:
 #### Manual Release (if needed)
 ```bash
 # Ensure changelog is updated
-npm run update-changelog
+pnpm run update-changelog
 
 # Run release script
-npm run release:patch  # or release:minor, release:major
+pnpm run release:patch  # or release:minor, release:major
 ```
 
 ## 🤝 Community

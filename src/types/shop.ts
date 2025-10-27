@@ -132,30 +132,16 @@ export interface ShopManagerOptions {
   readonly performanceMonitor?: PerformanceMonitor;
 }
 
-// Simple validation functions
-export const isValidShopId = (value: string): boolean => {
-  return /^[a-z0-9-]+$/.test(value) && value.length >= 1 && value.length <= 50;
-};
+/**
+ * Type guards and validation functions
+ *
+ * These are re-exported from the centralized validation-schemas module
+ * to maintain backward compatibility and provide convenient access.
+ */
 
-export const isValidDomain = (value: string): boolean => {
-  return value.endsWith('.myshopify.com') && value.length > '.myshopify.com'.length;
-};
-
-export const isValidThemeToken = (value: string, authMethod: AuthenticationMethod): boolean => {
-  if (!value || value.length < 10) return false;
-  if (authMethod === 'manual-tokens') {
-    return value.startsWith('shptka_');
-  }
-  return true;
-};
-
-export const isValidBranchName = (value: string): boolean => {
-  const invalidPatterns = [
-    /^\.|\/\.|\.\.|@\{/,  // No leading dots, no /./, no .., no @{
-    /\s|~|\^|:|\?|\*|\[/, // No spaces or special chars
-    /\/$/,                // No trailing slash
-    /\.lock$/             // No .lock suffix
-  ];
-
-  return !invalidPatterns.some(pattern => pattern.test(value)) && value.length <= 250;
-};
+export {
+  isValidShopId,
+  isValidDomain,
+  isValidBranchName,
+  isValidThemeToken
+} from '../lib/core/validation-schemas.js';

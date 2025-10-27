@@ -1,4 +1,4 @@
-import { intro, text, select, isCancel } from "@clack/prompts";
+import { text, select, isCancel } from "@clack/prompts";
 import type { AuthenticationMethod } from "../../types/shop.js";
 import type { CLIContext, Result } from "./types.js";
 import { validateShopId, validateDomain } from "./validation.js";

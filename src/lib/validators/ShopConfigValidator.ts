@@ -1,9 +1,20 @@
 import Ajv, { type ValidateFunction } from "ajv";
 import { ShopValidationError } from "../errors/ShopError.js";
 import type { ShopConfig, ShopCredentials, AuthenticationMethod } from "../../types/shop.js";
+import {
+  SHOP_ID_RULES,
+  SHOP_NAME_RULES,
+  DOMAIN_RULES,
+  BRANCH_NAME_RULES,
+  THEME_TOKEN_RULES,
+  AUTHENTICATION_METHODS,
+  isValidShopId,
+  isValidDomain,
+  isValidThemeToken
+} from "../core/validation-schemas.js";
 
 /**
- * Validates shop configurations using JSON Schema
+ * Validates shop configurations using JSON Schema with centralized validation rules
  */
 export class ShopConfigValidator {
   private readonly ajv: Ajv;
@@ -13,12 +24,13 @@ export class ShopConfigValidator {
   private readonly credentialSchema: object;
 
   constructor() {
-    this.ajv = new Ajv({ 
-      allErrors: true, 
+    this.ajv = new Ajv({
+      allErrors: true,
       verbose: true,
-      strict: false 
+      strict: false
     });
-    
+
+    // Use centralized validation rules
     this.shopConfigSchema = {
       type: "object",
       required: ["shopId", "name", "shopify"],
@@ -26,16 +38,16 @@ export class ShopConfigValidator {
       properties: {
         shopId: {
           type: "string",
-          pattern: "^[a-z0-9-]+$",
-          minLength: 1,
-          maxLength: 50,
-          description: "Unique shop identifier (lowercase, dashes only)"
+          pattern: SHOP_ID_RULES.patternString,
+          minLength: SHOP_ID_RULES.minLength,
+          maxLength: SHOP_ID_RULES.maxLength,
+          description: SHOP_ID_RULES.description
         },
         name: {
-          type: "string", 
-          minLength: 1,
-          maxLength: 100,
-          description: "Human-readable shop name"
+          type: "string",
+          minLength: SHOP_NAME_RULES.minLength,
+          maxLength: SHOP_NAME_RULES.maxLength,
+          description: SHOP_NAME_RULES.description
         },
         shopify: {
           type: "object",
@@ -51,28 +63,28 @@ export class ShopConfigValidator {
                   properties: {
                     domain: {
                       type: "string",
-                      pattern: "^[a-z0-9-]+\\.myshopify\\.com$",
+                      pattern: DOMAIN_RULES.patternString,
                       description: "Production Shopify store domain"
                     },
                     branch: {
                       type: "string",
-                      pattern: "^[a-z0-9-]+/main$",
+                      pattern: BRANCH_NAME_RULES.productionPatternString,
                       description: "Git branch connected to production store"
                     }
                   }
                 },
                 staging: {
-                  type: "object", 
+                  type: "object",
                   required: ["domain", "branch"],
                   properties: {
                     domain: {
                       type: "string",
-                      pattern: "^[a-z0-9-]+\\.myshopify\\.com$",
+                      pattern: DOMAIN_RULES.patternString,
                       description: "Staging Shopify store domain (can be same as production)"
                     },
                     branch: {
                       type: "string",
-                      pattern: "^[a-z0-9-]+/staging$", 
+                      pattern: BRANCH_NAME_RULES.stagingPatternString,
                       description: "Git branch connected to staging store"
                     }
                   }
@@ -84,7 +96,7 @@ export class ShopConfigValidator {
               properties: {
                 method: {
                   type: "string",
-                  enum: ["theme-access-app", "manual-tokens"],
+                  enum: [AUTHENTICATION_METHODS.themeAccessApp, AUTHENTICATION_METHODS.manualTokens],
                   description: "Authentication method for theme access"
                 }
               }
@@ -117,8 +129,8 @@ export class ShopConfigValidator {
                   properties: {
                     themeToken: {
                       type: "string",
-                      minLength: 10,
-                      description: "Theme access token or password"
+                      minLength: THEME_TOKEN_RULES.minLength,
+                      description: THEME_TOKEN_RULES.description
                     }
                   }
                 }
@@ -146,9 +158,9 @@ export class ShopConfigValidator {
    */
   validateConfig(config: unknown, shopId: string): ShopConfig {
     const isValid = this.validateShopConfig(config);
-    
+
     if (!isValid) {
-      const errors = (this.validateShopConfig.errors || []).map((error: any) => ({
+      const errors = (this.validateShopConfig.errors || []).map((error: { instancePath?: string; dataPath?: string; message?: string; data?: unknown; schema?: unknown }) => ({
         field: error.instancePath || error.dataPath,
         message: error.message,
         value: error.data,
@@ -169,15 +181,15 @@ export class ShopConfigValidator {
   /**
    * Validates credential structure
    * @param credentials - Credential object
-   * @param shopId - Shop ID for error context  
+   * @param shopId - Shop ID for error context
    * @throws ShopValidationError If validation fails
    * @returns Valid credentials
    */
   validateCredentialsStructure(credentials: unknown, shopId: string): ShopCredentials {
     const isValid = this.validateCredentials(credentials);
-    
+
     if (!isValid) {
-      const errors = (this.validateCredentials.errors || []).map((error: any) => ({
+      const errors = (this.validateCredentials.errors || []).map((error: { instancePath?: string; dataPath?: string; message?: string; data?: unknown }) => ({
         field: error.instancePath || error.dataPath,
         message: error.message,
         value: error.data
@@ -195,27 +207,15 @@ export class ShopConfigValidator {
   }
 
   /**
-   * Validates shop ID format
+   * Validates shop ID format using centralized rules
    * @param shopId - Shop identifier
    * @throws ShopValidationError If invalid
    * @returns Valid shop ID
    */
   validateShopId(shopId: unknown): string {
-    if (!shopId || typeof shopId !== 'string') {
-      throw new ShopValidationError('Shop ID is required', 'shopId', shopId);
-    }
-
-    if (!/^[a-z0-9-]+$/.test(shopId)) {
+    if (!isValidShopId(shopId)) {
       throw new ShopValidationError(
-        'Shop ID must contain only lowercase letters, numbers, and dashes',
-        'shopId', 
-        shopId
-      );
-    }
-
-    if (shopId.length < 1 || shopId.length > 50) {
-      throw new ShopValidationError(
-        'Shop ID must be between 1 and 50 characters',
+        SHOP_ID_RULES.description,
         'shopId',
         shopId
       );
@@ -225,53 +225,35 @@ export class ShopConfigValidator {
   }
 
   /**
-   * Validates Shopify store domain format
+   * Validates Shopify store domain format using centralized rules
    * @param domain - Store domain
    * @param type - Domain type (production/staging)
    * @throws ShopValidationError If invalid
    * @returns Valid domain
    */
   validateStoreDomain(domain: unknown, type: 'production' | 'staging' = 'production'): string {
-    if (!domain || typeof domain !== 'string') {
-      throw new ShopValidationError(`${type} domain is required`, 'domain', domain);
-    }
-
-    if (!domain.endsWith('.myshopify.com')) {
+    if (!isValidDomain(domain)) {
       throw new ShopValidationError(
-        `${type} domain must end with .myshopify.com`,
+        `${type} ${DOMAIN_RULES.description}`,
         'domain',
         domain
       );
     }
 
-    // Note: Staging domain can be same as production (for unpublished theme staging)
-
     return domain;
   }
 
   /**
-   * Validates theme token format
+   * Validates theme token format using centralized rules
    * @param token - Theme token
    * @param authMethod - Authentication method
    * @throws ShopValidationError If invalid
    * @returns Valid token
    */
   validateThemeToken(token: unknown, authMethod: AuthenticationMethod): string {
-    if (!token || typeof token !== 'string') {
-      throw new ShopValidationError('Theme token is required', 'themeToken', token);
-    }
-
-    if (authMethod === 'manual-tokens' && !token.startsWith('shptka_')) {
+    if (!isValidThemeToken(token, authMethod)) {
       throw new ShopValidationError(
-        'Manual theme tokens must start with "shptka_"',
-        'themeToken',
-        token
-      );
-    }
-
-    if (token.length < 10) {
-      throw new ShopValidationError(
-        'Theme token appears to be too short',
+        THEME_TOKEN_RULES.prefixDescription,
         'themeToken',
         token
       );

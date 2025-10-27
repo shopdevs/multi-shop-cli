@@ -15,7 +15,7 @@ export const setupShopResources = async (shopData: ShopData, config: ShopConfig,
   ]);
 };
 
-const handleBranchCreation = async (shopId: string, config: ShopConfig): Promise<void> => {
+const handleBranchCreation = async (shopId: string, _config: ShopConfig): Promise<void> => {
   const shouldCreate = await askToCreateBranches();
   
   if (shouldCreate) {

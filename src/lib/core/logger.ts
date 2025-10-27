@@ -4,7 +4,14 @@
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-const createLogger = (level: LogLevel = 'info') => {
+const createLogger = (level: LogLevel = 'info'): {
+  debug: (message: string, meta?: Record<string, unknown>) => void;
+  info: (message: string, meta?: Record<string, unknown>) => void;
+  warn: (message: string, meta?: Record<string, unknown>) => void;
+  error: (message: string, meta?: Record<string, unknown>) => void;
+  startOperation: (operation: string, context?: Record<string, unknown>) => (result?: string, meta?: Record<string, unknown>) => void;
+  flush: () => Promise<void>;
+} => {
   const logLevel = (process.env['LOG_LEVEL'] as LogLevel) || level;
   
   const shouldLog = (targetLevel: LogLevel): boolean => {
@@ -37,8 +44,8 @@ const createLogger = (level: LogLevel = 'info') => {
       }
     },
 
-    startOperation: (operation: string, context?: Record<string, unknown>) => {
-      return (result?: string, meta?: Record<string, unknown>) => {
+    startOperation: (_operation: string, _context?: Record<string, unknown>) => {
+      return (_result?: string, _meta?: Record<string, unknown>) => {
         // Simple operation tracking
       };
     },

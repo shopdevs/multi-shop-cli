@@ -22,9 +22,9 @@ export const editShop = async (context: CLIContext): Promise<Result<void>> => {
 
   switch (editAction) {
     case "delete":
-      return await deleteShop(context, selectedShop);
+      return deleteShop(context, selectedShop);
     case "credentials":
-      return await editCredentials(context, selectedShop);
+      return editCredentials(context, selectedShop);
     default:
       return { success: false, error: "Unknown action" };
   }
@@ -80,7 +80,11 @@ const editCredentials = async (context: CLIContext, shopId: string): Promise<Res
     return { success: false, error: configResult.error || "Failed to load shop config" };
   }
 
-  const config = configResult.data!;
+  const config = configResult.data;
+  if (!config) {
+    return { success: false, error: "Config data is missing" };
+  }
+
   const existingCredsResult = await context.credOps.loadCredentials(shopId);
   const existingCreds = existingCredsResult.success ? existingCredsResult.data : null;
 
@@ -135,7 +139,7 @@ const getTokenInput = async (message: string, existingToken?: string): Promise<s
   return isCancel(token) ? null : token as string;
 };
 
-const getStagingTokenForEdit = async (config: any, existingCreds: ShopCredentials | null | undefined, productionToken: string): Promise<string> => {
+const getStagingTokenForEdit = async (config: { shopify: { stores: { staging: { domain: string }; production: { domain: string } } } }, existingCreds: ShopCredentials | null | undefined, productionToken: string): Promise<string> => {
   if (config.shopify.stores.staging.domain === config.shopify.stores.production.domain) {
     return productionToken;
   }

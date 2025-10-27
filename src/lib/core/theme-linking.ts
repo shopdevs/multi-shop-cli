@@ -26,7 +26,11 @@ export const linkThemes = async (context: CLIContext): Promise<Result<void>> => 
     return { success: true };
   }
 
-  const config = configResult.data!;
+  const config = configResult.data;
+  if (!config) {
+    return { success: false, error: "Config data is missing" };
+  }
+
   note(`Setting up themes for ${config.name}`, `🎨 ${shopChoice}`);
   
   showThemeLinkingInstructions(config);
@@ -47,7 +51,7 @@ const selectShopForLinking = async (shops: string[]): Promise<string | null> => 
   return isCancel(shopChoice) ? null : shopChoice as string;
 };
 
-const showThemeLinkingInstructions = (config: any): void => {
+const showThemeLinkingInstructions = (config: { name: string; shopify: { stores: { production: { domain: string; branch: string }; staging: { domain: string; branch: string } } } }): void => {
   console.log(`\n📝 Manual theme linking for ${config.name}:`);
   console.log(`\n1. Go to Shopify Admin:`);
   console.log(`   Production: https://${config.shopify.stores.production.domain}/admin/themes`);

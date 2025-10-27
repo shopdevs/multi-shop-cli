@@ -22,11 +22,11 @@ export const handleTools = async (context: CLIContext): Promise<Result<void>> =>
 
   switch (toolChoice) {
     case "sync":
-      return await syncShops(context);
+      return syncShops(context);
     case "themes":
-      return await linkThemes(context);
+      return linkThemes(context);
     case "versions":
-      return await checkVersions();
+      return checkVersions();
     default:
       return { success: false, error: "Unknown tool" };
   }
