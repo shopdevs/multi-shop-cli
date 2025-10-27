@@ -69,6 +69,7 @@ and this project adheres to
 - **Path traversal protection** - Comprehensive security tests verify protection
 - **CI failures** - Fixed pnpm lockfile, deprecated GitHub Actions (upload-artifact v3→v4)
 - **Shopify authentication docs** - Corrected token prefix docs (shptka_ → tkat_/shpat_)
+- **Windows test failures** - Fixed cross-platform path separator issues in tests (3 tests)
 
 ## [2.0.10] - 2025-09-10
 

@@ -2,6 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createMultiShopCLI } from '../lib/core/index.js';
 import type { ShopConfig } from '../types/shop.js';
 import fs from 'fs';
+import path from 'path';
 
 // Mock file system
 vi.mock('fs');
@@ -27,10 +28,10 @@ describe('Functional Shop Manager API', () => {
       // Act
       const context = createMultiShopCLI(mockCwd);
 
-      // Assert
+      // Assert (use path.join for cross-platform compatibility)
       expect(context.deps.cwd).toBe(mockCwd);
-      expect(context.deps.shopsDir).toBe(`${mockCwd}/shops`);
-      expect(context.deps.credentialsDir).toBe(`${mockCwd}/shops/credentials`);
+      expect(context.deps.shopsDir).toBe(path.join(mockCwd, 'shops'));
+      expect(context.deps.credentialsDir).toBe(path.join(mockCwd, 'shops', 'credentials'));
     });
 
     test('should provide shop operations', () => {

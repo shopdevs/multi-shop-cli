@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import path from 'path';
 import {
   createTempDir,
   cleanupTempDir,
@@ -255,10 +256,10 @@ describe('CLI Commands Integration', () => {
 
   describe('Context Creation', () => {
     test('should create CLI context with correct dependencies', () => {
-      // Assert
+      // Assert (use path.join for cross-platform compatibility)
       expect(context.deps.cwd).toBe(tempDir);
-      expect(context.deps.shopsDir).toBe(`${tempDir}/shops`);
-      expect(context.deps.credentialsDir).toBe(`${tempDir}/shops/credentials`);
+      expect(context.deps.shopsDir).toBe(path.join(tempDir, 'shops'));
+      expect(context.deps.credentialsDir).toBe(path.join(tempDir, 'shops', 'credentials'));
     });
 
     test('should provide shop operations', () => {
