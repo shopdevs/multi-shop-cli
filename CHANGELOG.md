@@ -57,6 +57,7 @@ and this project adheres to
 - **Refactored CLI to state machine** - Removed recursion for cleaner stack traces
 - **Removed ShopManager class** - Simplified to functional API only
 - **Enhanced ESLint** - Strict TypeScript rules, security rules active
+- **Extracted content-detection.ts** - Separated from shop-sync.ts (CLAUDE.md compliance: <160 lines)
 - **Testing grade** - Improved from C to A+
 - **Code quality grade** - Improved from A- to A+
 - **Architecture grade** - Improved from A to A+
