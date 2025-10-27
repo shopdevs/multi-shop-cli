@@ -185,8 +185,11 @@ describe('Credential Isolation Security', () => {
       const gitignorePattern = 'shops/credentials/';
       const credentialPath = path.join('shops', 'credentials', 'test-shop.credentials.json');
 
+      // Normalize to forward slashes for cross-platform compatibility
+      const normalizedPath = credentialPath.split(path.sep).join('/');
+
       // Verify pattern would match the path
-      expect(credentialPath.includes('shops/credentials/')).toBe(true);
+      expect(normalizedPath.includes('shops/credentials/')).toBe(true);
     });
 
     test('verifies .credentials.json pattern would be ignored', () => {
@@ -213,9 +216,12 @@ describe('Credential Isolation Security', () => {
 
       const credPath = path.join(credentialsDir, `${shopId}.credentials.json`);
 
+      // Normalize paths for cross-platform compatibility
+      const normalizedCredPath = credPath.split(path.sep).join('/');
+
       // Verify path contains the gitignored directory
-      expect(credPath.includes('credentials')).toBe(true);
-      expect(credPath.includes(path.join('shops', 'credentials'))).toBe(true);
+      expect(normalizedCredPath.includes('credentials')).toBe(true);
+      expect(normalizedCredPath.includes('shops/credentials')).toBe(true);
     });
   });
 
