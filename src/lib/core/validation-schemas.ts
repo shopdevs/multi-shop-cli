@@ -163,12 +163,13 @@ export const isValidBranchName = (value: unknown, type?: 'production' | 'staging
 /**
  * Type guard: Checks if value is a valid theme token
  */
-export const isValidThemeToken = (value: unknown, authMethod: 'theme-access-app' | 'manual-tokens'): value is string => {
+export const isValidThemeToken = (value: unknown, _authMethod: 'theme-access-app' | 'manual-tokens'): value is string => {
   if (typeof value !== 'string') return false;
   if (value.length < THEME_TOKEN_RULES.minLength) return false;
 
   // Theme Access app uses tkat_ prefix
   // Custom apps use shpat_ prefix
   // Both are valid - we don't enforce prefix as tokens can vary
+  // authMethod parameter reserved for future strict validation if needed
   return true;
 };
