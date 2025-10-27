@@ -83,18 +83,14 @@ jobs:
         run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
+        run: |
+          gh release create "v${{ steps.version.outputs.new_version }}" \
+            --title "v${{ steps.version.outputs.new_version }}" \
+            --notes "Release ${{ steps.version.outputs.new_version }}
+
+          See [CHANGELOG.md](https://github.com/shopdevs/multi-shop/blob/main/CHANGELOG.md) for details."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          release_name: v${{ steps.version.outputs.new_version }}
-          body: |
-            Release ${{ steps.version.outputs.new_version }}
-
-            See [CHANGELOG.md](https://github.com/shopdevs/multi-shop/blob/main/CHANGELOG.md) for details.
-          draft: false
-          prerelease: false
 
       - name: Publish to npm
         run: npm publish --access public

@@ -44,10 +44,10 @@ logs/
 *.log
 .multi-shop/
 
-# Package manager
+# Package manager lockfiles (keep pnpm-lock.yaml for CI)
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+# pnpm-lock.yaml - KEEP THIS COMMITTED for reproducible builds
 
 # Runtime data
 pids/

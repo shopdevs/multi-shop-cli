@@ -67,6 +67,8 @@ and this project adheres to
 - **Domain validation edge case** - Single-character subdomains now properly validated
 - **37 linting errors** - Removed unused imports, non-null assertions, explicit any types
 - **Path traversal protection** - Comprehensive security tests verify protection
+- **CI failures** - Fixed pnpm lockfile, deprecated GitHub Actions (upload-artifact v3→v4)
+- **Shopify authentication docs** - Corrected token prefix docs (shptka_ → tkat_/shpat_)
 
 ## [2.0.10] - 2025-09-10
 
