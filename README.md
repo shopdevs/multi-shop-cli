@@ -5,17 +5,22 @@
 [![codecov](https://codecov.io/gh/shopdevs/multi-shop-cli/branch/main/graph/badge.svg)](https://codecov.io/gh/shopdevs/multi-shop-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> Contextual development and automated shop management for multi-shop Shopify themes
+> Contextual development and automated shop management for multi-shop Shopify
+> themes
 
 ## What is Multi-Shop?
 
-Transform any Shopify theme into a sophisticated multi-shop system with **contextual development** that adapts to your branch context and **automated shop syncing** that keeps all your stores in sync safely.
+Transform any Shopify theme into a sophisticated multi-shop system with
+**contextual development** that adapts to your branch context and **automated
+shop syncing** that keeps all your stores in sync safely.
 
-**Perfect for teams managing multiple Shopify stores** with Dawn theme, custom themes, or any existing Shopify theme that needs multi-shop capabilities.
+**Perfect for teams managing multiple Shopify stores** with Dawn theme, custom
+themes, or any existing Shopify theme that needs multi-shop capabilities.
 
 ### ✨ Key Features
 
-- **🧠 Contextual Development** - One command (`pnpm run dev`) adapts to your branch context
+- **🧠 Contextual Development** - One command (`pnpm run dev`) adapts to your
+  branch context
 - **🤖 Automated Shop Syncing** - PRs auto-created when main updates
 - **🔐 Secure Credentials** - Developer-specific tokens stored locally only
 - **🎨 Shop Isolation** - Complete separation between shop customizations
@@ -25,8 +30,9 @@ Transform any Shopify theme into a sophisticated multi-shop system with **contex
 ### 🛡️ Built-In Safeguards (v2.1.0+)
 
 - **🚨 Content Detection** - Warns before overwriting shop-specific settings
-- **🔒 Security Audit** - `multi-shop audit` command checks permissions and credentials
-- **✅ 543 Tests** - Unit, integration, security, E2E, and performance tests
+- **🔒 Security Audit** - `multi-shop audit` command checks permissions and
+  credentials
+- **✅ Tests** - Unit, integration, security, E2E, and performance tests
 - **🌐 Cross-Platform** - Works on Windows, macOS, Linux (Node 18, 20, 22)
 - **📚 Complete Docs** - API reference, guides, and working examples
 
@@ -43,6 +49,7 @@ pnpm add -D @shopdevs/multi-shop-cli && npx multi-shop init
 ```
 
 This creates:
+
 - `shops/` directory for shop configurations
 - GitHub workflow for automated shop syncing
 - Updated package.json with multi-shop scripts
@@ -57,14 +64,14 @@ pnpm run shop
 
 # For each shop, you'll configure:
 # 1. Shop ID (e.g., fitness-store)
-# 2. Display name (e.g., "Fitness Store") 
+# 2. Display name (e.g., "Fitness Store")
 # 3. Production domain (e.g., fitness-store.myshopify.com)
 # 4. Staging domain (e.g., staging-fitness-store.myshopify.com)
 # 5. Authentication method (theme-access-app recommended)
 
 # Repeat for all shops:
 # → shop-a (Shop A)
-# → shop-b (Shop B) 
+# → shop-b (Shop B)
 # → shop-c (Shop C)
 # → shop-d (Shop D)
 ```
@@ -76,7 +83,7 @@ pnpm run shop
 pnpm run dev
 # → Contextual development that adapts to your branch
 
-# Or use npx directly  
+# Or use npx directly
 npx multi-shop dev
 ```
 
@@ -84,7 +91,8 @@ npx multi-shop dev
 
 ## 🚀 Complete Setup for Multiple Shops
 
-Here's the step-by-step process to set up multi-shop on a new Shopify theme (example shows 4 shops, but you can use any number):
+Here's the step-by-step process to set up multi-shop on a new Shopify theme
+(example shows 4 shops, but you can use any number):
 
 ### Step 1: Initialize Project
 
@@ -102,11 +110,11 @@ pnpm run shop
 # Shop A
 # Shop ID: shop-a
 # Name: Shop A
-# Production: shop-a.myshopify.com  
+# Production: shop-a.myshopify.com
 # Staging: staging-shop-a.myshopify.com
 # Auth: theme-access-app
 
-# Shop B  
+# Shop B
 # Shop ID: shop-b
 # Name: Shop B
 # Production: shop-b.myshopify.com
@@ -114,7 +122,7 @@ pnpm run shop
 # Auth: theme-access-app
 
 # Shop C
-# Shop ID: shop-c  
+# Shop ID: shop-c
 # Name: Shop C
 # Production: shop-c.myshopify.com
 # Staging: staging-shop-c.myshopify.com
@@ -122,7 +130,7 @@ pnpm run shop
 
 # Shop D
 # Shop ID: shop-d
-# Name: Shop D  
+# Name: Shop D
 # Production: shop-d.myshopify.com
 # Staging: staging-shop-d.myshopify.com
 # Auth: theme-access-app
@@ -135,12 +143,13 @@ Each developer needs to set up their own theme access tokens:
 ```bash
 # Create credential files manually:
 shops/credentials/shop-a.credentials.json
-shops/credentials/shop-b.credentials.json  
+shops/credentials/shop-b.credentials.json
 shops/credentials/shop-c.credentials.json
 shops/credentials/shop-d.credentials.json
 ```
 
 Example credential file format:
+
 ```json
 // shops/credentials/shop-a.credentials.json
 {
@@ -166,7 +175,7 @@ When creating each shop, you'll be prompted:
 
 # This automatically creates:
 # shop-a/main and shop-a/staging
-# shop-b/main and shop-b/staging  
+# shop-b/main and shop-b/staging
 # shop-c/main and shop-c/staging
 # shop-d/main and shop-d/staging
 
@@ -225,18 +234,20 @@ pnpm run dev  # Try different shop contexts
 The system detects your branch context and adapts automatically:
 
 **Feature Branches** (like `feature/new-carousel`):
+
 ```bash
 pnpm run dev
 # → Prompts for shop context
-# → Prompts for environment (staging/production)  
+# → Prompts for environment (staging/production)
 # → Your code stays on feature branch
 # → Testing happens against selected shop
 ```
 
 **Shop Branches** (like `shop-a/custom-checkout`):
+
 ```bash
-pnpm run dev  
-# → Auto-detects "shop-a" 
+pnpm run dev
+# → Auto-detects "shop-a"
 # → Skips shop selection
 # → Starts development immediately
 ```
@@ -244,9 +255,12 @@ pnpm run dev
 ### Automated Shop Syncing (GitHub Flow)
 
 When you merge features to main:
-1. **Use Tools → Sync Shops**: Select shops and create PRs `main → shop-*/staging`
-2. **Each shop team reviews** their shop-specific PRs  
-3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`, `shop-b/staging → shop-b/main`, etc.
+
+1. **Use Tools → Sync Shops**: Select shops and create PRs
+   `main → shop-*/staging`
+2. **Each shop team reviews** their shop-specific PRs
+3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`,
+   `shop-b/staging → shop-b/main`, etc.
 
 ### Campaign Management (Per Shop)
 
@@ -281,7 +295,7 @@ git checkout main && git checkout -b feature/new-component
 # 2. Contextual development
 pnpm run dev  # Select shop context for testing
 
-# 3. Test across shops  
+# 3. Test across shops
 pnpm run dev  # Try different shop contexts
 
 # 4. Sync with latest main (if needed)
@@ -319,7 +333,7 @@ main (core theme)
 ├── hotfix/critical-bug          # Emergency fixes
 │
 ├── shop-a/main                  # Connected to shop-a
-│   ├── shop-a/staging           # Connected to staging-shop-a  
+│   ├── shop-a/staging           # Connected to staging-shop-a
 │   └── shop-a/promo-summer      # Campaign branches
 │
 ├── shop-b/main                  # Connected to shop-b
@@ -336,20 +350,21 @@ main (core theme)
 ### Security Model
 
 **Shop Configuration** (committed):
+
 ```json
 // shops/shop-a.config.json
 {
   "shopId": "shop-a",
-  "name": "Shop A", 
+  "name": "Shop A",
   "shopify": {
     "stores": {
-      "production": { 
+      "production": {
         "domain": "shop-a.myshopify.com",
         "branch": "shop-a/main"
       },
-      "staging": { 
+      "staging": {
         "domain": "staging-shop-a.myshopify.com",
-        "branch": "shop-a/staging" 
+        "branch": "shop-a/staging"
       }
     },
     "authentication": {
@@ -361,7 +376,8 @@ main (core theme)
 ```
 
 **Developer Credentials** (local only):
-```json  
+
+```json
 // shops/credentials/shop-a.credentials.json (NOT committed)
 {
   "developer": "your-name",
@@ -387,7 +403,7 @@ pnpm run dev  # Get preview URL
 
 # Run comprehensive tests
 pnpm test:integration     # Shopping flow tests
-pnpm test:visual         # Visual regression tests  
+pnpm test:visual         # Visual regression tests
 pnpm test:accessibility  # WCAG compliance tests
 pnpm test:performance    # Core Web Vitals tests
 
@@ -395,7 +411,8 @@ pnpm test:performance    # Core Web Vitals tests
 pnpm run test:pr         # Comprehensive PR testing
 ```
 
-All tests use **real Shopify preview themes** instead of mocks, providing realistic testing conditions.
+All tests use **real Shopify preview themes** instead of mocks, providing
+realistic testing conditions.
 
 ---
 
@@ -404,13 +421,15 @@ All tests use **real Shopify preview themes** instead of mocks, providing realis
 ### Common Setup Issues
 
 **"No shops configured yet"**
+
 ```bash
 # Make sure you've created shop configurations:
 pnpm run shop → Create New Shop
 # Check: ls shops/ should show *.config.json files
 ```
 
-**"No credentials found for shop-x"**  
+**"No credentials found for shop-x"**
+
 ```bash
 # Create credential file manually:
 # shops/credentials/shop-x.credentials.json
@@ -418,6 +437,7 @@ pnpm run shop → Create New Shop
 ```
 
 **"Shopify CLI not found"**
+
 ```bash
 # Install Shopify CLI globally:
 pnpm add -g @shopify/cli
@@ -427,6 +447,7 @@ shopify version
 ```
 
 **"Permission denied" (Unix/Linux/macOS)**
+
 ```bash
 # Fix credential file permissions:
 chmod 600 shops/credentials/*.credentials.json
@@ -435,11 +456,13 @@ chmod 600 shops/credentials/*.credentials.json
 ### Workflow Issues
 
 **"Can't connect theme to GitHub branch"**
+
 - Ensure branch exists: `git branch -r | grep shop-a/main`
 - Check Shopify admin → Themes → Add theme → Connect from GitHub
 - Verify repository connection in Shopify
 
 **"Development server won't start"**
+
 ```bash
 # Check your credentials and domain:
 pnpm run shop → List Shops
@@ -447,6 +470,7 @@ pnpm run shop → List Shops
 ```
 
 **"Feature branch not detecting context"**
+
 ```bash
 # Check branch name pattern:
 git branch --show-current
@@ -458,6 +482,7 @@ git branch --show-current
 ## 📚 Documentation
 
 Comprehensive guides included:
+
 - **Getting Started** - 5-minute setup
 - **Contextual Development** - Core workflow innovation
 - **Shop Management** - Creating and managing shops
@@ -468,7 +493,8 @@ Comprehensive guides included:
 
 ## 🤝 Contributing
 
-This package provides proven multi-shop workflow patterns for any Shopify theme development team.
+This package provides proven multi-shop workflow patterns for any Shopify theme
+development team.
 
 ### Development
 
@@ -498,4 +524,5 @@ MIT © [ShopDevs](https://shopdevs.com)
 
 - Built for modern multi-shop Shopify development workflows
 - Inspired by the need for better multi-shop Shopify development workflows
-- Powered by [@clack/prompts](https://www.npmjs.com/package/@clack/prompts) for beautiful CLI experiences
+- Powered by [@clack/prompts](https://www.npmjs.com/package/@clack/prompts) for
+  beautiful CLI experiences
