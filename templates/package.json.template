@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "multi-shop dev",
+    "shop": "multi-shop shop", 
+    "sync-main": "multi-shop sync-main",
+    "test:pr": "multi-shop test-pr",
+    "test:integration": "multi-shop test integration",
+    "test:visual": "multi-shop test visual",
+    "test:accessibility": "multi-shop test accessibility", 
+    "test:performance": "multi-shop test performance"
+  },
+  "devDependencies": {
+    "@shopdevs/multi-shop-cli": "^1.0.0"
+  }
+}

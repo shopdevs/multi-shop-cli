@@ -1,0 +1,46 @@
+{
+  "entryPoints": ["src/lib/index.ts"],
+  "out": "docs",
+  "theme": "default",
+  "name": "ShopDevs Multi-Shop",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "README.md",
+  "categorizeByGroup": true,
+  "defaultCategory": "Core",
+  "categoryOrder": [
+    "Core",
+    "Shop Management", 
+    "Security",
+    "Performance",
+    "Validation",
+    "Errors",
+    "Utilities",
+    "*"
+  ],
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Class",
+    "Interface", 
+    "Type alias",
+    "Function",
+    "Variable",
+    "Enumeration"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "searchInComments": true,
+  "treatWarningsAsErrors": false,
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "githubPages": true,
+  "gitRevision": "main",
+  "gitRemote": "origin"
+}

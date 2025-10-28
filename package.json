@@ -1,0 +1,121 @@
+{
+  "name": "@shopdevs/multi-shop-cli",
+  "version": "2.2.3",
+  "description": "CLI tool for contextual development and automated shop management for multi-shop Shopify themes",
+  "keywords": [
+    "shopify",
+    "theme",
+    "multi-shop",
+    "contextual-development",
+    "github-flow",
+    "cli",
+    "devops",
+    "automation",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "ShopDevs",
+    "email": "hello@shopdevs.com",
+    "url": "https://shopdevs.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopdevs/multi-shop-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shopdevs/multi-shop-cli/issues"
+  },
+  "homepage": "https://github.com/shopdevs/multi-shop-cli#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "type": "module",
+  "bin": {
+    "multi-shop": "./dist/bin/multi-shop.js"
+  },
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "templates/",
+    "examples/",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "WORKFLOWS.md",
+    "VERSIONING.md",
+    "LOCAL-TESTING.md",
+    "CONTRIBUTING.md"
+  ],
+  "scripts": {
+    "build": "tsc && npm run build:chmod",
+    "build:chmod": "chmod +x dist/bin/multi-shop.js",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist/",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:perf": "vitest run src/__tests__/performance",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "prepublishOnly": "npm run clean && npm run validate && npm run build",
+    "security:audit": "npm audit --audit-level moderate",
+    "security:outdated": "npm outdated",
+    "perf:startup": "node -e \"const start = Date.now(); require('./dist/bin/multi-shop.js'); console.log('Startup time:', Date.now() - start, 'ms');\"",
+    "perf:version": "time node dist/bin/multi-shop.js --version",
+    "perf:test": "npm run test:perf",
+    "docs:build": "typedoc --out docs src/lib/index.ts",
+    "version": "npm run validate && npm run build",
+    "update-changelog": "echo '\n⚠️  REQUIRED: Update CHANGELOG.md before continuing:\n1. Move [Unreleased] content to new version section with date\n2. Use Keep a Changelog v1.1.0 format (Added/Changed/Deprecated/Removed/Fixed/Security)\n3. Create new empty [Unreleased] section at top\n4. Save and commit: git add CHANGELOG.md && git commit -m \"Update CHANGELOG for release\"\n' && echo 'Press Enter when CHANGELOG.md is updated and committed...' && read dummy",
+    "release:patch": "npm run update-changelog && npm version patch && npm publish && git push --follow-tags",
+    "release:minor": "npm run update-changelog && npm version minor && npm publish && git push --follow-tags",
+    "release:major": "npm run update-changelog && npm version major && npm publish && git push --follow-tags",
+    "size-check": "npm pack --dry-run && du -sh *.tgz 2>/dev/null || echo 'Package size check complete'"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "ajv": "^8.12.0",
+    "commander": "^11.1.0",
+    "kleur": "^4.1.5",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-security": "^1.7.1",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "typedoc": "^0.25.4",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@shopify/cli": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@shopify/cli": {
+      "optional": true
+    }
+  }
+}
