@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.2.4] - 2025-10-28
+
+### Add npm package versioning badges to README.md
+
 ## [2.2.3] - 2025-10-28
 
 ### Bump version to 2.2.3 to catch up with npm package versioning.
