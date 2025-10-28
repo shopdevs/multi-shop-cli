@@ -1,7 +1,8 @@
 # 🚀 ShopDevs Multi-Shop
 
 [![CI](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/@shopdevs%2Fmulti-shop-cli.svg)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
+[![npm version](https://img.shields.io/npm/v/@shopdevs/multi-shop-cli)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
+[![npm downloads](https://img.shields.io/npm/dm/@shopdevs/multi-shop-cli)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
 [![codecov](https://codecov.io/gh/shopdevs/multi-shop-cli/branch/main/graph/badge.svg)](https://codecov.io/gh/shopdevs/multi-shop-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
