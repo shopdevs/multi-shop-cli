@@ -28,9 +28,14 @@ themes, or any existing Shopify theme that needs multi-shop capabilities.
 - **⚡ Modern GitHub Flow** - Simple, PR-based development workflow
 - **🧪 Interactive Testing** - Test against real Shopify preview themes
 
-### 🛡️ Built-In Safeguards (v2.1.0+)
+### 🛡️ Built-In Safeguards
 
-- **🚨 Content Detection** - Warns before overwriting shop-specific settings
+- **🚨 Content Protection** (v2.3.0+) - Config-based prevention of content
+  overwrites with strict/warn/off modes
+- **🏥 Health Check** (v2.3.0+) - Comprehensive diagnostics for configuration,
+  credentials, and branches
+- **🎯 Campaign Tools** (v2.3.0+) - Automated campaign lifecycle management with
+  one-command promo workflows
 - **🔒 Security Audit** - `multi-shop audit` command checks permissions and
   credentials
 - **✅ Tests** - Unit, integration, security, E2E, and performance tests
@@ -263,25 +268,98 @@ When you merge features to main:
 3. **Shop teams create final PRs**: `shop-a/staging → shop-a/main`,
    `shop-b/staging → shop-b/main`, etc.
 
-### Campaign Management (Per Shop)
+### Campaign Management (Per Shop) - v2.3.0+
+
+**New Campaign Tools Menu** automates the entire campaign lifecycle:
 
 ```bash
-# Create promo for specific shop
+# 1. Create promo branch (one command)
 pnpm run shop → Campaign Tools → Create Promo Branch
 # → Select shop: shop-a
 # → Promo name: summer-sale
-# → Creates: shop-a/promo-summer-sale
+# → Automatically creates and pushes: shop-a/promo-summer-sale
 
-# Connect promo theme in Shopify admin (shop-a only)
+# 2. Connect promo theme in Shopify admin
 # → Add theme → Connect from GitHub → shop-a/promo-summer-sale
 
-# Launch promo (shop-a only)
+# 3. Customize in Shopify Theme Editor
+# → Changes auto-sync back to promo branch
+
+# 4. Launch promo
 # → Publish theme or use Launchpad app
 
-# Push content back to shop main (keeps shop-a/main current)
+# 5. Push content back to main (one command)
 pnpm run shop → Campaign Tools → Push Promo to Main
+# → Select promo: shop-a/promo-summer-sale
 # → Creates PR: shop-a/promo-summer-sale → shop-a/main
+
+# 6. List all active campaigns
+pnpm run shop → Campaign Tools → List Active Promos
+# → Shows all promo branches across all shops
+
+# 7. Clean up after campaign
+pnpm run shop → Campaign Tools → End Promo
+# → Select and delete finished promo branch
 ```
+
+**Content Protection Integration:** Campaign content merges respect your Content
+Protection settings, ensuring intentional content changes.
+
+### Content Protection (v2.3.0+)
+
+**Config-based safeguards** prevent accidental content overwrites:
+
+```bash
+# View protection status
+pnpm run shop → Tools → Content Protection → Show Protection Status
+
+# Configure individual shop
+pnpm run shop → Tools → Content Protection → Configure Shop Protection
+# → Select shop
+# → Enable/Disable
+# → Choose mode: strict (block), warn (confirm), or off
+# → Choose verbosity: verbose or quiet
+
+# Enable protection for all shops
+pnpm run shop → Tools → Content Protection → Enable All Shops
+
+# Configure global defaults
+pnpm run shop → Tools → Content Protection → Global Settings
+```
+
+**Three Protection Modes:**
+
+- **Strict** - Blocks cross-shop content syncs, requires 'OVERRIDE' to proceed
+- **Warn** - Shows warning with file list, requires confirmation (default)
+- **Off** - No protection, content syncs freely
+
+**Smart Detection:** Distinguishes between risky cross-shop operations
+(`main → shop-a`) and safe within-shop operations
+(`shop-a/main → shop-a/staging`).
+
+### Health Check (v2.3.0+)
+
+**Diagnostic tool** verifies your shop configuration:
+
+```bash
+# Check single shop (detailed)
+pnpm run shop → Tools → Health Check → Check Single Shop
+# → Verifies: configuration, credentials, branches, content protection
+
+# Check all shops (quick overview)
+pnpm run shop → Tools → Health Check → Check All Shops
+# → Shows status for every configured shop
+```
+
+**What it checks:**
+
+- Configuration file validity (JSON, required fields, domains)
+- Credentials existence, tokens presence, file permissions
+- Git branch existence and sync status
+- Content Protection status and settings
+
+**Actionable recommendations** without auto-fixing - tells you exactly what
+commands to run.
 
 ---
 
@@ -478,6 +556,14 @@ git branch --show-current
 # Should be: feature/name or shop-a/name for auto-detection
 ```
 
+**"Not sure what's wrong?" - Run Health Check (v2.3.0+)**
+
+```bash
+pnpm run shop → Tools → Health Check
+# Comprehensive diagnostics with actionable recommendations
+# Checks: config, credentials, branches, content protection
+```
+
 ---
 
 ## 📚 Documentation
@@ -517,7 +603,7 @@ npm publish
 
 ## 📄 License
 
-MIT © [ShopDevs](https://shopdevs.com)
+MIT © [Brandt Milczewski](https://github.com/brandtam)
 
 ---
 

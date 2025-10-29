@@ -4,12 +4,13 @@ import { createNewShop } from "./shop-creation.js";
 import { startDevelopmentWorkflow } from "./dev-operations.js";
 import { editShop } from "./shop-editing.js";
 import { handleTools } from "./tools.js";
+import { handleCampaignTools } from "./campaign-tools.js";
 
 /**
  * CLI interface for shop management using state machine pattern
  */
 
-type MenuAction = 'dev' | 'list' | 'create' | 'edit' | 'tools' | 'exit';
+type MenuAction = 'dev' | 'list' | 'create' | 'edit' | 'campaign' | 'tools' | 'exit';
 
 export const runCLI = async (context: CLIContext): Promise<void> => {
   intro("🚀 Multi-Shop Manager");
@@ -45,6 +46,7 @@ const showMainMenu = async (context: CLIContext): Promise<string> => {
       { value: "list", label: "List Shops", hint: "View all shops" },
       { value: "create", label: "Create New Shop", hint: "Set up new shop" },
       { value: "edit", label: "Edit Shop", hint: "Update shop" },
+      { value: "campaign", label: "Campaign Tools", hint: "Manage promos and campaigns" },
       { value: "tools", label: "Tools", hint: "Sync shops and workflows" },
       { value: "exit", label: "Exit", hint: "Close manager" }
     ]
@@ -91,6 +93,9 @@ const executeMenuChoice = async (context: CLIContext, choice: MenuAction): Promi
       break;
     case "edit":
       await editShop(context);
+      break;
+    case "campaign":
+      await handleCampaignTools(context);
       break;
     case "tools":
       await handleTools(context);

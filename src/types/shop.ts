@@ -7,6 +7,25 @@ export interface ShopConfig {
   readonly name: string;
   readonly shopify: ShopifyConfig;
   readonly metadata?: ShopMetadata;
+  readonly contentProtection?: ContentProtectionConfig;
+}
+
+export interface ContentProtectionConfig {
+  readonly enabled: boolean;
+  readonly mode: ContentProtectionMode;
+  readonly verbosity: ContentProtectionVerbosity;
+}
+
+export type ContentProtectionMode = 'strict' | 'warn' | 'off';
+export type ContentProtectionVerbosity = 'verbose' | 'quiet';
+
+export interface GlobalSettings {
+  readonly contentProtection: {
+    readonly defaultMode: ContentProtectionMode;
+    readonly defaultVerbosity: ContentProtectionVerbosity;
+    readonly applyToNewShops: boolean;
+  };
+  readonly version: string;
 }
 
 export interface ShopifyConfig {

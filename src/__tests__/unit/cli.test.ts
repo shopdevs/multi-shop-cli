@@ -231,6 +231,7 @@ describe('cli', () => {
             { value: 'list', label: 'List Shops', hint: 'View all shops' },
             { value: 'create', label: 'Create New Shop', hint: 'Set up new shop' },
             { value: 'edit', label: 'Edit Shop', hint: 'Update shop' },
+            { value: 'campaign', label: 'Campaign Tools', hint: 'Manage promos and campaigns' },
             { value: 'tools', label: 'Tools', hint: 'Sync shops and workflows' },
             { value: 'exit', label: 'Exit', hint: 'Close manager' }
           ]

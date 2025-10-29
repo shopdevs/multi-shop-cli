@@ -44,6 +44,9 @@ ShopDevs Multi-Shop transforms any Shopify theme into a sophisticated multi-shop
 
 - **Contextual Development** - One command adapts to your branch context
 - **Automated Shop Syncing** - PRs auto-created when main updates
+- **Campaign Tools** (v2.3.0+) - One-command campaign lifecycle management
+- **Content Protection** (v2.3.0+) - Config-based safeguards against content overwrites
+- **Health Check** (v2.3.0+) - Diagnostic tool for shop configuration verification
 - **Secure Credentials** - Developer-specific tokens stored locally only
 - **Shop Isolation** - Complete separation between shop customizations
 - **Modern GitHub Flow** - Simple, PR-based development workflow
@@ -179,15 +182,17 @@ Build features for one shop only:
 3. Create PR to shop's main branch
 4. Deploy to that shop only
 
-### Campaign Management
+### Campaign Management (v2.3.0+)
 
-Run promotions and campaigns:
+Run promotions and campaigns with automated tools:
 
-1. Create promo branch from shop main
-2. Connect promo theme in Shopify
-3. Customize in Shopify admin (auto-syncs)
-4. Launch promo theme
-5. Push content back to shop main
+1. **Create Promo Branch** - One command creates campaign branch
+2. **Connect to Shopify** - Link branch to preview theme
+3. **Customize** - Edit in Shopify admin (auto-syncs)
+4. **Launch** - Publish campaign theme
+5. **Push to Main** - One command creates PR to merge content back
+6. **List Promos** - See all active campaigns across shops
+7. **End Promo** - Clean up after campaign completes
 
 ## Architecture
 
