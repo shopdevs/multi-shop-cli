@@ -30,6 +30,15 @@ and this project adheres to
   - Enable/Disable protection per shop or for all shops
   - Smart detection: Only blocks cross-shop (main → shop-a), allows within-shop (shop-a → shop-a)
   - 14 comprehensive tests
+- **Shop Health Check** - Diagnostic tool for verifying shop setup
+  - Check single shop or all shops
+  - Configuration validation (JSON, domains, branches)
+  - Credentials verification (file exists, tokens present, permissions)
+  - Git branch validation (existence, sync status)
+  - Content protection status display
+  - Actionable recommendations for issues
+  - Informational only (no auto-fix, always exits successfully)
+  - 8 comprehensive tests
 
 ### Changed
 

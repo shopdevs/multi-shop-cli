@@ -210,6 +210,168 @@ Works securely across all platforms:
 - Path separator handling
 - Drive letter validation
 
+## Content Protection System (v2.3.0+)
+
+### What is Content Protection?
+
+Content Protection prevents accidental overwrites of shop-specific customizations when syncing code changes across shops. It's a config-based safety system that detects content file modifications and blocks or warns before potentially destructive operations.
+
+**Content files include:**
+- `config/settings_data.json` - Theme settings (colors, fonts, layouts)
+- `templates/*.json` - Page layouts and section configurations
+- `locales/*.json` - Translations and text content
+
+### Three Protection Modes
+
+**Strict Mode** (recommended for production):
+```bash
+# Blocks cross-shop content syncs completely
+# Requires typing 'OVERRIDE' to proceed
+# Use when you want maximum protection
+```
+
+**Warn Mode** (default):
+```bash
+# Shows warning with content file list
+# Requires confirmation (y/n)
+# Good balance of safety and flexibility
+```
+
+**Off Mode**:
+```bash
+# No protection, content syncs freely
+# Use for testing or when protection not needed
+```
+
+### Smart Cross-Shop Detection
+
+Content Protection uses smart detection to distinguish between risky cross-shop operations and safe within-shop operations:
+
+**Cross-Shop Sync (BLOCKED in strict mode):**
+```bash
+main → shop-a/staging           # ⛔ Different shops, strict protection
+feature/test → shop-b/main      # ⛔ Different shops, strict protection
+```
+
+**Within-Shop Sync (INFO only):**
+```bash
+shop-a/main → shop-a/staging    # ✅ Same shop, just informational
+shop-a/promo → shop-a/main      # ✅ Same shop, just informational
+my-store/dev → my-store/test    # ✅ Same shop, just informational
+```
+
+This works for ANY shop name pattern - the system automatically detects the shop prefix and determines context.
+
+### Configuration
+
+**Per-Shop Settings:**
+
+Each shop can have its own content protection settings in `shops/{shopId}.config.json`:
+
+```json
+{
+  "shopId": "shop-a",
+  "name": "Shop A",
+  "contentProtection": {
+    "enabled": true,
+    "mode": "strict",
+    "verbosity": "verbose"
+  }
+}
+```
+
+**Global Defaults:**
+
+Set defaults for all shops in `shops/settings.json`:
+
+```json
+{
+  "contentProtection": {
+    "defaultMode": "warn",
+    "defaultVerbosity": "verbose"
+  }
+}
+```
+
+### Using Content Protection Tools
+
+**View Protection Status:**
+```bash
+pnpm run shop → Tools → Content Protection → Show Protection Status
+# Shows protection status for all shops
+```
+
+**Configure Individual Shop:**
+```bash
+pnpm run shop → Tools → Content Protection → Configure Shop Protection
+# → Select shop
+# → Enable/Disable
+# → Choose mode (strict/warn/off)
+# → Choose verbosity (verbose/quiet)
+```
+
+**Enable All Shops:**
+```bash
+pnpm run shop → Tools → Content Protection → Enable All Shops
+# Enables protection for every shop
+```
+
+**Disable All Shops:**
+```bash
+pnpm run shop → Tools → Content Protection → Disable All Shops
+# Removes protection from every shop
+```
+
+**Configure Global Defaults:**
+```bash
+pnpm run shop → Tools → Content Protection → Global Settings
+# Set default mode and verbosity for new shops
+```
+
+### Bypassing Strict Mode
+
+When you encounter strict mode protection and need to proceed:
+
+```bash
+🚨 STRICT MODE: Content Protection Enabled
+
+The following content files would be modified:
+  - config/settings_data.json
+  - templates/index.json
+
+Type 'OVERRIDE' to bypass protection: OVERRIDE
+```
+
+This ensures you're making an intentional decision to sync content files.
+
+### Best Practices
+
+1. **Enable strict mode for production shops** - Maximum protection
+2. **Use warn mode for staging** - Balance of safety and speed
+3. **Review content files carefully** before syncing cross-shop
+4. **Use within-shop syncs freely** - Protection is smart about context
+5. **Configure global defaults** - Consistent protection across team
+
+### Troubleshooting Content Protection
+
+**"Content protection blocking my sync"**
+- Check if it's a cross-shop sync (main → shop-a) vs within-shop (shop-a → shop-a)
+- Review the content files listed - are they actually shop-specific?
+- Consider changing mode to 'warn' if strict is too aggressive
+- Type 'OVERRIDE' if you're certain the sync is safe
+
+**"I want to disable protection temporarily"**
+```bash
+pnpm run shop → Tools → Content Protection → Configure Shop Protection
+# → Select shop → Disable
+```
+
+**"How do I know if protection is working?"**
+```bash
+pnpm run shop → Tools → Health Check → Check Single Shop
+# Shows content protection status in health report
+```
+
 ## Security Audit
 
 Run security audits to verify credential safety:

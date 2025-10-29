@@ -45,16 +45,19 @@ pnpm run shop → Edit Shop
 pnpm run shop → Delete Shop
 ```
 
-### Campaign Tools
+### Campaign Tools (NEW in v2.3.0)
 
 ```bash
-# Create promo branch
+# Create promo branch (shop-a/main → shop-a/promo-NAME)
 pnpm run shop → Campaign Tools → Create Promo Branch
 
-# Push promo to main
+# List all active campaign branches
+pnpm run shop → Campaign Tools → List Active Promos
+
+# Push promo content back to shop main
 pnpm run shop → Campaign Tools → Push Promo to Main
 
-# End promo campaign
+# End campaign and cleanup
 pnpm run shop → Campaign Tools → End Promo
 ```
 
@@ -64,11 +67,20 @@ pnpm run shop → Campaign Tools → End Promo
 # Sync shops (create PRs)
 pnpm run shop → Tools → Sync Shops
 
-# Link themes
+# Verify shop configuration
+pnpm run shop → Tools → Health Check
+
+# Configure content protection
+pnpm run shop → Tools → Content Protection
+
+# Link themes to GitHub
 pnpm run shop → Tools → Link Themes
 
-# Security audit
-pnpm run shop → Tools → Security Audit
+# Check package versions
+pnpm run shop → Tools → Version Check
+
+# Run security audit
+npx multi-shop audit
 ```
 
 ## Configuration Files
@@ -94,7 +106,26 @@ pnpm run shop → Tools → Security Audit
     "authentication": {
       "method": "theme-access-app"
     }
+  },
+  "contentProtection": {
+    "enabled": true,
+    "mode": "strict",
+    "verbosity": "verbose"
   }
+}
+```
+
+### Global Settings (Root)
+
+```json
+// settings.json (NEW in v2.3.0)
+{
+  "contentProtection": {
+    "defaultMode": "strict",
+    "defaultVerbosity": "verbose",
+    "applyToNewShops": true
+  },
+  "version": "1.0.0"
 }
 ```
 
@@ -163,8 +194,11 @@ pnpm run shop → Campaign Tools → Create Promo Branch
 # 4. Launch promo
 # Publish theme or use Launchpad app
 
-# 5. Push content back to main
+# 5. After campaign: Push content back to main
 pnpm run shop → Campaign Tools → Push Promo to Main
+
+# 6. Cleanup campaign branch
+pnpm run shop → Campaign Tools → End Promo
 ```
 
 ## Branch Naming

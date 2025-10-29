@@ -349,11 +349,13 @@ pnpm run shop → Edit Shop
 # Delete shop
 pnpm run shop → Delete Shop
 
-# Campaign tools
+# Campaign tools (v2.3.0+)
 pnpm run shop → Campaign Tools
+# → Create Promo Branch, Push Promo to Main, List Active Promos, End Promo
 
 # Tools menu
 pnpm run shop → Tools
+# → Sync Shops, Content Protection, Health Check (v2.3.0+)
 ```
 
 ### Direct npx Commands
@@ -440,12 +442,16 @@ pnpm run dev
 gh pr create --base shop-a/main --title "Add calculator"
 ```
 
-### Campaign/Promo
+### Campaign/Promo Workflow
+
+**Quick Campaign Management with Campaign Tools (v2.3.0+):**
 
 ```bash
-# 1. Create promo branch
+# 1. Create promo branch automatically
 pnpm run shop → Campaign Tools → Create Promo Branch
-# → shop-a → promo name: summer-sale
+# → Select shop: shop-a
+# → Promo name: summer-sale
+# → Branch created: shop-a/promo-summer-sale
 
 # 2. Connect to Shopify theme
 # Shopify Admin → Add theme → Connect from GitHub → shop-a/promo-summer-sale
@@ -456,9 +462,21 @@ pnpm run shop → Campaign Tools → Create Promo Branch
 # 4. Launch promo
 # Publish theme or use Launchpad app
 
-# 5. Push to main (keeps main current)
+# 5. Push content back to main (one command)
 pnpm run shop → Campaign Tools → Push Promo to Main
+# → Select promo: shop-a/promo-summer-sale
+# → Creates PR: shop-a/promo-summer-sale → shop-a/main
+
+# 6. List all active campaigns
+pnpm run shop → Campaign Tools → List Active Promos
+# → Shows all promo branches across all shops
+
+# 7. Clean up after campaign (optional)
+pnpm run shop → Campaign Tools → End Promo
+# → Select promo to delete
 ```
+
+**Note on Content Protection:** If you have Content Protection enabled (strict mode), pushing promo content to main will detect content file changes and warn you appropriately. This is normal for campaign workflows - the protection ensures you're intentionally merging customized content.
 
 ## Troubleshooting
 
@@ -508,6 +526,24 @@ chmod 600 shops/credentials/*.credentials.json
 1. Check branch exists: `git branch -r | grep shop-a/main`
 2. Push if needed: `git push -u origin shop-a/main`
 3. Verify GitHub connection in Shopify Admin → Settings
+
+### Run Health Check (v2.3.0+)
+
+**Not sure what's wrong?** Use the built-in health check:
+
+```bash
+pnpm run shop → Tools → Health Check
+# → Check Single Shop (detailed diagnostics)
+# → Check All Shops (quick overview)
+```
+
+The health check verifies:
+- Configuration file validity (JSON syntax, required fields)
+- Credentials existence and permissions
+- Git branch existence and sync status
+- Content Protection status
+
+It provides actionable recommendations without auto-fixing anything.
 
 ## Next Steps
 
