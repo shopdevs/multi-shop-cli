@@ -33,7 +33,21 @@ describe('shop-sync', () => {
         credentialsDir: '/test/project/shops/credentials'
       },
       shopOps: {
-        loadConfig: vi.fn(),
+        loadConfig: vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            shopId: 'shop-a',
+            name: 'Shop A',
+            shopify: {
+              stores: {
+                production: { domain: 'shop-a.myshopify.com', branch: 'shop-a/main' },
+                staging: { domain: 'staging-shop-a.myshopify.com', branch: 'shop-a/staging' }
+              },
+              authentication: { method: 'theme-access-app' }
+            }
+            // No contentProtection by default (protection disabled)
+          }
+        }),
         saveConfig: vi.fn(),
         listShops: vi.fn(),
         deleteShop: vi.fn()

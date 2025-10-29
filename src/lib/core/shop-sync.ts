@@ -23,7 +23,7 @@ export const syncShops = async (context: CLIContext): Promise<Result<void>> => {
   const prTitle = await getPRTitle();
   if (!prTitle) return { success: false, error: "No PR title provided" };
 
-  return createShopSyncPRs(selectedShops, prTitle);
+  return createShopSyncPRs(selectedShops, prTitle, context);
 };
 
 const selectShopsToSync = async (shops: string[]): Promise<string[] | null> => {
@@ -49,11 +49,24 @@ const getPRTitle = async (): Promise<string | null> => {
   return isCancel(prTitle) ? null : prTitle as string;
 };
 
-const createShopSyncPRs = async (selectedShops: string[], title: string): Promise<Result<void>> => {
-  // Check for content file changes before creating PRs
-  const contentCheck = await checkContentFiles(selectedShops);
+const createShopSyncPRs = async (
+  selectedShops: string[],
+  title: string,
+  context: CLIContext
+): Promise<Result<void>> => {
+  // Load shop configs for protection settings
+  const shopConfigs = new Map();
+  for (const shopId of selectedShops) {
+    const configResult = await context.shopOps.loadConfig(shopId);
+    if (configResult.success && configResult.data) {
+      shopConfigs.set(shopId, configResult.data);
+    }
+  }
+
+  // Check for content file changes and enforce protection
+  const contentCheck = await checkContentFiles(selectedShops, shopConfigs);
   if (contentCheck.shouldBlock) {
-    return { success: false, error: "Sync cancelled by user" };
+    return { success: false, error: "Sync cancelled - content protection active" };
   }
 
   const s = spinner();

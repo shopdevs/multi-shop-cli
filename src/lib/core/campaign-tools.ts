@@ -108,7 +108,7 @@ const createAndPushPromoBranch = async (
   }
 };
 
-const pushPromoToMain = async (context: CLIContext): Promise<Result<void>> => {
+const pushPromoToMain = async (_context: CLIContext): Promise<Result<void>> => {
   note("Push promo campaign content back to shop main branch", "🔄 Push Promo to Main");
 
   const currentBranch = getCurrentBranch();
@@ -174,7 +174,7 @@ const endPromo = async (_context: CLIContext): Promise<Result<void>> => {
   }
 };
 
-const listActivePromos = async (context: CLIContext): Promise<Result<void>> => {
+const listActivePromos = async (_context: CLIContext): Promise<Result<void>> => {
   try {
     const branches = execSync('git branch -r', { encoding: 'utf8' })
       .split('\n')
@@ -274,9 +274,9 @@ GitHub Web:
 };
 
 const displayPromoNextSteps = (shopId: string, branchName: string, promoName: string): void => {
-  note("Promo branch created successfully!", "✅ Success");
+  note(`Promo branch created: ${promoName}`, "✅ Success");
 
-  console.log(`\n📋 Next Steps:\n`);
+  console.log(`\n📋 Next Steps for ${promoName} campaign:\n`);
   console.log(`1. Connect to Shopify Theme:`);
   console.log(`   - Shopify Admin → Themes → Add theme → Connect from GitHub`);
   console.log(`   - Select branch: ${branchName}`);
