@@ -1,4 +1,4 @@
-# 🚀 ShopDevs Multi-Shop
+# 🚀 ShopDevs Multi-Shop-CLI
 
 [![CI](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@shopdevs/multi-shop-cli)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
@@ -9,7 +9,7 @@
 > Contextual development and automated shop management for multi-shop Shopify
 > themes
 
-## What is Multi-Shop?
+## What is Multi-Shop-CLI?
 
 Transform any Shopify theme into a sophisticated multi-shop system with
 **contextual development** that adapts to your branch context and **automated
@@ -58,7 +58,7 @@ This creates:
 
 - `shops/` directory for shop configurations
 - GitHub workflow for automated shop syncing
-- Updated package.json with multi-shop scripts
+- Updated package.json with multi-shop-cli scripts
 - Secure credential storage setup
 
 ### Set Up Your Shops
@@ -97,7 +97,7 @@ npx multi-shop dev
 
 ## 🚀 Complete Setup for Multiple Shops
 
-Here's the step-by-step process to set up multi-shop on a new Shopify theme
+Here's the step-by-step process to set up multi-shop-cli on a new Shopify theme
 (example shows 4 shops, but you can use any number):
 
 ### Step 1: Initialize Project
