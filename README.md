@@ -1,4 +1,4 @@
-# 🚀 ShopDevs Multi-Shop-CLI
+# 🚀 Multi-Shop-CLI
 
 [![CI](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/shopdevs/multi-shop-cli/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@shopdevs/multi-shop-cli)](https://www.npmjs.com/package/@shopdevs/multi-shop-cli)
