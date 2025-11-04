@@ -8,6 +8,24 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.3.1] - 2025-11-03
+
+### Fixed
+
+- **Initializer dependency management** - Fixed package.json updates during initialization
+  - Now uses actual CLI version instead of hardcoded `^1.0.0`
+  - Automatically removes package from `dependencies` if present (should only be in `devDependencies`)
+  - Preserves existing version when moving from dependencies to devDependencies
+  - Dynamically reads version from package.json at runtime
+- **Global settings path** - Fixed settings file location
+  - Changed from `settings.json` (root) to `shops/settings.json` (correct location per docs)
+  - Updated both `loadGlobalSettings` and `saveGlobalSettings` functions
+  - Updated all tests to use correct path
+- **Content protection defaults for new shops** - Fixed missing default protection settings
+  - New shops now automatically get content protection enabled with default settings
+  - Applies global default mode (`strict`) and verbosity (`verbose`) from settings
+  - Prevents accidental content overwrites on newly created shops
+
 ## [2.3.0] - 2025-10-28
 
 ### Added
