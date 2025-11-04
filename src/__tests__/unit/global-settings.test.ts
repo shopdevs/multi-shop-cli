@@ -10,6 +10,11 @@ describe('global-settings', () => {
 
   beforeEach(() => {
     tempDir = createTempDir();
+    // Create shops directory for settings
+    const shopsDir = path.join(tempDir, 'shops');
+    if (!fs.existsSync(shopsDir)) {
+      fs.mkdirSync(shopsDir, { recursive: true });
+    }
   });
 
   afterEach(() => {
@@ -39,7 +44,7 @@ describe('global-settings', () => {
         version: '1.0.0'
       };
 
-      const settingsPath = path.join(tempDir, 'settings.json');
+      const settingsPath = path.join(tempDir, 'shops', 'settings.json');
       fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 
       // Act
@@ -54,7 +59,7 @@ describe('global-settings', () => {
 
     test('handles corrupted settings file', async () => {
       // Arrange
-      const settingsPath = path.join(tempDir, 'settings.json');
+      const settingsPath = path.join(tempDir, 'shops', 'settings.json');
       fs.writeFileSync(settingsPath, '{ invalid json }');
 
       // Act
@@ -84,7 +89,7 @@ describe('global-settings', () => {
       // Assert
       expect(result.success).toBe(true);
 
-      const settingsPath = path.join(tempDir, 'settings.json');
+      const settingsPath = path.join(tempDir, 'shops', 'settings.json');
       expect(fs.existsSync(settingsPath)).toBe(true);
 
       const savedSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
@@ -119,7 +124,7 @@ describe('global-settings', () => {
       // Assert
       expect(result.success).toBe(true);
 
-      const settingsPath = path.join(tempDir, 'settings.json');
+      const settingsPath = path.join(tempDir, 'shops', 'settings.json');
       const savedSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
       expect(savedSettings.contentProtection.defaultMode).toBe('strict');
     });

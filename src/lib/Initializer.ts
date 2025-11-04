@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { createRequire } from "module";
 import {
   select,
   spinner,
@@ -9,6 +10,10 @@ import {
 
 import { logger } from "./core/logger.js";
 import { ShopConfigurationError } from "./errors/ShopError.js";
+
+// Get package version dynamically
+const require = createRequire(import.meta.url);
+const { version: CLI_VERSION } = require("../../package.json");
 
 /**
  * Initializes multi-shop setup in existing Shopify theme projects
@@ -156,10 +161,25 @@ export class Initializer {
 
     packageJson.scripts = { ...packageJson.scripts, ...newScripts };
 
-    // Add devDependency if not already present
-    if (!packageJson.devDependencies?.["@shopdevs/multi-shop-cli"]) {
+    // Manage @shopdevs/multi-shop-cli dependency
+    const packageName = "@shopdevs/multi-shop-cli";
+    const existingDepVersion = packageJson.dependencies?.[packageName];
+    const existingDevDepVersion = packageJson.devDependencies?.[packageName];
+
+    // Remove from dependencies if present (should only be in devDependencies)
+    if (existingDepVersion) {
+      delete packageJson.dependencies[packageName];
+      this.logger.debug('Removed from dependencies', { package: packageName, version: existingDepVersion });
+    }
+
+    // Add to devDependencies if not already present, using existing version or current CLI version
+    if (!existingDevDepVersion) {
       packageJson.devDependencies = packageJson.devDependencies || {};
-      packageJson.devDependencies["@shopdevs/multi-shop-cli"] = "^1.0.0";
+      const versionToUse = existingDepVersion || `^${CLI_VERSION}`;
+      packageJson.devDependencies[packageName] = versionToUse;
+      this.logger.debug('Added to devDependencies', { package: packageName, version: versionToUse });
+    } else {
+      this.logger.debug('Already in devDependencies', { package: packageName, version: existingDevDepVersion });
     }
 
     fs.writeFileSync(this.packageJsonPath, JSON.stringify(packageJson, null, 2));

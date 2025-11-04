@@ -18,7 +18,7 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 
 export const loadGlobalSettings = async (cwd: string): Promise<Result<GlobalSettings>> => {
   try {
-    const settingsPath = path.join(cwd, 'settings.json');
+    const settingsPath = path.join(cwd, 'shops', 'settings.json');
 
     if (!fs.existsSync(settingsPath)) {
       return { success: true, data: DEFAULT_SETTINGS };
@@ -38,7 +38,7 @@ export const loadGlobalSettings = async (cwd: string): Promise<Result<GlobalSett
 
 export const saveGlobalSettings = async (cwd: string, settings: GlobalSettings): Promise<Result<void>> => {
   try {
-    const settingsPath = path.join(cwd, 'settings.json');
+    const settingsPath = path.join(cwd, 'shops', 'settings.json');
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 
     return { success: true };

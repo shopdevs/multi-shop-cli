@@ -3,6 +3,7 @@ import type { ShopConfig } from "../../types/shop.js";
 import type { CLIContext, Result } from "./types.js";
 import { collectShopData, type ShopData } from "./shop-input.js";
 import { setupShopResources } from "./shop-setup.js";
+import { getDefaultContentProtection } from "./global-settings.js";
 
 /**
  * Shop creation workflow
@@ -10,11 +11,11 @@ import { setupShopResources } from "./shop-setup.js";
 
 export const createNewShop = async (context: CLIContext): Promise<Result<void>> => {
   intro("🆕 Create New Shop");
-  
+
   const shopDataResult = await collectShopData(context);
   if (!shopDataResult.success || !shopDataResult.data) return { success: false, error: shopDataResult.error || "Failed to collect shop data" };
 
-  const configResult = await buildShopConfig(shopDataResult.data);
+  const configResult = await buildShopConfig(shopDataResult.data, context.deps.cwd);
   if (!configResult.success || !configResult.data) return { success: false, error: configResult.error || "Failed to build config" };
 
   const saveResult = await context.shopOps.saveConfig(shopDataResult.data.shopId, configResult.data);
@@ -27,7 +28,10 @@ export const createNewShop = async (context: CLIContext): Promise<Result<void>> 
   return { success: true };
 };
 
-const buildShopConfig = async (shopData: ShopData): Promise<Result<ShopConfig>> => {
+const buildShopConfig = async (shopData: ShopData, cwd: string): Promise<Result<ShopConfig>> => {
+  // Get default content protection settings from global config
+  const defaultProtection = await getDefaultContentProtection(cwd);
+
   const config: ShopConfig = {
     shopId: shopData.shopId,
     name: shopData.shopName,
@@ -45,6 +49,12 @@ const buildShopConfig = async (shopData: ShopData): Promise<Result<ShopConfig>> 
       authentication: {
         method: shopData.authMethod
       }
+    },
+    // Apply default content protection settings if configured
+    contentProtection: {
+      enabled: true,
+      mode: defaultProtection.defaultMode,
+      verbosity: defaultProtection.defaultVerbosity
     }
   };
 
