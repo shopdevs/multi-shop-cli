@@ -24,7 +24,10 @@ export const startDevelopmentWorkflow = async (context: CLIContext): Promise<Res
   const environment = await selectEnvironment();
   if (!environment) return { success: false, error: "No environment selected" };
 
-  return startShopifyDevelopmentServer(context, selectedShop, environment);
+  const themeEditorSync = await selectThemeEditorSync();
+  if (themeEditorSync === null) return { success: false, error: "Selection cancelled" };
+
+  return startShopifyDevelopmentServer(context, selectedShop, environment, themeEditorSync);
 };
 
 const selectShopForDevelopment = async (shops: string[]): Promise<string | null> => {
@@ -52,7 +55,20 @@ const selectEnvironment = async (): Promise<'staging' | 'production' | null> => 
   return isCancel(envChoice) ? null : envChoice as 'staging' | 'production';
 };
 
-const startShopifyDevelopmentServer = async (context: CLIContext, shopId: string, environment: 'production' | 'staging'): Promise<Result<void>> => {
+const selectThemeEditorSync = async (): Promise<boolean | null> => {
+  const syncChoice = await select({
+    message: "Sync theme editor files to local?",
+    options: [
+      { value: "yes", label: "Yes, sync theme editor files", hint: "Pull changes made in theme editor" },
+      { value: "no", label: "No, do not sync", hint: "Ignore theme editor changes" }
+    ]
+  });
+
+  if (isCancel(syncChoice)) return null;
+  return syncChoice === "yes";
+};
+
+const startShopifyDevelopmentServer = async (context: CLIContext, shopId: string, environment: 'production' | 'staging', themeEditorSync: boolean): Promise<Result<void>> => {
   // Load shop configuration
   const configResult = await context.shopOps.loadConfig(shopId);
   if (!configResult.success) {
@@ -84,10 +100,10 @@ const startShopifyDevelopmentServer = async (context: CLIContext, shopId: string
     return { success: false, error: "No theme token available" };
   }
 
-  return executeShopifyCLI(store.domain, token, shopId, environment);
+  return executeShopifyCLI(store.domain, token, shopId, environment, themeEditorSync);
 };
 
-const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId: string, environment: 'staging' | 'production'): Promise<Result<void>> => {
+const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId: string, environment: 'staging' | 'production', themeEditorSync: boolean): Promise<Result<void>> => {
   const s = spinner();
   s.start("Starting Shopify CLI...");
 
@@ -97,19 +113,23 @@ const executeShopifyCLI = async (storeDomain: string, themeToken: string, shopId
 
     s.stop("✅ Starting development server");
 
+    const storeArg = `--store=${storeDomain.replace('.myshopify.com', '')}`;
+    const args = ['theme', 'dev', storeArg];
+
+    if (themeEditorSync) {
+      args.push('--theme-editor-sync');
+    }
+
     console.log(`\n🔗 Development Server:`);
     console.log(`   Shop: ${shopId} (${environment})`);
     console.log(`   Store: ${storeDomain}`);
     console.log(`   Token: ${themeToken.substring(0, 8)}...`);
-    console.log(`\n⚡ Running: shopify theme dev --store=${storeDomain.replace('.myshopify.com', '')}`);
+    console.log(`   Theme Editor Sync: ${themeEditorSync ? 'Enabled' : 'Disabled'}`);
+    console.log(`\n⚡ Running: shopify ${args.join(' ')}`);
     console.log(`\nPress Ctrl+C to stop\n`);
 
     // Start Shopify CLI with proper signal handling
-    const devProcess = spawn('shopify', [
-      'theme', 
-      'dev', 
-      `--store=${storeDomain.replace('.myshopify.com', '')}`
-    ], {
+    const devProcess = spawn('shopify', args, {
       env: {
         ...process.env,
         SHOPIFY_CLI_THEME_TOKEN: themeToken,
