@@ -8,7 +8,7 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [2.4.0] - 2025-01-12
+## [2.4.0] - 2026-01-12
 
 ### Added
 
@@ -22,18 +22,24 @@ and this project adheres to
 
 ### Fixed
 
-- **Initializer dependency management** - Fixed package.json updates during initialization
+- **Initializer dependency management** - Fixed package.json updates during
+  initialization
   - Now uses actual CLI version instead of hardcoded `^1.0.0`
-  - Automatically removes package from `dependencies` if present (should only be in `devDependencies`)
+  - Automatically removes package from `dependencies` if present (should only be
+    in `devDependencies`)
   - Preserves existing version when moving from dependencies to devDependencies
   - Dynamically reads version from package.json at runtime
 - **Global settings path** - Fixed settings file location
-  - Changed from `settings.json` (root) to `shops/settings.json` (correct location per docs)
+  - Changed from `settings.json` (root) to `shops/settings.json` (correct
+    location per docs)
   - Updated both `loadGlobalSettings` and `saveGlobalSettings` functions
   - Updated all tests to use correct path
-- **Content protection defaults for new shops** - Fixed missing default protection settings
-  - New shops now automatically get content protection enabled with default settings
-  - Applies global default mode (`strict`) and verbosity (`verbose`) from settings
+- **Content protection defaults for new shops** - Fixed missing default
+  protection settings
+  - New shops now automatically get content protection enabled with default
+    settings
+  - Applies global default mode (`strict`) and verbosity (`verbose`) from
+    settings
   - Prevents accidental content overwrites on newly created shops
 
 ## [2.3.0] - 2025-10-28
@@ -50,13 +56,15 @@ and this project adheres to
 - **Content Protection System** - Config-based content overwrite prevention
   - Per-shop content protection settings (strict/warn/off modes)
   - Global settings for default protection behavior (settings.json)
-  - STRICT mode: Blocks cross-shop content sync, requires 'OVERRIDE' confirmation
+  - STRICT mode: Blocks cross-shop content sync, requires 'OVERRIDE'
+    confirmation
   - WARN mode: Shows warning, requires explicit confirmation
   - Verbose/quiet verbosity controls
   - Tools → Content Protection menu for configuration
   - Show Protection Status for all shops
   - Enable/Disable protection per shop or for all shops
-  - Smart detection: Only blocks cross-shop (main → shop-a), allows within-shop (shop-a → shop-a)
+  - Smart detection: Only blocks cross-shop (main → shop-a), allows within-shop
+    (shop-a → shop-a)
   - 14 comprehensive tests
 - **Shop Health Check** - Diagnostic tool for verifying shop setup
   - Check single shop or all shops
