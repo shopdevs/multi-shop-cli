@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.4.0] - 2025-01-12
+
+### Added
+
+- **Theme Editor Sync Option** - New prompt when starting development server
+  - Choose whether to sync theme editor changes to local files
+  - Adds `--theme-editor-sync` flag to Shopify CLI when enabled
+  - Pulls changes made in Shopify's online theme editor during dev session
+  - Development server output now shows sync status
+
 ## [2.3.1] - 2025-11-03
 
 ### Fixed
